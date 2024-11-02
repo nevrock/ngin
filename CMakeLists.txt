@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(nev)
+project(ngin)
 
 set(CMAKE_CXX_STANDARD 20)  # Use C++17 standard
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -10,33 +10,24 @@ link_directories(${CMAKE_SOURCE_DIR}/lib/)
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)
-find_package(ASSIMP REQUIRED)
-message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
 
-include_directories(${CMAKE_SOURCE_DIR}/includes/)
+include_directories(${CMAKE_SOURCE_DIR}/include/)
+include_directories(${CMAKE_SOURCE_DIR}/include/imgui/)
 
 # Add source files
 set(SOURCES
-    src/glad.c
-    src/stb_image.cpp
-    src/game.cpp
+    include/imgui/imgui.cpp
+
+    include/imgui/imgui_impl_glfw.cpp
+    include/imgui/imgui_impl_opengl3.cpp
+
+    include/imgui/imgui_tables.cpp
+    include/imgui/imgui_widgets.cpp
+
+    include/imgui/imgui_draw.cpp
+
+    include/imgui/imgui_demo.cpp
     src/main.cpp
-    src/animator.cpp
-    src/animation.cpp
-    src/surface_sdf.cpp
-    src/worker_manager.cpp
-    src/model/model_primitive.cpp
-    src/model/model_fbx.cpp
-    src/model/model_ui.cpp
-    src/model/model_drawer.cpp
-    src/model/model_text.cpp
-    src/model/model_sdf.cpp
-    src/physics/body.cpp
-    src/physics/body_box.cpp
-    src/physics/body_mesh.cpp
-    src/physics/physics_manager.cpp
-    src/light/light.cpp
-    src/camera/camera.cpp
 )
 
 configure_file(configuration/root_directory.h.in configuration/root_directory.h)
@@ -44,28 +35,14 @@ configure_file(configuration/root_directory.h.in configuration/root_directory.h)
 include_directories(${CMAKE_BINARY_DIR}/configuration)
 
 # Add executable
-add_executable(nev ${SOURCES})
+add_executable(ngin ${SOURCES})
+
 
 # Link libraries
-target_link_libraries(nev ${OPENGL_LIBRARIES} glfw3 freetype assimp irrKlang)
-# target_link_options(nev PRIVATE "/VERBOSE")
+target_link_libraries(ngin ${OPENGL_LIBRARIES} /usr/local/lib/libglfw3.a)
+# target_link_options(ngin PRIVATE "/VERBOSE")
 
-add_custom_command(TARGET nev POST_BUILD
+add_custom_command(TARGET ngin POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${CMAKE_SOURCE_DIR}/dlls/glfw3.dll"
-    $<TARGET_FILE_DIR:nev>)
-
-add_custom_command(TARGET nev POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_SOURCE_DIR}/dlls/assimp-vc143-mtd.dll"
-    $<TARGET_FILE_DIR:nev>)
-
-add_custom_command(TARGET nev POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_SOURCE_DIR}/dlls/irrKlang.dll"
-    $<TARGET_FILE_DIR:nev>)
-
-add_custom_command(TARGET nev POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_SOURCE_DIR}/dlls/ikpMP3.dll"
-    $<TARGET_FILE_DIR:nev>)
+    $<TARGET_FILE_DIR:ngin>)
