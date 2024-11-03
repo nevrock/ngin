@@ -41,8 +41,3 @@ add_executable(ngin ${SOURCES})
 # Link libraries
 target_link_libraries(ngin ${OPENGL_LIBRARIES} /usr/local/lib/libglfw3.a)
 # target_link_options(ngin PRIVATE "/VERBOSE")
-
-add_custom_command(TARGET ngin POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_SOURCE_DIR}/dlls/glfw3.dll"
-    $<TARGET_FILE_DIR:ngin>)
