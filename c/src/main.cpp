@@ -6,25 +6,26 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <nev/fileutils.h>
-#include <nev/shader.h>
-#include "camera/camera.h"
-#include "light/light.h"
-#include <nev/window.h>
-#include <nev/resources.h>
-#include <nev/scene.h>
-#include <nev/constants.h>
-#include <nev/sound_manager.h>
-
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
 #include <iostream>
 #include <thread>
 #include <atomic>
-#include <nev/game.h>
 
-#include <nev/dict.h>
+#include <ngin/nevgl/window.h>
+
+#include <ngin/game.h>
+#include <ngin/sound/manager.h>
+
+#include <ngin/nevobj/scene.h>
+
+#include <ngin/nevobj/camera/camera.h>
+#include <ngin/nevobj/light/light.h>
+
+
+// ------------------------------
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -61,14 +62,17 @@ ISoundEngine* SoundManager::engine = nullptr;
 std::unordered_map<unsigned int, ISound*> SoundManager::sounds;
 std::atomic<unsigned int> SoundManager::nextSoundId{1};  // Start IDs from 1
 
+
+// ------------------------------
+
+
 int main()
 {
-    Window window(SCR_WIDTH, SCR_HEIGHT, "nev_v1");
+    Window window(SCR_WIDTH, SCR_HEIGHT, "ngin.v1.0");
     GLFWwindow* win = Window::getGLFWwindow();
 
     Game::setState("loading");
     Game::setState("start");
-
 
     SoundManager sound;
     //sound.play(std::string("sleep_song"));
@@ -77,18 +81,6 @@ int main()
     Scene scene("scene_start");
 
     scene.initScene();
-    
-    //scene.initScene([&scene]() {  // Capture scene by reference
-    //    auto camera = Camera::getMainCamera();
-    //    auto light = Light::getMainLight();
-
-    //    if (camera && light) {  // Ensure these objects are valid
-    //        scene.initDepth();
-    //        scene.launch();
-    //    } else {
-    //        std::cerr << "Failed to initialize camera or light" << std::endl;
-    //    }
-    //});
     scene.build();
 
     std::atomic<bool> running(true);
@@ -109,7 +101,6 @@ int main()
 
     camera = Camera::getMainCamera();
     light = Light::getMainLight();
-
 
     glfwSetFramebufferSizeCallback(win, framebuffer_size_callback);
     glfwSetCursorPosCallback(win, mouse_callback);

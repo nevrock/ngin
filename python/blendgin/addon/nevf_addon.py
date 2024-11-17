@@ -21,7 +21,7 @@ def create_object_filepath_property():
             default="",
             update=None  # Optional: Define an update function if needed
         )
-        
+
 class NevfDataPanel(bpy.types.Panel):
     """Creates a Panel in the Object properties window"""
     bl_label = "Nevf Data"
@@ -88,17 +88,31 @@ class OBJECT_PT_custom_string_property(bpy.types.Panel):
         layout.operator("object.file_browser", text="Browse File")
 
 
+# Function to handle saving logic
+def write_nevf_data(dummy):  # 'dummy' is required for handler functions
+    for obj in bpy.data.objects:
+        if hasattr(obj, "nevf_data") and obj.nevf_data:
+            filepath = obj.nevf_data
+            print(filepath)
+
+
 def register():
     create_object_filepath_property()  # Add the custom property to the object type
     bpy.utils.register_class(NevfDataPanel)
     bpy.utils.register_class(OBJECT_OT_file_browser)
     bpy.utils.register_class(OBJECT_PT_custom_string_property)
 
+    # Add the save_post handler
+    bpy.app.handlers.save_post.append(write_nevf_data)
+
 def unregister():
     bpy.utils.unregister_class(NevfDataPanel)
     del bpy.types.Object.nevf_data  # Clean up by removing the property
     bpy.utils.unregister_class(OBJECT_OT_file_browser)
     bpy.utils.unregister_class(OBJECT_PT_custom_string_property)
+
+    # Remove the save_post handler
+    bpy.app.handlers.save_post.remove(write_nevf_data)
 
 if __name__ == "__main__":
     register()
