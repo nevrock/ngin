@@ -1,0 +1,12 @@
+name: "prim_cube"
+point: 
+    position: [0.0,10.0,0.0]
+    rotation: [0.0,0.0,0.0]
+    scale: [1.0,1.0,1.0]
+components: 
+    model_primitive: 
+        type: "cube"
+        textures: ["wood"]
+        is_instance: true
+    body: 
+        size: [2.0,2.0,2.0]

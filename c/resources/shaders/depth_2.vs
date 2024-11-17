@@ -1,0 +1,39 @@
+layout (location = 0) in vec3 aPos;
+layout (location = 4) in ivec4 aBoneIDs;
+layout (location = 5) in vec4 aWeights;
+
+layout (location = 6) in vec4 aInstanceMatrixCol0;
+layout (location = 7) in vec4 aInstanceMatrixCol1;
+layout (location = 8) in vec4 aInstanceMatrixCol2;
+layout (location = 9) in vec4 aInstanceMatrixCol3;
+
+void main()
+{
+    mat4 instanceModelMatrix = mat4(aInstanceMatrixCol0, aInstanceMatrixCol1, aInstanceMatrixCol2, aInstanceMatrixCol3);
+    
+    mat4 modelMatrix = M_MODEL;
+    if (IS_INSTANCE)
+        modelMatrix = instanceModelMatrix;
+
+    mat4 skinning = mat4(0.0);
+    if (IS_ANIMATION) {
+        // Initialize skinning matrix as zero matrix
+        skinning = mat4(0.0);
+        // Accumulate the transformations from each affecting bone
+        int counter = 0;
+        for (int i = 0; i < 4; i++) {
+            int boneID = aBoneIDs[i];
+            float weight = aWeights[i];
+            if (boneID >= 0 && boneID < 40) { // Validate bone index and ensure it's within bounds
+                skinning += A_M_BONES[boneID] * weight;
+                counter++;
+            }
+        }
+        skinning = skinning/counter;
+    } else {
+        // No animation, just use the identity matrix
+        skinning = mat4(1.0);
+    }
+
+    gl_Position = modelMatrix * skinning * vec4(aPos, 1.0);
+}

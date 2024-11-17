@@ -1,0 +1,58 @@
+#version 430 core
+
+// BOOL
+uniform bool IS_INSTANCE;
+uniform bool IS_ANIMATION;
+uniform bool IS_SDF;
+uniform bool IS_TEXT;
+uniform bool IS_REVERSE_NORMALS;
+
+// MAT 4
+// lights
+uniform mat4 M_LIGHT_SPACE;
+// cameras
+uniform mat4 M_CAMERA_VIEW;
+uniform mat4 M_CAMERA_I_VIEW;
+uniform mat4 M_CAMERA_PROJECTION;
+uniform mat4 M_CAMERA_I_PROJECTION;
+// model
+uniform mat4 M_MODEL;
+
+// VEC 3
+uniform vec3 LIGHT_POS;
+uniform vec3 LIGHT_DIRECTION;
+uniform vec3 POINT_LIGHT_POS;
+uniform vec3 CAMERA_POS;
+
+// FLOAT
+uniform float LIGHT_NEAR_PLANE;
+uniform float CAMERA_NEAR_PLANE;
+uniform float LIGHT_FAR_PLANE;
+uniform float CAMERA_FAR_PLANE;
+uniform float POINT_SHADOWS_THRESHOLD;
+
+// INT
+uniform int NUM_LIGHTS;
+uniform int NUM_SURFACES;
+uniform int NUM_BONES;
+
+// 2D
+uniform sampler2D DIRECTIONAL_SHADOW_MAP;
+
+uniform sampler2D TEX_DIFFUSE;
+
+// CUBE
+uniform samplerCube POINT_SHADOW_CUBE_MAP;
+
+// ARRAYS
+uniform mat4 A_M_POINT_SHADOWS[6];
+uniform mat4 A_M_BONES[40]; // Ensure this size matches the number of bones used in your models
+
+uniform vec3 SHADOW_GRID_SAMPLING_DISK[20] = vec3[]
+(
+   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+   vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+   vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
+   vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
+   vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
+);
