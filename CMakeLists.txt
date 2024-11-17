@@ -55,7 +55,28 @@ endif(WIN32)
 set(SOURCES
     src/glad.c
     src/stb_image.cpp
+    src/game.cpp
     src/main.cpp
+    src/animator.cpp
+    src/animation.cpp
+    src/surface_sdf.cpp
+    src/model/model_primitive.cpp
+    src/model/model_fbx.cpp
+    src/model/model_ui.cpp
+    src/model/model_drawer.cpp
+    src/model/model_text.cpp
+    src/model/model_sdf.cpp
+    src/physics/body.cpp
+    src/physics/body_box.cpp
+    src/physics/body_mesh.cpp
+    src/physics/physics_manager.cpp
+    src/light/light.cpp
+    src/camera/camera.cpp
+)
+
+set(SOURCES_GRAPH
+    src/stb_image.cpp
+    src/main_graph.cpp
 )
 
 configure_file(configuration/root_directory.h.in configuration/root_directory.h)

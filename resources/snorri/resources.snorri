@@ -1,0 +1,25 @@
+is_log: false
+
+shaders:
+    depth: 0
+    depth_2: 1
+    textured_1: 2
+    sdf: 3
+    ui_1: 4
+
+textures: 
+    wood: 0
+    palette: 1
+
+models: 
+    sphere: 0
+    player: 1
+
+models_primitive: 
+    plane: 0
+    cube: 1
+    quad: 2
+
+fonts: 
+    antonio_bold: 0
+

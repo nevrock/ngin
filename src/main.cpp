@@ -6,26 +6,26 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <snorri/fileutils.h>
+#include <snorri/shader.h>
+#include "camera/camera.h"
+#include "light/light.h"
+#include <snorri/window.h>
+#include <snorri/resources.h>
+#include <snorri/scene.h>
+#include <snorri/constants.h>
+#include <snorri/sound_manager.h>
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
 #include <iostream>
 #include <thread>
 #include <atomic>
+#include <snorri/game.h>
 
-#include <ngin/nevgl/window.h>
-
-#include <ngin/game.h>
-#include <ngin/sound/manager.h>
-
-#include <ngin/nevobj/scene.h>
-
-#include <ngin/nevobj/camera/camera.h>
-#include <ngin/nevobj/light/light.h>
-
-
-// ------------------------------
-
+#include <snorri_graphs/graph_generator.h>
+#include <snorri/dict.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -33,8 +33,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 // settings
-const unsigned int SCR_WIDTH = nev::SCREEN_WIDTH;
-const unsigned int SCR_HEIGHT = nev::SCREEN_HEIGHT;
+const unsigned int SCR_WIDTH = snorri::SCREEN_WIDTH;
+const unsigned int SCR_HEIGHT = snorri::SCREEN_HEIGHT;
 
 Camera* camera;
 Light* light;
@@ -62,17 +62,18 @@ ISoundEngine* SoundManager::engine = nullptr;
 std::unordered_map<unsigned int, ISound*> SoundManager::sounds;
 std::atomic<unsigned int> SoundManager::nextSoundId{1};  // Start IDs from 1
 
-
-// ------------------------------
-
-
 int main()
 {
-    Window window(SCR_WIDTH, SCR_HEIGHT, "ngin.v1.0");
+    Window window(SCR_WIDTH, SCR_HEIGHT, "nev_v1");
     GLFWwindow* win = Window::getGLFWwindow();
+
+    //GraphGenerator graph(25, 0.5);
+    //graph.loadFromFile(Resources::getResourcePath("snorri/map_generator.snorri"));
+    //graph.saveToPNG(Resources::getResourcePath("out/grid.png").c_str());
 
     Game::setState("loading");
     Game::setState("start");
+
 
     SoundManager sound;
     //sound.play(std::string("sleep_song"));
@@ -81,6 +82,18 @@ int main()
     Scene scene("scene_start");
 
     scene.initScene();
+    
+    //scene.initScene([&scene]() {  // Capture scene by reference
+    //    auto camera = Camera::getMainCamera();
+    //    auto light = Light::getMainLight();
+
+    //    if (camera && light) {  // Ensure these objects are valid
+    //        scene.initDepth();
+    //        scene.launch();
+    //    } else {
+    //        std::cerr << "Failed to initialize camera or light" << std::endl;
+    //    }
+    //});
     scene.build();
 
     std::atomic<bool> running(true);
@@ -101,6 +114,7 @@ int main()
 
     camera = Camera::getMainCamera();
     light = Light::getMainLight();
+
 
     glfwSetFramebufferSizeCallback(win, framebuffer_size_callback);
     glfwSetCursorPosCallback(win, mouse_callback);
@@ -165,7 +179,7 @@ int main()
             // 2. render scene as normal using the generated depth/shadow map  
             // --------------------------------------------------------------
 
-            for (int i = nev::RENDER_LAYER_THRESHOLD_SHADOWS; i < nev::RENDER_LAYER_THRESHOLD_UI; i++) {
+            for (int i = snorri::RENDER_LAYER_THRESHOLD_SHADOWS; i < snorri::RENDER_LAYER_THRESHOLD_UI; i++) {
                 scene.preRender(i);
                 window.bindDepthMap();
                 window.bindCubeMap();
@@ -176,7 +190,7 @@ int main()
             // --------------------------------------------------------------
             glDisable(GL_DEPTH_TEST);
             
-            int idx = nev::RENDER_LAYER_UI;
+            int idx = snorri::RENDER_LAYER_UI;
             scene.preRender(idx);
             scene.render(idx);
 

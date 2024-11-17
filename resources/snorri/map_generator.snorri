@@ -1,0 +1,50 @@
+// basic settings
+wavelength: 20.0
+grid_size: 50
+jitter: 0.5
+image_size: 1024
+seed: 251
+
+// noises
+noise_island:
+    frequency: 0.08
+    type: 0
+    fractal_type: 1
+    octaves: 5
+    lacunarity: 2.0
+    gain: 0.5
+    weighted_strength: 0.45 
+
+threshold_water: 0.3
+river_count: 25
+road_size: 1
+river_factor: 1
+
+// colors
+river_color: [94, 182, 223]
+road_color: [238, 214, 175]
+biome_colors:
+    ocean: [94, 182, 223]
+    lake: [94, 182, 223]
+    coast: [223, 205, 87]
+    ground: [125, 185, 75]
+    marsh: [33, 94, 33]
+    ice: [210, 255, 252]
+    beach: [245, 222, 179]
+    snow: [255, 250, 250]
+    tundra: [169, 169, 169]
+    bare: [201, 180, 155]
+    scorched: [153, 130, 109]
+    taiga: [51, 102, 0]
+    shrubland: [128, 128, 0]
+    temperate_desert: [238, 214, 175]
+    temperate_rain_forest: [85, 107, 47]
+    temperate_decidious_forest: [34, 139, 34]
+    grassland: [124, 252, 0]
+    tropical_rain_forest: [0, 100, 0]
+    tropical_seasonal_forest: [107, 142, 35]
+    subtropical_desert: [250, 250, 210]
+
+// bools
+is_noisy_edges: true
+
