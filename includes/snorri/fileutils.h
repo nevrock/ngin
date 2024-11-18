@@ -26,7 +26,12 @@ public:
 
   static std::string getResourcePath(const std::string& path) 
   {
-    return getPath("resources/" + path);
+    std::string pathN = getPath("resources/" + path);
+    if (!doesPathExist(pathN)) {
+      return pathN;
+    } else {
+      return getProjPath("resources/" + path);
+    }
   }
 
   static bool doesAssetExist(const std::string& path)
