@@ -6,10 +6,6 @@ shaders:
     textured_1: 2
     ui_1: 4
 
-textures: 
-
-models: 
-
 models_primitive: 
     plane: 0
     cube: 1
