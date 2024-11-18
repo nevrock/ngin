@@ -36,11 +36,6 @@ public:
                 Resources::loadTexture(pair.first);
             }
         }
-        if (d.contains("models")) {
-            for (const auto& pair : d.get<Dict>("models", nullptr)->data()) {
-                Resources::loadModel(pair.first);
-            }
-        }
         if (d.contains("models_primitive")) {
             for (const auto& pair : d.get<Dict>("models_primitive", nullptr)->data()) {
                 Resources::loadModelPrimitive(pair.first);
