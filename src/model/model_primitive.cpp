@@ -32,6 +32,9 @@ void ModelPrimitive::loadFromNevf(const Nevf& d) {
 
             texIndex += 1;
         }
+        isTextured = true;
+    } else {
+        isTextured = false;
     }
 }
 void ModelPrimitive::updatePreRender(const unsigned int index, Shader& shader) {
@@ -53,7 +56,7 @@ void ModelPrimitive::updateRender(const unsigned int index, Shader& shader) {
         shader.setMat4("M_MODEL", getPoint().getModelMatrix());
         shader.setFloat("POINT_SHADOWS_THRESHOLD", distanceLimit);
         shader.setFloat("IS_ANIMATION", false);
-        if (index == 2) {
+        if (index == 2 && isTextured) {
             int texIndex = 2;  // This represents the base texture unit (GL_TEXTURE2)
             for (int i = 0; i < textures.size(); i++) {
                 // Retrieve the texture by its name

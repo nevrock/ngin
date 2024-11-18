@@ -58,6 +58,7 @@ protected:
     std::string fileName;
     unsigned int layer = 0;
     bool isAddedToDrawer;
+    bool isTextured;
 };
 
 #endif  // MODEL_H
