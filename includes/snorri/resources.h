@@ -15,7 +15,6 @@
 #include <snorri/fileutils.h>
 #include <snorri/log.h>
 #include <snorri/mesh.h>
-#include <snorri/model_loader.h>
 #include <snorri/font.h>
 #include <snorri/constants.h>
 
