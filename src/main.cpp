@@ -24,7 +24,6 @@
 #include <atomic>
 #include <snorri/game.h>
 
-#include <snorri_graphs/graph_generator.h>
 #include <snorri/dict.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);

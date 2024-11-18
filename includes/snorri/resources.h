@@ -13,7 +13,6 @@
 #include <snorri/shader.h>
 #include <snorri/texture_2d.h>
 #include <snorri/fileutils.h>
-#include <snorri/animation.h>
 #include <snorri/log.h>
 #include <snorri/mesh.h>
 #include <snorri/model_loader.h>
@@ -30,7 +29,6 @@ public:
 
     inline static std::map<std::string, Shader>    shaders;
     inline static std::map<std::string, std::unique_ptr<Texture2D>> textures; // Changed to use std::unique_ptrc
-    inline static std::map<std::string, std::unique_ptr<Animation>> animations; // Changed to use std::unique_ptrc
     inline static std::map<std::string, std::unique_ptr<ModelData>> models; // Changed to use std::unique_ptrc
     inline static std::map<std::string, std::unique_ptr<Font>> fonts; // Changed to use std::unique_ptrc
 
@@ -51,7 +49,6 @@ public:
         textures.clear();
         shaders.clear();
         models.clear();
-        animations.clear();
         fonts.clear();
     }
     
@@ -175,32 +172,6 @@ public:
     }
     static bool loadFontFromFile(const char* path, Font& font) {
         font.generate(std::string(path), 24);
-        return true;
-    }
-
-    static Animation* getAnimation(const std::string& name) {
-        auto it = animations.find(name);
-        if (it == animations.end()) {
-            std::cerr << "Animation not found: " << name << "." << std::endl;
-            return nullptr;
-        }
-        return it->second.get();
-    }
-    static Animation& loadAnimation(const std::string& name, ModelAnimation* model) {
-        Log::console("load animation! " + name);
-        std::string path = FileUtils::getResourcePath("fbx/anim/" + name + ".fbx");
-        auto& animation = animations[name]; // Create a new unique_ptr entry if it does not exist
-        if (!animation) {
-            animation = std::make_unique<Animation>(); // Create a new Animation if not already loaded
-        }
-        if (loadAnimationFromFile(path.c_str(), *animation, model)) {
-            return *animation;
-        } else {
-            throw std::runtime_error("Failed to load animation: " + name);
-        }
-    }
-    static bool loadAnimationFromFile(const char* path, Animation& animation, ModelAnimation* model) {
-        animation = Animation(std::string(path), model);
         return true;
     }
 
@@ -403,7 +374,6 @@ public:
             Log::console("root node: " + std::string(scene->mRootNode ? "Yes" : "No"));
             Log::console("mesh count: " + std::to_string(scene->mNumMeshes));
             Log::console("material count: " + std::to_string(scene->mNumMaterials));
-            Log::console("animation count: " + std::to_string(scene->mNumAnimations));
         }
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             Log::console("ERROR::ASSIMP:: " + std::string(importer.GetErrorString()));
@@ -422,9 +392,6 @@ public:
             Log::console("Scene contains embedded textures.");
         } else {
             Log::console("No embedded textures in scene.");
-        }
-        if (scene->HasAnimations()) {
-            Log::console("Number of animations: " + std::to_string(scene->mNumAnimations));
         }
         if (scene->HasMaterials()) {
             Log::console("Number of materials: " + std::to_string(scene->mNumMaterials));
