@@ -63,29 +63,6 @@ children:
                 type: cube
                 textures: ["wood"]
                 is_instance: true
-        children: 
-            fbx_sphere: 
-                name: "fbx_sphere"
-                point: 
-                    position: [0.0,1.0,0.0]
-                    rotation: [0.0,0.0,0.0]
-                    scale: [1.0,1.0,1.0]
-                components: 
-                    model_fbx: 
-                        file: "sphere"
-    fbx_player: 
-        name: "fbx_player"
-        point: 
-            position: [-4.0,1.0,5.0]
-            rotation: [0.0,0.0,0.0]
-            scale: [1.0,1.0,1.0]
-        components: 
-            model_fbx: 
-                file: player
-                textures: ["palette"]
-                animation: "unarmed_idle"
-            animator: 
-                file: "unarmed_idle"
     prim_ui_1: 
         name: "prim_ui_1"
         point: 
