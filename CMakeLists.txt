@@ -24,7 +24,6 @@ find_package(IRRKLANG REQUIRED)
 message(STATUS "Found IRRKLANG in ${IRRKLANG_INCLUDE_DIR}")
 
 include_directories(${CMAKE_SOURCE_DIR}/includes/)
-include_directories(${CMAKE_SOURCE_DIR}/../scripts/)
 
 if(WIN32)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
@@ -75,10 +74,6 @@ set(SOURCES
     src/camera/camera.cpp
 )
 
-set(SOURCES_GRAPH
-    src/stb_image.cpp
-    src/main_graph.cpp
-)
 
 configure_file(configuration/root_directory.h.in configuration/root_directory.h)
 
