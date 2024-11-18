@@ -6,15 +6,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <ngin/fileutils.h>
+#include <ngin/utils/fileutils.h>
 #include <ngin/gl/shader.h>
 #include "camera/camera.h"
 #include "light/light.h"
 #include <ngin/gl/window.h>
 #include <ngin/resources.h>
-#include <ngin/scene.h>
+#include <ngin/scene/scene.h>
 #include <ngin/constants.h>
-#include <ngin/sound_manager.h>
+#include <ngin/sound/manager.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -22,7 +22,7 @@
 #include <iostream>
 #include <thread>
 #include <atomic>
-#include <ngin/game.h>
+#include <ngin/scene/game.h>
 
 #include <ngin/collections/nevf.h>
 
