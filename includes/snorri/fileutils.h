@@ -27,7 +27,7 @@ public:
   static std::string getResourcePath(const std::string& path) 
   {
     std::string pathN = getPath("resources/" + path);
-    if (!doesPathExist(pathN)) {
+    if (doesPathExist(pathN)) {
       return pathN;
     } else {
       return getProjPath("resources/" + path);
