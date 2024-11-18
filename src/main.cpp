@@ -26,7 +26,7 @@
 
 #include <snorri_graphs/graph_generator.h>
 #include <snorri/dict.h>
-#include <snorri/coroutine_manager.h"
+#include <snorri/coroutine_manager.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
