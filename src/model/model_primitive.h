@@ -1,7 +1,7 @@
 #ifndef MODEL_PRIMITIVE_H
 #define MODEL_PRIMITIVE_H
 
-#include <ngin/model.h>
+#include <ngin/gl/model.h>
 
 class ModelPrimitive : public Model {
 public:
