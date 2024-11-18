@@ -17,6 +17,7 @@
 #include <snorri/mesh.h>
 #include <snorri/font.h>
 #include <snorri/constants.h>
+#include <snorri/model_loader.h>
 
 #if defined(_MSC_VER)
     #include <io.h>
