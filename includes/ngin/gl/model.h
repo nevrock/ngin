@@ -7,7 +7,7 @@
 #include <ngin/scene/object.h>
 #include <ngin/gl/mesh.h>
 #include <ngin/resources.h>
-#include <ngin/scene/model_drawer.h>
+#include <ngin/gl/model_drawer.h>
 #include <ngin/log.h>
 
 class Model : public Component {
