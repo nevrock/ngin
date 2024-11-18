@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 cmake_policy(VERSION 3.0)
 
-project(nev_engine)
+project(ngin)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -80,13 +80,13 @@ configure_file(configuration/root_directory.h.in configuration/root_directory.h)
 include_directories(${CMAKE_BINARY_DIR}/configuration)
 
 # Add executable
-add_executable(nev_engine ${SOURCES})
+add_executable(ngin ${SOURCES})
 
 # Link libraries
-target_link_libraries(nev_engine ${LIBS})
+target_link_libraries(ngin ${LIBS})
 
 # MSVC specific flags
 if(MSVC)
-    target_compile_options(nev_engine PRIVATE /std:c++17 /MP)
-    target_link_options(nev_engine PUBLIC /ignore:4099)
+    target_compile_options(ngin PRIVATE /std:c++17 /MP)
+    target_link_options(ngin PUBLIC /ignore:4099)
 endif()
