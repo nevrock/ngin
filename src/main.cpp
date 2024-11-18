@@ -26,6 +26,7 @@
 
 #include <snorri_graphs/graph_generator.h>
 #include <snorri/dict.h>
+#include <snorri/coroutine_manager.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -66,6 +67,9 @@ int main()
 {
     Window window(SCR_WIDTH, SCR_HEIGHT, "nev_v1");
     GLFWwindow* win = Window::getGLFWwindow();
+
+    CoroutineManager manager;
+    manager.start(); // Start the coroutine manager
 
     //GraphGenerator graph(25, 0.5);
     //graph.loadFromFile(Resources::getResourcePath("snorri/map_generator.snorri"));
@@ -206,6 +210,8 @@ int main()
     scene.clear();
 
     running = false;
+
+    manager.stop(); // Stop the coroutine manager
 
     physicsThread.join();  
 
