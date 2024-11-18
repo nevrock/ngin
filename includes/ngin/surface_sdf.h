@@ -3,9 +3,9 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
-#include <snorri/object.h>
+#include <ngin/object.h>
 
-#include <snorri/surface_data.h>
+#include <ngin/surface_data.h>
 
 class SurfaceSdf : public Component
 {

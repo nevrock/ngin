@@ -2,11 +2,11 @@
 #include "body_box.h"
 #include "body_mesh.h"
 #include "physics_manager.h"
-#include <snorri/log.h>
+#include <ngin/log.h>
 #include <glm/glm.hpp>
 #include <iostream>
 
-#include <snorri/resources.h>
+#include <ngin/resources.h>
 
 Body::Body(Object* parent) 
     : Component(parent), mass(0.0), size(glm::vec3(1,1,1)), desiredVelocity(glm::vec3(0,0,0)),

@@ -1,12 +1,12 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include <snorri/i_object.h>
-#include <snorri/component.h>
-#include <snorri/point_ui.h>
-#include <snorri/log.h>
-#include <snorri/fileutils.h>
-#include <snorri/dict.h> 
+#include <ngin/i_object.h>
+#include <ngin/component.h>
+#include <ngin/point_ui.h>
+#include <ngin/log.h>
+#include <ngin/fileutils.h>
+#include <ngin/dict.h> 
 
 #include <vector>
 #include <memory>
@@ -71,7 +71,7 @@ public:
         if (d.contains("inherit")) {
             std::string inheritFromObj  = d.getC<std::string>("inherit", "");
             Dict dOther;
-            dOther.read(FileUtils::getResourcePath("snorri/objects/" + inheritFromObj + ".snorri"));
+            dOther.read(FileUtils::getResourcePath("ngin/objects/" + inheritFromObj + ".snorri"));
             d.sync(&dOther);
             Log::console("object inherit from: " + inheritFromObj);
             d.print();

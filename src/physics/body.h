@@ -3,9 +3,9 @@
 
 #include <memory>
 #include <glm/glm.hpp>
-#include <snorri/object.h>
+#include <ngin/object.h>
 #include "body_collider.h"
-#include <snorri/dict.h>
+#include <ngin/dict.h>
 
 class Body : public Component, public std::enable_shared_from_this<Body> {
 public:

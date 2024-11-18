@@ -6,15 +6,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <snorri/fileutils.h>
-#include <snorri/shader.h>
+#include <ngin/fileutils.h>
+#include <ngin/shader.h>
 #include "camera/camera.h"
 #include "light/light.h"
-#include <snorri/window.h>
-#include <snorri/resources.h>
-#include <snorri/scene.h>
-#include <snorri/constants.h>
-#include <snorri/sound_manager.h>
+#include <ngin/window.h>
+#include <ngin/resources.h>
+#include <ngin/scene.h>
+#include <ngin/constants.h>
+#include <ngin/sound_manager.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -22,9 +22,9 @@
 #include <iostream>
 #include <thread>
 #include <atomic>
-#include <snorri/game.h>
+#include <ngin/game.h>
 
-#include <snorri/dict.h>
+#include <ngin/dict.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);

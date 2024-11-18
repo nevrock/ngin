@@ -3,10 +3,10 @@
 
 #include <iostream> 
 #include <vector>
-#include <snorri/dict.h>
-#include <snorri/resources.h>
-#include <snorri/object.h>
-#include <snorri/model_drawer.h>
+#include <ngin/dict.h>
+#include <ngin/resources.h>
+#include <ngin/object.h>
+#include <ngin/model_drawer.h>
 #include <memory> // Include for smart pointers
 #include <unordered_map>
 
@@ -21,7 +21,7 @@ public:
     void initScene() {
 
         Dict d;
-        d.read(FileUtils::getResourcePath("snorri/resources.snorri").c_str());
+        d.read(FileUtils::getResourcePath("ngin/resources.snorri").c_str());
         d.print();
 
         if (d.contains("shaders")) {
@@ -51,7 +51,7 @@ public:
     }
     void build() {
         Dict d;
-        d.read(FileUtils::getResourcePath("snorri/" + originName + ".snorri").c_str());
+        d.read(FileUtils::getResourcePath("ngin/" + originName + ".snorri").c_str());
         d.print();
         origin = std::make_unique<Object>(d, 0, nullptr, false);
     }

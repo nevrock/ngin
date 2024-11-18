@@ -3,8 +3,8 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <snorri/point.h>
-#include <snorri/constants.h>
+#include <ngin/point.h>
+#include <ngin/constants.h>
 
 class PointUi : public Point {
 public:

@@ -6,7 +6,7 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <snorri/constants.h>
+#include <ngin/constants.h>
 
 class Model;
 class Shader;

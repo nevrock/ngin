@@ -1,7 +1,7 @@
 #ifndef IOBJECT_H
 #define IOBJECT_H
 
-//#include <snorri/point.h> // Include the Point class definition
+//#include <ngin/point.h> // Include the Point class definition
 #include <memory>
 #include <glm/glm.hpp>
 #include <string>

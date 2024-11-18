@@ -1,12 +1,12 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include <snorri/dict.h> // Include the JSON library
+#include <ngin/dict.h> // Include the JSON library
 
-#include <snorri/i_object.h>
-#include <snorri/shader.h>
-#include <snorri/point.h>
-#include <snorri/log.h>
+#include <ngin/i_object.h>
+#include <ngin/shader.h>
+#include <ngin/point.h>
+#include <ngin/log.h>
 
 class Object;
 

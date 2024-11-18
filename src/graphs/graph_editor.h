@@ -1,7 +1,7 @@
 #ifndef GRAPH_EDITOR_H
 #define GRAPH_EDITOR_H
 
-#include <snorri/object.h>
+#include <ngin/object.h>
 
 class GraphEditor : public Component
 {

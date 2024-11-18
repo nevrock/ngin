@@ -2,7 +2,7 @@
 #define NOISE_H
 
 #include <noise/FastNoiseLite.h>
-#include <snorri/dict.h>
+#include <ngin/dict.h>
 #include <iostream>  // Include the iostream header for console output
 
 class Noise {

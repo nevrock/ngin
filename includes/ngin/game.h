@@ -1,7 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <snorri/event.h>
+#include <ngin/event.h>
 #include <memory>
 #include <functional>
 #include <atomic>

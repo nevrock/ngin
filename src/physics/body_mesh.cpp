@@ -3,8 +3,8 @@
 #include "body_mesh.h"
 #include <algorithm>
 #include <glm/glm.hpp>
-#include <snorri/log.h>
-#include <snorri/mathutils.h>
+#include <ngin/log.h>
+#include <ngin/mathutils.h>
 
 BodyMesh::BodyMesh(Mesh* mesh, const glm::vec3& position, const glm::vec3& size, const glm::vec3& velocity, float mass)
     : BodyCollider(position, size, velocity, mass), mesh(mesh) {

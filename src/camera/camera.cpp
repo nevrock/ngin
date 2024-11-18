@@ -1,5 +1,5 @@
 #include "camera.h"
-#include <snorri/constants.h>
+#include <ngin/constants.h>
 Camera* Camera::mainCamera = nullptr;
 
 

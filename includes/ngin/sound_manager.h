@@ -4,8 +4,8 @@
 #include <irrklang/irrKlang.h>
 using namespace irrklang;
 
-#include <snorri/fileutils.h>
-#include <snorri/log.h>
+#include <ngin/fileutils.h>
+#include <ngin/log.h>
 #include <unordered_map>
 #include <atomic>
 

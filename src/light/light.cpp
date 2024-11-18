@@ -1,7 +1,7 @@
 #include "light.h"
 #include <glm/glm.hpp>
 #include <iostream>
-#include <snorri/resources.h>
+#include <ngin/resources.h>
 #include <limits>
 #include <algorithm>
 #undef max

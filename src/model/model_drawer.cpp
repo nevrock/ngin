@@ -1,8 +1,8 @@
 // model_drawer.cpp
 
-#include <snorri/model_drawer.h>
-#include <snorri/log.h>
-#include <snorri/model.h>
+#include <ngin/model_drawer.h>
+#include <ngin/log.h>
+#include <ngin/model.h>
 
 using namespace snorri;
 

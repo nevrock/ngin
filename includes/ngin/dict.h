@@ -10,8 +10,8 @@
 #include <algorithm>
 #include <optional>
 
-#include <snorri/collection.h>
-#include <snorri/list.h>
+#include <ngin/collection.h>
+#include <ngin/list.h>
 
 class Dict : public Collection {
 public:

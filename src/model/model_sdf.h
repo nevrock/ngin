@@ -1,8 +1,8 @@
 #ifndef MODEL_SDF_H
 #define MODEL_SDF_H
 
-#include <snorri/model.h>
-#include <snorri/surface_data.h>
+#include <ngin/model.h>
+#include <ngin/surface_data.h>
 
 class ModelSdf : public Model {
 public:

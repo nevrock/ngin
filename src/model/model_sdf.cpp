@@ -2,9 +2,9 @@
 #include <iostream>
 #include <vector>
 #include "../light/light.h"
-#include <snorri/constants.h>
-#include <snorri/surface_data.h>
-#include <snorri/surface_sdf.h>
+#include <ngin/constants.h>
+#include <ngin/surface_data.h>
+#include <ngin/surface_sdf.h>
 
 ModelSdf::ModelSdf(Object* parent) : Model(parent), surfacesBuffer(0), currentBufferSize(0) {
 }

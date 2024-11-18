@@ -1,8 +1,8 @@
 #pragma once
 
-#include <snorri/object.h>
+#include <ngin/object.h>
 #include <glm/glm.hpp>
-#include <snorri/constants.h>
+#include <ngin/constants.h>
 #include <vector>
 
 class Light : public Component {

@@ -1,7 +1,7 @@
 #include "model_primitive.h"
 #include <iostream>
 #include "../light/light.h"
-#include <snorri/constants.h>
+#include <ngin/constants.h>
 
 ModelPrimitive::ModelPrimitive(Object* parent) : Model(parent) {}
 

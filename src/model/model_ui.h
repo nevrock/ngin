@@ -2,8 +2,8 @@
 #ifndef MODEL_UI_H
 #define MODEL_UI_H
 
-#include <snorri/model.h>
-#include <snorri/constants.h>
+#include <ngin/model.h>
+#include <ngin/constants.h>
 
 class ModelUi : public Model {
 public:

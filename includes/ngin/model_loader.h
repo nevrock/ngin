@@ -1,9 +1,9 @@
 #ifndef MODEL_LOADER_H
 #define MODEL_LOADER_H
 
-#include <snorri/dict.h>  // Include the JSON library header
+#include <ngin/dict.h>  // Include the JSON library header
 
-#include <snorri/log.h>
+#include <ngin/log.h>
 
 struct ModelData {
 public:

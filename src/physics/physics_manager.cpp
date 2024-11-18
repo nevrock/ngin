@@ -1,4 +1,4 @@
-#include <snorri/log.h>
+#include <ngin/log.h>
 #include "body.h" // Include here for complete type information
 #include "physics_manager.h"
 

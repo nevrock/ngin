@@ -1,4 +1,4 @@
-#include <snorri/surface_sdf.h>
+#include <ngin/surface_sdf.h>
 
 void SurfaceSdf::loadFromDict(const Dict& d) {    
 }

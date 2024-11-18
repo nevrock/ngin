@@ -1,7 +1,7 @@
 #ifndef MODEL_PRIMITIVE_H
 #define MODEL_PRIMITIVE_H
 
-#include <snorri/model.h>
+#include <ngin/model.h>
 
 class ModelPrimitive : public Model {
 public:

@@ -10,14 +10,14 @@
 #include <vector>
 #include <stb_image.h>
 
-#include <snorri/shader.h>
-#include <snorri/texture_2d.h>
-#include <snorri/fileutils.h>
-#include <snorri/log.h>
-#include <snorri/mesh.h>
-#include <snorri/font.h>
-#include <snorri/constants.h>
-#include <snorri/model_loader.h>
+#include <ngin/shader.h>
+#include <ngin/texture_2d.h>
+#include <ngin/fileutils.h>
+#include <ngin/log.h>
+#include <ngin/mesh.h>
+#include <ngin/font.h>
+#include <ngin/constants.h>
+#include <ngin/model_loader.h>
 
 #if defined(_MSC_VER)
     #include <io.h>
@@ -193,7 +193,7 @@ public:
             std::vector<Texture> textures;
 
             Dict d;
-            d.read(FileUtils::getResourcePath("snorri/models/" + name + ".snorri"));
+            d.read(FileUtils::getResourcePath("ngin/models/" + name + ".snorri"));
             int texIndex = 2;
             for (const auto& textureName : d.getC<std::vector<std::string>>("textures", std::vector<std::string>{""})) {
                 Log::console("resources loading texture for mesh prim! " + std::string(textureName));

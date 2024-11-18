@@ -1,5 +1,5 @@
 #include "model_ui.h"
-#include <snorri/constants.h>
+#include <ngin/constants.h>
 #include <iostream>
 
 ModelUi::ModelUi(Object* parent) : Model(parent) {}

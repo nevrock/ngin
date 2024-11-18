@@ -1,6 +1,6 @@
 #include "model_text.h"
-#include <snorri/constants.h>
-#include <snorri/font.h>
+#include <ngin/constants.h>
+#include <ngin/font.h>
 #include <iostream>
 
 ModelText::ModelText(Object* parent) : Model(parent) {}

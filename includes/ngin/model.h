@@ -1,11 +1,11 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <snorri/object.h>
-#include <snorri/mesh.h>
-#include <snorri/resources.h>
-#include <snorri/model_drawer.h>
-#include <snorri/log.h>
+#include <ngin/object.h>
+#include <ngin/mesh.h>
+#include <ngin/resources.h>
+#include <ngin/model_drawer.h>
+#include <ngin/log.h>
 #include <memory>
 #include <vector>
 
