@@ -17,19 +17,36 @@ public:
     static std::string(*pathBuilder)(std::string const &) = getPathBuilder();
     return (*pathBuilder)(path);
   }
+
   static bool doesPathExist(const std::string& path)
   {
     std::ifstream file(path);
     return file.good();
   }
+
   static std::string getResourcePath(const std::string& path) 
   {
     return getPath("resources/" + path);
   }
+
   static bool doesAssetExist(const std::string& path)
   {
     std::ifstream file(getResourcePath(path));
     return file.good();
+  }
+
+  // New method to retrieve the PROJ_DIR path
+  static std::string getProjDir()
+  {
+    static std::string const & projDir = getProjDirPath();
+    return projDir;
+  }
+
+  // New method to get the path relative to PROJ_DIR
+  static std::string getProjPath(const std::string& path)
+  {
+    static std::string(*projPathBuilder)(std::string const &) = getProjPathBuilder();
+    return (*projPathBuilder)(path);
   }
 
 private:
@@ -39,6 +56,15 @@ private:
     static char const * givenRoot = (envRoot != nullptr ? envRoot : ROOT_DIR);
     static std::string root = (givenRoot != nullptr ? givenRoot : "");
     return root;
+  }
+
+  // New method to retrieve PROJ_DIR environment variable or fallback to CMake variable
+  static std::string const & getProjDirPath()
+  {
+    static char const * envProjDir = getenv("LOGL_PROJ_PATH"); // Assuming this is the environment variable for PROJ_DIR
+    static char const * givenProjDir = (envProjDir != nullptr ? envProjDir : PROJ_DIR); // Assuming PROJ_DIR is defined in the CMake configuration
+    static std::string projDir = (givenProjDir != nullptr ? givenProjDir : "");
+    return projDir;
   }
 
   static Builder getPathBuilder()
@@ -58,6 +84,21 @@ private:
   {
     return "../../../" + path;
   }
+
+  // Builder for the PROJ_DIR path
+  static Builder getProjPathBuilder()
+  {
+    if (getProjDir() != "")
+      return &FileUtils::getPathRelativeProjDir;
+    else
+      return &FileUtils::getPathRelativeBinary; // Fallback if PROJ_DIR is not available
+  }
+
+  static std::string getPathRelativeProjDir(const std::string& path)
+  {
+    return getProjDir() + std::string("/") + path;
+  }
+
 };
 
 #endif // FILEUTILS_H
