@@ -24,6 +24,7 @@ find_package(IRRKLANG REQUIRED)
 message(STATUS "Found IRRKLANG in ${IRRKLANG_INCLUDE_DIR}")
 
 include_directories(${CMAKE_SOURCE_DIR}/includes/)
+include_directories(${CMAKE_SOURCE_DIR}/../scripts/)
 
 if(WIN32)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
