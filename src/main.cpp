@@ -67,10 +67,6 @@ int main()
     Window window(SCR_WIDTH, SCR_HEIGHT, "nev_v1");
     GLFWwindow* win = Window::getGLFWwindow();
 
-    //GraphGenerator graph(25, 0.5);
-    //graph.loadFromFile(Resources::getResourcePath("snorri/map_generator.snorri"));
-    //graph.saveToPNG(Resources::getResourcePath("out/grid.png").c_str());
-
     Game::setState("loading");
     Game::setState("start");
 
@@ -82,18 +78,6 @@ int main()
     Scene scene("scene_start");
 
     scene.initScene();
-    
-    //scene.initScene([&scene]() {  // Capture scene by reference
-    //    auto camera = Camera::getMainCamera();
-    //    auto light = Light::getMainLight();
-
-    //    if (camera && light) {  // Ensure these objects are valid
-    //        scene.initDepth();
-    //        scene.launch();
-    //    } else {
-    //        std::cerr << "Failed to initialize camera or light" << std::endl;
-    //    }
-    //});
     scene.build();
 
     std::atomic<bool> running(true);
