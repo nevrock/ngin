@@ -195,14 +195,16 @@ public:
             Nevf d;
             d.read(FileUtils::getResourcePath("nevf/models/" + name + ".nevf"));
             int texIndex = 2;
-            for (const auto& textureName : d.getC<std::vector<std::string>>("textures", std::vector<std::string>{""})) {
-                Log::console("resources loading texture for mesh prim! " + std::string(textureName));
-                Texture texture;
-                texture.id = texIndex,
-                texture.name = textureName;
-                textures.push_back(texture);
+            if (d.contains('textures')) {
+                for (const auto& textureName : d.getC<std::vector<std::string>>("textures", std::vector<std::string>{""})) {
+                    Log::console("resources loading texture for mesh prim! " + std::string(textureName));
+                    Texture texture;
+                    texture.id = texIndex,
+                    texture.name = textureName;
+                    textures.push_back(texture);
 
-                texIndex += 1;
+                    texIndex += 1;
+                }
             }
 
 
