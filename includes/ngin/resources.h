@@ -10,14 +10,14 @@
 #include <vector>
 #include <stb_image.h>
 
-#include <ngin/shader.h>
-#include <ngin/texture_2d.h>
-#include <ngin/fileutils.h>
+#include <ngin/gl/shader.h>
+#include <ngin/gl/texture_2d.h>
+#include <ngin/utils/fileutils.h>
 #include <ngin/log.h>
-#include <ngin/mesh.h>
-#include <ngin/font.h>
+#include <ngin/gl/mesh.h>
+#include <ngin/gui/font.h>
 #include <ngin/constants.h>
-#include <ngin/model_loader.h>
+#include <ngin/scene/model_loader.h>
 
 #if defined(_MSC_VER)
     #include <io.h>
@@ -77,7 +77,7 @@ public:
         std::string fShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".fs");
         std::string gShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".gs");
         std::string iShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".include");
-        std::string hShaderFilePath = FileUtils::getResourcePath("shaders/" + std::string(snorri::SHADER_INCLUDE_MANDATORY) + ".include");
+        std::string hShaderFilePath = FileUtils::getResourcePath("shaders/" + std::string(ngin::SHADER_INCLUDE_MANDATORY) + ".include");
 
         if (FileUtils::doesPathExist(gShaderFilePath)) {
             if (FileUtils::doesPathExist(iShaderFilePath)) {
@@ -192,8 +192,8 @@ public:
             
             std::vector<Texture> textures;
 
-            Dict d;
-            d.read(FileUtils::getResourcePath("ngin/models/" + name + ".snorri"));
+            Nevf d;
+            d.read(FileUtils::getResourcePath("nevf/models/" + name + ".nevf"));
             int texIndex = 2;
             for (const auto& textureName : d.getC<std::vector<std::string>>("textures", std::vector<std::string>{""})) {
                 Log::console("resources loading texture for mesh prim! " + std::string(textureName));

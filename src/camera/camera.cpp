@@ -15,7 +15,7 @@ Camera::Camera(Object* parent)
     mainWindow = Window::getMainWindow();
 }
 
-void Camera::loadFromDict(const Dict& d) {
+void Camera::loadFromNevf(const Nevf& d) {
     if (d.contains("is_main")) {
         if (d.getC<bool>("is_main", false)) {
             setMainCamera(this);
@@ -50,7 +50,7 @@ glm::mat4 Camera::getProjectionMatrix(float screenWidth, float screenHeight)
 
 void Camera::updatePreRender(const unsigned int index, Shader& shader) {
     if (index > 1) {
-        glm::mat4 projection = getProjectionMatrix(snorri::SCREEN_WIDTH, snorri::SCREEN_HEIGHT);
+        glm::mat4 projection = getProjectionMatrix(ngin::SCREEN_WIDTH, ngin::SCREEN_HEIGHT);
         glm::mat4 view = getViewMatrix();
         glm::mat4 inverseViewMatrix = glm::inverse(view);
         glm::mat4 inverseProjectionMatrix = glm::inverse(projection);

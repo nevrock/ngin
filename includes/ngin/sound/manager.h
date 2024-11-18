@@ -4,7 +4,7 @@
 #include <irrklang/irrKlang.h>
 using namespace irrklang;
 
-#include <ngin/fileutils.h>
+#include <ngin/utils/fileutils.h>
 #include <ngin/log.h>
 #include <unordered_map>
 #include <atomic>

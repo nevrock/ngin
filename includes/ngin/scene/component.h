@@ -1,11 +1,11 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include <ngin/dict.h> // Include the JSON library
+#include <ngin/collections/nevf.h> // Include the JSON library
 
-#include <ngin/i_object.h>
-#include <ngin/shader.h>
-#include <ngin/point.h>
+#include <ngin/scene/i_object.h>
+#include <ngin/gl/shader.h>
+#include <ngin/scene/point.h>
 #include <ngin/log.h>
 
 class Object;
@@ -15,7 +15,7 @@ public:
     Component(IObject* parentObj) : parent(parentObj) {}
     virtual ~Component() {}
 
-    virtual void loadFromDict(const Dict& d) = 0;
+    virtual void loadFromNevf(const Nevf& d) = 0;
 
     virtual void update() {}
     virtual void updatePhysics(float dt) {}

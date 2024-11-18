@@ -1,6 +1,6 @@
 #include <ngin/surface_sdf.h>
 
-void SurfaceSdf::loadFromDict(const Dict& d) {    
+void SurfaceSdf::loadFromNevf(const Nevf& d) {    
 }
 
 bool surface_sdf_registered = []() {

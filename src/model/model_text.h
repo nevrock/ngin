@@ -18,7 +18,7 @@ public:
 
     unsigned int VAO, VBO;  // Vertex Array Object and Vertex Buffer Object for text rendering
 
-    void loadFromDict(const Dict& d) override;
+    void loadFromNevf(const Nevf& d) override;
     void updatePreRender(const unsigned int index, Shader& shader) override;
     void updateRender(const unsigned int index, Shader& shader) override;
     void draw(Shader &shader, std::string text, float x, float y, float scale) const;

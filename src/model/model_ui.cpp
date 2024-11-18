@@ -7,7 +7,7 @@ ModelUi::ModelUi(Object* parent) : Model(parent) {}
 ModelUi::~ModelUi() {
 }
 
-void ModelUi::loadFromDict(const Dict& d) {
+void ModelUi::loadFromNevf(const Nevf& d) {
 
     fileName = std::string("quad");
     data = Resources::getModel("quad");
@@ -48,12 +48,12 @@ glm::mat4 ModelUi::getTransformation() {
     return matrixOut;
 }
 void ModelUi::updatePreRender(const unsigned int index, Shader& shader) {
-    if (index == snorri::RENDER_LAYER_UI) {
-        //shader.setMat4("screenMat", createScreenToNDCMatrix(snorri::SCREEN_WIDTH, snorri::SCREEN_HEIGHT));
+    if (index == ngin::RENDER_LAYER_UI) {
+        //gl/shader.setMat4("screenMat", createScreenToNDCMatrix(ngin::SCREEN_WIDTH, ngin::SCREEN_HEIGHT));
     }
 }
 void ModelUi::updateRender(const unsigned int index, Shader& shader) {
-    if (index == snorri::RENDER_LAYER_UI) {
+    if (index == ngin::RENDER_LAYER_UI) {
         shader.setInt("NUM_LIGHTS", 0);
 
         shader.setMat4("M_MODEL", getTransformation());
@@ -88,7 +88,7 @@ void ModelUi::updateRender(const unsigned int index, Shader& shader) {
     }
 }
 bool ModelUi::isValidLayer(const unsigned int index) {
-    if (index == snorri::RENDER_LAYER_UI) {
+    if (index == ngin::RENDER_LAYER_UI) {
         return true;
     } return false;
 }

@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <ngin/window.h>
+#include <ngin/gl/window.h>
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum CameraMovement {
@@ -45,7 +45,7 @@ public:
 
     static Camera* getMainCamera();
     static void setMainCamera(Camera* light);  // Static method to set the main camera
-    void loadFromDict(const Dict& d) override;
+    void loadFromNevf(const Nevf& d) override;
     void update() override;
     void updatePreRender(const unsigned int index, Shader& shader) override;
 

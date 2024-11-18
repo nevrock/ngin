@@ -98,20 +98,3 @@ children:
                         components: 
                             model_text: 
                                 is_cull: true                    
-    prim_sdf: 
-        name: "prim_sdf"
-        point: 
-            position: [8.0,0.5,8.0]
-            rotation: [0.0,0.0,0.0]
-            scale: [1.0,1.0,1.0]
-        components: 
-            model_sdf: 
-        children: 
-            sdf_1: 
-                name: "surface_sdf_1"
-                point: 
-                    position: [0.0,0.0,0.0]
-                    rotation: [0.0,0.0,0.0]
-                    scale: [1.0,1.0,1.0]
-                components: 
-                    surface_sdf: 

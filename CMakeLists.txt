@@ -61,7 +61,6 @@ set(SOURCES
     src/model/model_ui.cpp
     src/model/model_drawer.cpp
     src/model/model_text.cpp
-    src/model/model_sdf.cpp
     src/physics/body.cpp
     src/physics/body_box.cpp
     src/physics/body_mesh.cpp

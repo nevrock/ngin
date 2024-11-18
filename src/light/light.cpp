@@ -40,7 +40,7 @@ Light::~Light() {
     }
 }
 
-void Light::loadFromDict(const Dict& d) {
+void Light::loadFromNevf(const Nevf& d) {
     if (d.getC<bool>("is_main", false)) {
         setMainLight(this);
         isMain = true;
@@ -82,7 +82,7 @@ void Light::updateShadows(Shader& shader) {
 
     float nearPlane = 1.0f;
     float farPlane  = 25.0f;
-    glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)snorri::SHADOW_WIDTH / (float)snorri::SHADOW_HEIGHT, nearPlane, farPlane);
+    glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)ngin::SHADOW_WIDTH / (float)ngin::SHADOW_HEIGHT, nearPlane, farPlane);
     std::vector<glm::mat4> shadowTransforms;
     shadowTransforms.push_back(shadowProj * glm::lookAt(position, position + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
     shadowTransforms.push_back(shadowProj * glm::lookAt(position, position + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)));

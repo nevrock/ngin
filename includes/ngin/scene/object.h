@@ -1,12 +1,12 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include <ngin/i_object.h>
-#include <ngin/component.h>
-#include <ngin/point_ui.h>
+#include <ngin/scene/i_object.h>
+#include <ngin/scene/component.h>
+#include <ngin/scene/point_ui.h>
 #include <ngin/log.h>
-#include <ngin/fileutils.h>
-#include <ngin/dict.h> 
+#include <ngin/utils/fileutils.h>
+#include <ngin/collections/nevf.h> 
 
 #include <vector>
 #include <memory>
@@ -20,10 +20,10 @@ public:
     // Constructors
     Object() : isParent(false), point(std::make_unique<Point>()) {}
 
-    Object(const Dict& dict, unsigned int hIndex, 
+    Object(const Nevf& dict, unsigned int hIndex, 
         IObject* parentObj = nullptr, bool isParentObj = false) : isParent(isParentObj), 
         point(std::make_unique<Point>()), parent(parentObj), hierarchyIndex(hIndex) {
-        loadFromDict(dict);
+        loadFromNevf(dict);
     }
 
     ~Object() {
@@ -65,13 +65,13 @@ public:
     }
 
     // Load from JSON
-    void loadFromDict(const Dict& dConst) {
-        Dict d = dConst;  // Create a modifiable copy of dConst
+    void loadFromNevf(const Nevf& dConst) {
+        Nevf d = dConst;  // Create a modifiable copy of dConst
         isUiPoint = false;
         if (d.contains("inherit")) {
             std::string inheritFromObj  = d.getC<std::string>("inherit", "");
-            Dict dOther;
-            dOther.read(FileUtils::getResourcePath("ngin/objects/" + inheritFromObj + ".snorri"));
+            Nevf dOther;
+            dOther.read(FileUtils::getResourcePath("nevf/objects/" + inheritFromObj + ".nevf"));
             d.sync(&dOther);
             Log::console("object inherit from: " + inheritFromObj);
             d.print();
@@ -84,47 +84,47 @@ public:
                 ", with parent - " + parent->getName());
         }
         if (d.contains("point")) {
-            Dict pD;
-            loadPoint(d.getC<Dict>("point", pD));
+            Nevf pD;
+            loadPoint(d.getC<Nevf>("point", pD));
         } else {
             point->setScale(glm::vec3(1.0,1.0,1.0));
         }
         if (d.contains("components")) {
-            Dict cD;
-            loadComponents(d.getC<Dict>("components", cD));
+            Nevf cD;
+            loadComponents(d.getC<Nevf>("components", cD));
         }
         if (d.contains("children")) {
-            Dict chD;
-            loadChildren(d.getC<Dict>("children", chD));
+            Nevf chD;
+            loadChildren(d.getC<Nevf>("children", chD));
         }
     }
-    void loadChildren(const Dict& d) {
-        for (auto& childDict : d.data()) {
-            std::string name = std::any_cast<std::string>(childDict.first);
-            Dict childData;
-            childData = d.getC<Dict>(name, childData);
+    void loadChildren(const Nevf& d) {
+        for (auto& childNevf : d.data()) {
+            std::string name = std::any_cast<std::string>(childNevf.first);
+            Nevf childData;
+            childData = d.getC<Nevf>(name, childData);
             
             std::shared_ptr<Object> child = std::make_shared<Object>(childData, hierarchyIndex+1, this, true);
             children[name] = child;
         }
     }
-    void addChild(const std::string& key, const Dict& args) {
+    void addChild(const std::string& key, const Nevf& args) {
         if (args.contains(key)) {
-            Dict childDict;
-            childDict = args.getC<Dict>(key, childDict);
-            if (childDict.contains("name")) {
-                std::string childName = childDict.getC<std::string>("name", "");
+            Nevf childNevf;
+            childNevf = args.getC<Nevf>(key, childNevf);
+            if (childNevf.contains("name")) {
+                std::string childName = childNevf.getC<std::string>("name", "");
                 if (childName == "") {
                     return;
                 }
-                std::shared_ptr<Object> child = std::make_shared<Object>(childDict, hierarchyIndex+1, this, true);
+                std::shared_ptr<Object> child = std::make_shared<Object>(childNevf, hierarchyIndex+1, this, true);
                 children[childName] = child;
                 Log::console("Added child with key '" + key + "': " + childName);
             } else {
-                Log::console("Dict under key '" + key + "' does not contain a 'name' key, child not added.");
+                Log::console("Nevf under key '" + key + "' does not contain a 'name' key, child not added.");
             }
         } else {
-            Log::console("Dict does not contain key: " + key);
+            Log::console("Nevf does not contain key: " + key);
         }
     }
     void removeChild(const std::string& name) {
@@ -320,7 +320,7 @@ private:
         }
     }
 
-    void loadPoint(const Dict& d) {
+    void loadPoint(const Nevf& d) {
         Log::console("object load point!");
         if (d.contains("is_ui") && d.getC<bool>("is_ui", true)) {
             resetPoint(true);
@@ -343,16 +343,16 @@ private:
 
 protected:
     unsigned int hierarchyIndex;
-    void loadComponents(const Dict& dict, bool isLaunch = false) {
+    void loadComponents(const Nevf& dict, bool isLaunch = false) {
         for (auto& element : dict.data()) {
             std::string type = element.first;
-            Dict componentData;
-            componentData = dict.getC<Dict>(type, componentData);
+            Nevf componentData;
+            componentData = dict.getC<Nevf>(type, componentData);
             
             auto it = getComponentFactories().find(type);
             if (it != getComponentFactories().end()) {
                 std::shared_ptr<Component> component = it->second(this);
-                component->loadFromDict(componentData);
+                component->loadFromNevf(componentData);
                 components.push_back(component);
 
                 if (isLaunch)

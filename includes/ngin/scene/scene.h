@@ -3,10 +3,10 @@
 
 #include <iostream> 
 #include <vector>
-#include <ngin/dict.h>
+#include <ngin/collections/nevf.h>
 #include <ngin/resources.h>
-#include <ngin/object.h>
-#include <ngin/model_drawer.h>
+#include <ngin/scene/object.h>
+#include <ngin/gl/model_drawer.h>
 #include <memory> // Include for smart pointers
 #include <unordered_map>
 
@@ -20,29 +20,29 @@ public:
 
     void initScene() {
 
-        Dict d;
-        d.read(FileUtils::getResourcePath("ngin/resources.snorri").c_str());
+        Nevf d;
+        d.read(FileUtils::getResourcePath("nevf/resources.nevf").c_str());
         d.print();
 
         if (d.contains("shaders")) {
-            for (const auto& pair : d.get<Dict>("shaders", nullptr)->data()) {
+            for (const auto& pair : d.get<Nevf>("shaders", nullptr)->data()) {
                 int shaderId = std::any_cast<int>(pair.second);
                 shaderNames[shaderId] = pair.first;
                 Resources::loadShader(pair.first);
             }
         }
         if (d.contains("textures")) {
-            for (const auto& pair : d.get<Dict>("textures", nullptr)->data()) {
+            for (const auto& pair : d.get<Nevf>("textures", nullptr)->data()) {
                 Resources::loadTexture(pair.first);
             }
         }
         if (d.contains("models_primitive")) {
-            for (const auto& pair : d.get<Dict>("models_primitive", nullptr)->data()) {
+            for (const auto& pair : d.get<Nevf>("models_primitive", nullptr)->data()) {
                 Resources::loadModelPrimitive(pair.first);
             }
         }
         if (d.contains("fonts")) {
-            for (const auto& pair : d.get<Dict>("fonts", nullptr)->data()) {
+            for (const auto& pair : d.get<Nevf>("fonts", nullptr)->data()) {
                 Resources::loadFont(pair.first);
             }
         }
@@ -50,8 +50,8 @@ public:
         ModelDrawer::init();
     }
     void build() {
-        Dict d;
-        d.read(FileUtils::getResourcePath("ngin/" + originName + ".snorri").c_str());
+        Nevf d;
+        d.read(FileUtils::getResourcePath("nevf/" + originName + ".nevf").c_str());
         d.print();
         origin = std::make_unique<Object>(d, 0, nullptr, false);
     }

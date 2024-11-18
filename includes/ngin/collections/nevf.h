@@ -10,26 +10,26 @@
 #include <algorithm>
 #include <optional>
 
-#include <ngin/collection.h>
-#include <ngin/list.h>
+#include <ngin/collections/collection.h>
+#include <ngin/collections/list.h>
 
-class Dict : public Collection {
+class Nevf : public Collection {
 public:
-    Dict() = default;
-    ~Dict() = default;
-    Dict(const Dict& other) {
+    Nevf() = default;
+    ~Nevf() = default;
+    Nevf(const Nevf& other) {
         data_ = other.data_; // Use the map's copy assignment
     }
-    Dict& operator=(const Dict& other) {
+    Nevf& operator=(const Nevf& other) {
         if (this != &other) {
             data_ = other.data_; // Use the map's copy assignment
         }
         return *this;
     }
-    Dict(Dict&& other) noexcept {
+    Nevf(Nevf&& other) noexcept {
         data_ = std::move(other.data_);
     }
-    Dict& operator=(Dict&& other) noexcept {
+    Nevf& operator=(Nevf&& other) noexcept {
         if (this != &other) {
             data_ = std::move(other.data_);
         }
@@ -135,9 +135,9 @@ public:
         std::string result;
         for (const auto& pair : data_) {
             result += std::string(indent, ' ') + pair.first + ": ";
-            if (pair.second.type() == typeid(Dict)) {
+            if (pair.second.type() == typeid(Nevf)) {
                 result += "\n";
-                result += std::any_cast<const Dict&>(pair.second).getString(indent + 4);
+                result += std::any_cast<const Nevf&>(pair.second).getString(indent + 4);
             } else if (pair.second.type() == typeid(std::vector<float>) ||
                     pair.second.type() == typeid(std::vector<int>) ||
                     pair.second.type() == typeid(std::vector<std::string>) ||
@@ -194,7 +194,7 @@ public:
     }
 
     const std::map<std::string, std::any>& data() const { return data_; }
-    void sync(const Dict* other, bool overwrite = false) {
+    void sync(const Nevf* other, bool overwrite = false) {
         if (other == nullptr) {
             std::cerr << "Provided dictionary pointer is null" << std::endl;
             return;
@@ -224,11 +224,11 @@ public:
         std::ifstream file(filename);
         std::string line;
 
-        std::map<int, Dict*> dictStack;
+        std::map<int, Nevf*> dictStack;
         dictStack[-1] = this;
 
-        //std::stack<Dict*> dictStack;
-        //dictStack.push(this);
+        //std::stack<Nevf*> dictStack;
+        //collections/nevfStack.push(this);
 
         //int currentIndent = -1;
 
@@ -266,19 +266,19 @@ public:
                 std::string value = delimiterPos < line.size() - 1 ? trim(line.substr(delimiterPos + 1)) : "";
                 if (value == "") {
                     if (isLog_) std::cout << "# element is a collection! " << std::endl;
-                    //dictStack.push(parseDict(dictStack.top(), key));
-                    dictStack[indent] = parseDict(dictStack[indent - 1], key); // putting new dict with key into currently opened dict, and adding to stack
+                    //collections/nevfStack.push(parseNevf(dictStack.top(), key));
+                    dictStack[indent] = parseNevf(dictStack[indent - 1], key); // putting new dict with key into currently opened dict, and adding to stack
                     //currentIndex = indent;
                     if (isLog_) std::cout << "# addded dict at indent - " << indent << std::endl;
 
                 } else {
                     if (isLog_) std::cout << "# element is a part of a dict! " << std::endl;
-                    parseDictElement(dictStack[indent - 1], key, value);
+                    parseNevfElement(dictStack[indent - 1], key, value);
                     if (isLog_) std::cout << "# added element to dict at indent - " << indent - 1 << std::endl;
                     /*
                     if (indent > 0) {
                         if (isLog_) std::cout << "# element is a part of a dict! " << std::endl;
-                        parseDictElement(dictStack.top(), key, value);
+                        parseNevfElement(dictStack.top(), key, value);
                     } else {
                         if (isLog_) std::cout << "# element is a value! " << std::endl;
                         parseElement(dictStack.top(), key, value);
@@ -411,16 +411,16 @@ private:
         }
 
     }
-    void parseDictElement(Dict* dict, std::string& key, std::string& value) {
+    void parseNevfElement(Nevf* dict, std::string& key, std::string& value) {
         //std::cout << "## setting element of dict " << std::endl;
         dict->set(key, parseValue(value));
         if (key == "is_log") {
             isLog_ = (value == "true");
         }
     }
-    Dict* parseDict(Dict* dict, std::string& collectionName) {
-        dict->set(collectionName, Dict());
-        return dict->get<Dict>(collectionName);
+    Nevf* parseNevf(Nevf* dict, std::string& collectionName) {
+        dict->set(collectionName, Nevf());
+        return dict->get<Nevf>(collectionName);
     }
     void parseListElement(std::string& collectionName, std::string& value) {
         List* list = get<List>(collectionName);

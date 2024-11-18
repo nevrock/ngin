@@ -8,7 +8,7 @@ ModelText::ModelText(Object* parent) : Model(parent) {}
 ModelText::~ModelText() {
 }
 
-void ModelText::loadFromDict(const Dict& d) {
+void ModelText::loadFromNevf(const Nevf& d) {
     fileName = std::string("text");
     isInstance = false;
 
@@ -52,13 +52,13 @@ int ModelText::getSortIndex() {
 }
 
 void ModelText::updateRender(const unsigned int index, Shader& shader) {
-    if (index == snorri::RENDER_LAYER_UI) {
+    if (index == ngin::RENDER_LAYER_UI) {
         shader.setInt("NUM_LIGHTS", 0);
         shader.setInt("text", 2);
         shader.setMat4("M_MODEL", getTransformation());
         shader.setFloat("IS_ANIMATION", false);
         shader.setFloat("IS_TEXT", true);
-        glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(snorri::SCREEN_WIDTH), 0.0f, static_cast<float>(snorri::SCREEN_HEIGHT));
+        glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(ngin::SCREEN_WIDTH), 0.0f, static_cast<float>(ngin::SCREEN_HEIGHT));
         shader.setMat4("M_CAMERA_PROJECTION", projection);
         shader.setVec3("textColor", glm::vec3(0.5));
 
@@ -109,7 +109,7 @@ void ModelText::draw(Shader &shader, std::string text, float x, float y, float s
 }
 
 bool ModelText::isValidLayer(const unsigned int index) {
-    return index == snorri::RENDER_LAYER_UI;
+    return index == ngin::RENDER_LAYER_UI;
 }
 
 bool model_text_registered = []() {

@@ -8,7 +8,7 @@ ModelPrimitive::ModelPrimitive(Object* parent) : Model(parent) {}
 ModelPrimitive::~ModelPrimitive() {
 }
 
-void ModelPrimitive::loadFromDict(const Dict& d) {
+void ModelPrimitive::loadFromNevf(const Nevf& d) {
     fileName = d.getC<std::string>("type", "");
     typeName = fileName;
     data = Resources::getModel(fileName);
@@ -37,10 +37,10 @@ void ModelPrimitive::loadFromDict(const Dict& d) {
 void ModelPrimitive::updatePreRender(const unsigned int index, Shader& shader) {
 }
 void ModelPrimitive::updateRender(const unsigned int index, Shader& shader) {
-    if (index >= snorri::RENDER_LAYER_DIRECTIONAL_DEPTH && index <= 2) {
+    if (index >= ngin::RENDER_LAYER_DIRECTIONAL_DEPTH && index <= 2) {
         shader.setInt("NUM_LIGHTS", 0);
 
-        if ((index == snorri::RENDER_LAYER_POINT_DEPTH || index == 2)) {
+        if ((index == ngin::RENDER_LAYER_POINT_DEPTH || index == 2)) {
             shader.setInt("NUM_LIGHTS", 1);
 
             glm::vec3 pos = getPoint().getPosition();

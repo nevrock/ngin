@@ -7,10 +7,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <ngin/fileutils.h>
-#include <ngin/shader.h>
+#include <ngin/gl/shader.h>
 #include "camera/camera.h"
 #include "light/light.h"
-#include <ngin/window.h>
+#include <ngin/gl/window.h>
 #include <ngin/resources.h>
 #include <ngin/scene.h>
 #include <ngin/constants.h>
@@ -24,7 +24,7 @@
 #include <atomic>
 #include <ngin/game.h>
 
-#include <ngin/dict.h>
+#include <ngin/collections/nevf.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -32,8 +32,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 // settings
-const unsigned int SCR_WIDTH = snorri::SCREEN_WIDTH;
-const unsigned int SCR_HEIGHT = snorri::SCREEN_HEIGHT;
+const unsigned int SCR_WIDTH = ngin::SCREEN_WIDTH;
+const unsigned int SCR_HEIGHT = ngin::SCREEN_HEIGHT;
 
 Camera* camera;
 Light* light;
@@ -162,7 +162,7 @@ int main()
             // 2. render scene as normal using the generated depth/shadow map  
             // --------------------------------------------------------------
 
-            for (int i = snorri::RENDER_LAYER_THRESHOLD_SHADOWS; i < snorri::RENDER_LAYER_THRESHOLD_UI; i++) {
+            for (int i = ngin::RENDER_LAYER_THRESHOLD_SHADOWS; i < ngin::RENDER_LAYER_THRESHOLD_UI; i++) {
                 scene.preRender(i);
                 window.bindDepthMap();
                 window.bindCubeMap();
@@ -173,7 +173,7 @@ int main()
             // --------------------------------------------------------------
             glDisable(GL_DEPTH_TEST);
             
-            int idx = snorri::RENDER_LAYER_UI;
+            int idx = ngin::RENDER_LAYER_UI;
             scene.preRender(idx);
             scene.render(idx);
 

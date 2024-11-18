@@ -15,7 +15,7 @@ public:
     Light(Object* parent);
     ~Light();  // Destructor to remove point lights from the list
 
-    void loadFromDict(const Dict& d) override;
+    void loadFromNevf(const Nevf& d) override;
     void update() override;
     void updatePreRender(const unsigned int index, Shader& shader) override;
     void updateShadows(Shader& shader);

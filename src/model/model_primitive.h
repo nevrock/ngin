@@ -7,7 +7,7 @@ class ModelPrimitive : public Model {
 public:
     ModelPrimitive(Object* parent);
     ~ModelPrimitive() override;
-    void loadFromDict(const Dict& d) override;
+    void loadFromNevf(const Nevf& d) override;
     void updatePreRender(const unsigned int index, Shader& shader) override;
     void updateRender(const unsigned int index, Shader& shader) override;
     bool isValidLayer(const unsigned int index) override;

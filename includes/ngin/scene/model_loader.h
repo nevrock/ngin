@@ -1,7 +1,7 @@
 #ifndef MODEL_LOADER_H
 #define MODEL_LOADER_H
 
-#include <ngin/dict.h>  // Include the JSON library header
+#include <ngin/collections/nevf.h>  // Include the JSON library header
 
 #include <ngin/log.h>
 

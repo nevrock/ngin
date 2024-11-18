@@ -4,7 +4,7 @@
 #include <ngin/log.h>
 #include <ngin/model.h>
 
-using namespace snorri;
+using namespace ngin;
 
 #include <GLFW/glfw3.h>
 

@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <ngin/object.h>
 #include "body_collider.h"
-#include <ngin/dict.h>
+#include <ngin/collections/nevf.h>
 
 class Body : public Component, public std::enable_shared_from_this<Body> {
 public:
@@ -13,7 +13,7 @@ public:
     ~Body() override;
 
     void launch() override;
-    void loadFromDict(const Dict& d) override;
+    void loadFromNevf(const Nevf& d) override;
     void updatePhysics(float dt) override;
 
     glm::vec3 getVelocity(float dt);

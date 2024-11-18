@@ -1,13 +1,14 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <ngin/object.h>
-#include <ngin/mesh.h>
-#include <ngin/resources.h>
-#include <ngin/model_drawer.h>
-#include <ngin/log.h>
 #include <memory>
 #include <vector>
+
+#include <ngin/scene/object.h>
+#include <ngin/gl/mesh.h>
+#include <ngin/resources.h>
+#include <ngin/scene/model_drawer.h>
+#include <ngin/log.h>
 
 class Model : public Component {
 public:

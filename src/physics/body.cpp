@@ -18,7 +18,7 @@ Body::~Body() {
     //PhysicsManager::unregisterBody(shared_from_this());
 }
 
-void Body::loadFromDict(const Dict& d) {
+void Body::loadFromNevf(const Nevf& d) {
     PhysicsManager::registerBody(shared_from_this());
 
     type = d.getC<std::string>("type", "box");

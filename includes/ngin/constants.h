@@ -5,7 +5,7 @@
 #include <string>
 
 // Define the namespace
-namespace snorri {
+namespace ngin {
     // Define constants within the namespace
     constexpr  unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 

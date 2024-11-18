@@ -3,7 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <ngin/point.h>
+#include <ngin/scene/point.h>
 #include <ngin/constants.h>
 
 class PointUi : public Point {
@@ -26,10 +26,10 @@ public:
         return transformMatrix;
     }
     glm::mat4 getUiMatrix(glm::vec2 pos) const {
-        float xScale = (size_.x)/(snorri::SCREEN_WIDTH/2.0);
-        float yScale = (size_.y)/(snorri::SCREEN_HEIGHT/2.0);
-        float xPos = (pos.x - (snorri::SCREEN_WIDTH/2.0))/(snorri::SCREEN_WIDTH/2.0);
-        float yPos = (pos.y - (snorri::SCREEN_HEIGHT/2.0))/(snorri::SCREEN_HEIGHT/2.0);
+        float xScale = (size_.x)/(ngin::SCREEN_WIDTH/2.0);
+        float yScale = (size_.y)/(ngin::SCREEN_HEIGHT/2.0);
+        float xPos = (pos.x - (ngin::SCREEN_WIDTH/2.0))/(ngin::SCREEN_WIDTH/2.0);
+        float yPos = (pos.y - (ngin::SCREEN_HEIGHT/2.0))/(ngin::SCREEN_HEIGHT/2.0);
         return create2DTransformMatrix(glm::vec3(xPos,yPos,0), 0, 
                 glm::vec2(xScale, yScale));
     }
