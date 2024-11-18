@@ -31,10 +31,13 @@ public:
     
     virtual glm::mat4 getTransformation() {
         IObject* p = getParent();
+        glm::mat4 localMatrix = getPoint().getModelMatrix();
+
         if (p == nullptr) {
-            return getPoint().getModelMatrix();
+            return localMatrix; // No parent, so world transformation is the local matrix.
         }
-        return p->getWorldMatrix();
+
+        return p->getWorldMatrix() * localMatrix; // Combine parent's world matrix with the local transformation.
     }
     virtual glm::vec2 getUvOffset() {
         return glm::vec2(0,0);

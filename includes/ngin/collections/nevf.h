@@ -227,10 +227,6 @@ public:
         std::map<int, Nevf*> dictStack;
         dictStack[-1] = this;
 
-        //std::stack<Nevf*> dictStack;
-        //collections/nevfStack.push(this);
-
-        //int currentIndent = -1;
 
         if (isLog_) std::cout << "### dict parsing ### - " << filename << std::endl;
 
@@ -243,17 +239,6 @@ public:
             
             int indent = line.find_first_not_of(' ');
             indent = indent / 4;
-            /*
-            if (indent < currentIndent) {
-                int levelsUp = (currentIndent - indent) / 4;
-                for (int i = 0; i < levelsUp; ++i) {
-                    if (!dictStack.empty()) {
-                        dictStack.pop(); // Move up in the dictionary stack
-                        if (isLog_) std::cout << "# moving up from nested dict" << std::endl;
-                    }
-                }
-            }
-            */
 
             if (isLog_) std::cout << "# indent - " << indent << std::endl;
 
