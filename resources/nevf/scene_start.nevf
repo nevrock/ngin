@@ -44,7 +44,6 @@ children:
         components: 
             model_primitive: 
                 type: "plane"
-                textures: ["wood"]
             body: 
                 size: [10.0,0.05,10.0]
                 is_kinematic: true
@@ -61,7 +60,6 @@ children:
         components: 
             model_primitive: 
                 type: cube
-                textures: ["wood"]
                 is_instance: true
     prim_ui_1: 
         name: "prim_ui_1"

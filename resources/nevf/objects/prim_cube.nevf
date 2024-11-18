@@ -6,7 +6,6 @@ point:
 components: 
     model_primitive: 
         type: "cube"
-        textures: ["wood"]
         is_instance: true
     body: 
         size: [2.0,2.0,2.0]
