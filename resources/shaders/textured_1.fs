@@ -114,7 +114,13 @@ float ShadowCalculationDirectionalSoft(vec4 fragPosLightSpace) {
 }
 
 vec3 getColor() {
-    vec3 color = texture(TEX_DIFFUSE, fs_in.TexCoords).rgb;
+    vec3 color;
+    #ifdef TEX_DIFFUSE
+        color = texture(TEX_DIFFUSE, fs_in.TexCoords).rgb;
+    #else
+        color = vec3(1.0, 1.0, 1.0); // Default to white
+    #endif
+    //vec3 color = texture(TEX_DIFFUSE, fs_in.TexCoords).rgb;
     vec3 normal = normalize(fs_in.Normal);
     vec3 lightColor = vec3(0.8);
     // ambient
@@ -140,7 +146,13 @@ vec3 getColor() {
 }
 
 vec3 getColorDirectional() {
-    vec3 color = texture(TEX_DIFFUSE, fs_in.TexCoords).rgb;
+    vec3 color;
+    #ifdef TEX_DIFFUSE
+        color = texture(TEX_DIFFUSE, fs_in.TexCoords).rgb;
+    #else
+        color = vec3(1.0, 1.0, 1.0); // Default to white
+    #endif
+    //vec3 color = texture(TEX_DIFFUSE, fs_in.TexCoords).rgb;
     vec3 normal = normalize(fs_in.Normal);
     vec3 lightColor = vec3(0.8);
     // ambient
