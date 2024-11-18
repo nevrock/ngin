@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ngin/object.h>
+#include <ngin/scene/object.h>
 #include <glm/glm.hpp>
 #include <ngin/constants.h>
 #include <vector>

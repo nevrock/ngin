@@ -3,7 +3,7 @@
 
 #include <glm/vec3.hpp>
 #include <iostream>
-#include <ngin/ray.h>
+#include <ngin/physics/ray.h>
 
 class BodyCollider {
 public:

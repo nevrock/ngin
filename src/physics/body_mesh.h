@@ -3,7 +3,7 @@
 
 #include <glm/vec3.hpp>
 #include "body_collider.h"
-#include <ngin/mesh.h>  // Include path for Mesh might need to be updated based on your project structure
+#include <ngin/gl/mesh.h>  // Include path for Mesh might need to be updated based on your project structure
 
 class BodyMesh : public BodyCollider {
 public:

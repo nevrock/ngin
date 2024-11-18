@@ -1,6 +1,6 @@
 #include "model_text.h"
 #include <ngin/constants.h>
-#include <ngin/font.h>
+#include <ngin/gui/font.h>
 #include <iostream>
 
 ModelText::ModelText(Object* parent) : Model(parent) {}

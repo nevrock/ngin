@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <glm/glm.hpp>
-#include <ngin/object.h>
+#include <ngin/scene/object.h>
 #include "body_collider.h"
 #include <ngin/collections/nevf.h>
 

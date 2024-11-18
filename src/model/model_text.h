@@ -1,7 +1,7 @@
 #ifndef MODEL_TEXT_H
 #define MODEL_TEXT_H
 
-#include <ngin/model.h>
+#include <ngin/gl/model.h>
 #include <ngin/constants.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>  // If not already included elsewhere for matrix operations

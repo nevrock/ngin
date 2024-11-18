@@ -1,8 +1,8 @@
 // model_drawer.cpp
 
-#include <ngin/model_drawer.h>
+#include <ngin/gl/model_drawer.h>
 #include <ngin/log.h>
-#include <ngin/model.h>
+#include <ngin/gl/model.h>
 
 using namespace ngin;
 
