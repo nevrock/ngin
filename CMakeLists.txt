@@ -56,8 +56,6 @@ set(SOURCES
     src/stb_image.cpp
     src/game.cpp
     src/main.cpp
-    src/animator.cpp
-    src/animation.cpp
     src/surface_sdf.cpp
     src/model/model_primitive.cpp
     src/model/model_ui.cpp
