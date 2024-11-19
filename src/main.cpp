@@ -9,7 +9,6 @@
 #include <ngin/utils/fileutils.h>
 #include <ngin/gl/shader.h>
 #include "camera/camera.h"
-#include "light/light.h"
 #include <ngin/gl/window.h>
 #include <ngin/resources.h>
 #include <ngin/scene/scene.h>
@@ -36,7 +35,6 @@ const unsigned int SCR_WIDTH = ngin::SCREEN_WIDTH;
 const unsigned int SCR_HEIGHT = ngin::SCREEN_HEIGHT;
 
 Camera* camera;
-Light* light;
 // camera
 float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
@@ -96,7 +94,6 @@ int main()
     });
 
     camera = Camera::getMainCamera();
-    light = Light::getMainLight();
 
 
     glfwSetFramebufferSizeCallback(win, framebuffer_size_callback);
@@ -200,15 +197,15 @@ int main()
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS && camera != nullptr)
         glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && camera != nullptr)
         camera->processKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && camera != nullptr)
         camera->processKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && camera != nullptr)
         camera->processKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && camera != nullptr)
         camera->processKeyboard(RIGHT, deltaTime);
 }
 
@@ -242,12 +239,14 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
     lastX = xpos;
     lastY = ypos;
 
-    camera->processMouseMovement(xoffset, yoffset);
+    if (camera != nullptr)
+        camera->processMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    camera->processMouseScroll(static_cast<float>(yoffset));
+    if (camera != nullptr)
+        camera->processMouseScroll(static_cast<float>(yoffset));
 }
