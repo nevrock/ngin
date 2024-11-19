@@ -13,12 +13,25 @@ BodyBox::BodyBox() { type = "box"; }
 
 bool BodyBox::intersects(const BodyCollider& other) const {
     if (other.getType() == "box") {
-        bool intersects = (abs(position.x - other.position.x) <= (size.x + other.size.x) * 0.5f) &&
-               (abs(position.y - other.position.y) <= (size.y + other.size.y) * 0.5f) &&
-               (abs(position.z - other.position.z) <= (size.z + other.size.z) * 0.5f);
+        glm::vec3 penetration;
+        penetration.x = (size.x + other.size.x) * 0.5f - abs(position.x - other.position.x);
+        penetration.y = (size.y + other.size.y) * 0.5f - abs(position.y - other.position.y);
+        penetration.z = (size.z + other.size.z) * 0.5f - abs(position.z - other.position.z);
+
+        bool intersects = penetration.x > 0 && penetration.y > 0 && penetration.z > 0;
 
         if (intersects) {
-            std::cout << "Intersection detected at: " << std::endl;
+            std::cout << "Intersection detected! Direction: ";
+
+            if (penetration.x < penetration.y && penetration.x < penetration.z) {
+                std::cout << "X-axis";
+            } else if (penetration.y < penetration.z) {
+                std::cout << "Y-axis";
+            } else {
+                std::cout << "Z-axis";
+            }
+
+            std::cout << std::endl;
             std::cout << "This box position: (" << position.x << ", " << position.y << ", " << position.z << ")" << std::endl;
             std::cout << "Other box position: (" << other.position.x << ", " << other.position.y << ", " << other.position.z << ")" << std::endl; 
         }
