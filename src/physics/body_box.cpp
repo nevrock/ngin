@@ -14,9 +14,9 @@ BodyBox::BodyBox() { type = "box"; }
 bool BodyBox::intersects(const BodyCollider& other) const {
     if (other.getType() == "box") {
         glm::vec3 penetration;
-        penetration.x = (size.x + other.size.x) * 0.5f - abs(position.x - other.position.x);
-        penetration.y = (size.y + other.size.y) * 0.5f - abs(position.y - other.position.y);
-        penetration.z = (size.z + other.size.z) * 0.5f - abs(position.z - other.position.z);
+        penetration.x = size.x + other.size.x - abs(position.x - other.position.x);
+        penetration.y = size.y + other.size.y - abs(position.y - other.position.y);
+        penetration.z = size.z + other.size.z - abs(position.z - other.position.z);
 
         bool intersects = penetration.x > 0 && penetration.y > 0 && penetration.z > 0;
 
@@ -46,9 +46,9 @@ bool BodyBox::intersects(const BodyCollider& other) const {
 void BodyBox::resolveCollision(BodyCollider& other) {
     if (other.getType() == "box") {
         glm::vec3 penetration;
-        penetration.x = (size.x + other.size.x) * 0.5f - abs(position.x - other.position.x);
-        penetration.y = (size.y + other.size.y) * 0.5f - abs(position.y - other.position.y);
-        penetration.z = (size.z + other.size.z) * 0.5f - abs(position.z - other.position.z);
+        penetration.x = size.x + other.size.x - abs(position.x - other.position.x);
+        penetration.y = size.y + other.size.y - abs(position.y - other.position.y);
+        penetration.z = size.z + other.size.z - abs(position.z - other.position.z);
 
         // Find the axis of minimum penetration
         if (penetration.x < penetration.y && penetration.x < penetration.z) {
