@@ -31,7 +31,7 @@ public:
     
     virtual glm::mat4 getTransformation() {
         IObject* p = getParent();
-        return getPoint().getModelMatrix();
+        //return getPoint().getModelMatrix();
         if (p == nullptr) {
             return getPoint().getModelMatrix();
         }
