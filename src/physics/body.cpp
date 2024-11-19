@@ -29,11 +29,12 @@ void Body::loadFromNevf(const Nevf& d) {
     // Initialize BodyBox with these parameters
     Point& p = getPoint();
     glm::vec3 pos = p.getPosition();
+    glm::vec3 scale = p.getScale();
 
     size = d.getVec("size", glm::vec3(1.0));
 
     if (type == "box") {
-        bodyCollider = std::make_unique<BodyBox>(pos, size, glm::vec3(0), mass);
+        bodyCollider = std::make_unique<BodyBox>(pos, scale, glm::vec3(0), mass);
     } else if (type == "mesh") {
 
         std::string fileName = d.getC<std::string>("file", "plane");
