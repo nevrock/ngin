@@ -53,7 +53,8 @@ void ModelPrimitive::updateRender(const unsigned int index, Shader& shader) {
                 shader.setInt("NUM_LIGHTS", 1);
             } 
         }
-        shader.setMat4("M_MODEL", getPoint().getModelMatrix());
+        //shader.setMat4("M_MODEL", getPoint().getModelMatrix());
+        shader.setMat4("M_MODEL", getTransformation());
         shader.setFloat("POINT_SHADOWS_THRESHOLD", distanceLimit);
         shader.setFloat("IS_ANIMATION", false);
         if (index == 2 && isTextured) {
