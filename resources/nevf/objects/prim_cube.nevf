@@ -8,4 +8,4 @@ components:
         type: "cube"
         is_instance: true
     body: 
-        size: [1.0, 1.0, 1.0]
+        size: [0.5, 0.5, 0.5]
