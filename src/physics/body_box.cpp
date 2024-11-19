@@ -12,9 +12,9 @@ BodyBox::BodyBox() { type = "box"; }
 
 bool BodyBox::intersects(const BodyCollider& other) const {
     if (other.getType() == "box") {
-        return (abs(position.x - other.position.x) <= (size.x + other.size.x) ) ||
-           (abs(position.y - other.position.y) <= (size.y + other.size.y) ) ||
-           (abs(position.z - other.position.z) <= (size.z + other.size.z));
+        return (abs(position.x - other.position.x) <= (size.x + other.size.x) * 0.5f) ||
+           (abs(position.y - other.position.y) <= (size.y + other.size.y) * 0.5f) ||
+           (abs(position.z - other.position.z) <= (size.z + other.size.z) * 0.5f);
     } else if (other.getType() == "mesh") {
         return other.intersects(*this);
     }
@@ -22,29 +22,29 @@ bool BodyBox::intersects(const BodyCollider& other) const {
 
 void BodyBox::resolveCollision(BodyCollider& other) {
     if (other.getType() == "box") {
-        if (((position.y - other.position.y) <= (size.y + other.size.y))) {
+        if (((position.y - other.position.y) <= (size.y + other.size.y) * 0.5f)) {
             //below
             if (velocity.y < 0.0)
                 velocity.y = 0.0;
-        } else if ((abs(position.y - other.position.y) <= (size.y + other.size.y))) {
+        } else if ((abs(position.y - other.position.y) <= (size.y + other.size.y) * 0.5f)) {
             // above
             if (velocity.y > 0.1)
                 velocity.y = 0.0;
         }
-        if (((position.x - other.position.x) <= (size.x + other.size.x))) {
+        if (((position.x - other.position.x) <= (size.x + other.size.x) * 0.5f)) {
             //left
             if (velocity.x < 0.0)
                 velocity.x = 0.0;
-        } else if ((abs(position.x - other.position.x) <= (size.x + other.size.x))) {
+        } else if ((abs(position.x - other.position.x) <= (size.x + other.size.x) * 0.5f)) {
             // right
             if (velocity.x > 0.1)
                 velocity.x = 0.0;
         }
-        if (((position.z - other.position.z) <= (size.z + other.size.z) )) {
+        if (((position.z - other.position.z) <= (size.z + other.size.z) * 0.5f)) {
             // front
             if (velocity.z > 0.1)
                 velocity.z = 0.0;
-        } else if ((abs(position.z - other.position.z) <= (size.z + other.size.z))) {
+        } else if ((abs(position.z - other.position.z) <= (size.z + other.size.z) * 0.5f)) {
             // back
             if (velocity.z < 0.0)
                 velocity.z = 0.0;
