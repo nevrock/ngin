@@ -52,20 +52,10 @@ endif()
 
 # Add source files
 set(SOURCES
-    src/glad.c
-    src/stb_image.cpp
-    src/game.cpp
+    includes/ngin/glad.c
+    includes/ngin/stb_image.cpp
+    includes/ngin/game.cpp
     src/main.cpp
-    src/model/model_primitive.cpp
-    src/model/model_ui.cpp
-    src/model/model_drawer.cpp
-    src/model/model_text.cpp
-    src/physics/body.cpp
-    src/physics/body_box.cpp
-    src/physics/body_mesh.cpp
-    src/physics/physics_manager.cpp
-    src/light/light.cpp
-    src/camera/camera.cpp
 )
 
 # Configure and include root directory header

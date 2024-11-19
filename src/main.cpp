@@ -7,13 +7,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <ngin/utils/fileutils.h>
-#include <ngin/gl/shader.h>
-#include "camera/camera.h"
 #include <ngin/gl/window.h>
-#include <ngin/resources.h>
-#include <ngin/scene/scene.h>
 #include <ngin/constants.h>
-#include <ngin/sound/manager.h>
+#include <ngin/collections/nevf.h>
+#include <ngin/scene/game.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -21,9 +18,6 @@
 #include <iostream>
 #include <thread>
 #include <atomic>
-#include <ngin/scene/game.h>
-
-#include <ngin/collections/nevf.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -34,7 +28,6 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = ngin::SCREEN_WIDTH;
 const unsigned int SCR_HEIGHT = ngin::SCREEN_HEIGHT;
 
-Camera* camera;
 // camera
 float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
@@ -54,11 +47,6 @@ unsigned int screenWidth, screenHeight;
 GLFWwindow* Window::window = nullptr; // Initialize static member
 Window* Window::mainWindow = nullptr; // Initialize static member
 
-// Initialize static members
-ISoundEngine* SoundManager::engine = nullptr;
-std::unordered_map<unsigned int, ISound*> SoundManager::sounds;
-std::atomic<unsigned int> SoundManager::nextSoundId{1};  // Start IDs from 1
-
 int main()
 {
     Window window(SCR_WIDTH, SCR_HEIGHT, "nev_v1");
@@ -67,56 +55,18 @@ int main()
     Game::setState("loading");
     Game::setState("start");
 
-
-    SoundManager sound;
-    //sound.play(std::string("sleep_song"));
-    //SoundManager::play(std::string("sleep_song"));
-
-    Scene scene("scene_start");
-
-    scene.initScene();
-    scene.build();
-
-    std::atomic<bool> running(true);
-    std::thread physicsThread([&]() {
-        float lastFramePhysics = static_cast<float>(glfwGetTime());  // Initialize lastFramePhysics here
-        while (running) {
-            float currentFrame = static_cast<float>(glfwGetTime());
-            deltaTimePhysics = currentFrame - lastFramePhysics;
-
-            if (deltaTimePhysics > fixedPhysicsStep) {
-                lastFramePhysics = currentFrame;
-                scene.updatePhysics(deltaTimePhysics);
-            }
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));  // Simulate the passage of time between frames
-        }
-    });
-
-    camera = Camera::getMainCamera();
-
-
     glfwSetFramebufferSizeCallback(win, framebuffer_size_callback);
     glfwSetCursorPosCallback(win, mouse_callback);
     glfwSetScrollCallback(win, scroll_callback);
     glfwSetScrollCallback(win, scroll_callback);
 
-    // configure depth map FBO
-    // -----------------------
     window.setupDepthMap();
     window.setupCubeMap();
 
-    // shader configuration
-    // --------------------
-    scene.initDepth();
-    scene.launch();
+    std::atomic<bool> running(true);
 
-    // render loop
-    // -----------
     while (!glfwWindowShouldClose(win))
     {
-        // per-frame time logic
-        // --------------------
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -130,25 +80,18 @@ int main()
         window.clear();
 
         if (state != "loading") {
-
-            scene.update();
-            scene.updateAnimation(deltaTime);
             
             // 1. render depth of scene to texture (from light's perspective)
             // --------------------------------------------------------------
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
 
-            scene.preRender(0);
             window.updateDepthMap();
-            scene.render(0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             // render scene from light's point of view
-            scene.preRender(1);
             window.updateCubeMap();
-            scene.render(1);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             
@@ -160,19 +103,14 @@ int main()
             // --------------------------------------------------------------
 
             for (int i = ngin::RENDER_LAYER_THRESHOLD_SHADOWS; i < ngin::RENDER_LAYER_THRESHOLD_UI; i++) {
-                scene.preRender(i);
                 window.bindDepthMap();
                 window.bindCubeMap();
-                scene.render(i);
             }
 
             // 3. render ui
             // --------------------------------------------------------------
             glDisable(GL_DEPTH_TEST);
             
-            int idx = ngin::RENDER_LAYER_UI;
-            scene.preRender(idx);
-            scene.render(idx);
 
             std::this_thread::sleep_for(std::chrono::milliseconds(5));  // Simulate the passage of time between frames
         }
@@ -183,11 +121,7 @@ int main()
         glfwPollEvents();
     }
 
-    scene.clear();
-
     running = false;
-
-    physicsThread.join();  
 
     glfwTerminate();
 
@@ -197,16 +131,8 @@ int main()
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS && camera != nullptr)
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && camera != nullptr)
-        camera->processKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && camera != nullptr)
-        camera->processKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && camera != nullptr)
-        camera->processKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && camera != nullptr)
-        camera->processKeyboard(RIGHT, deltaTime);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -238,15 +164,11 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 
     lastX = xpos;
     lastY = ypos;
-
-    if (camera != nullptr)
-        camera->processMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    if (camera != nullptr)
-        camera->processMouseScroll(static_cast<float>(yoffset));
+
 }
