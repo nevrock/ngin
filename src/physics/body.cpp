@@ -32,7 +32,7 @@ void Body::loadFromNevf(const Nevf& d) {
     glm::vec3 scale = p.getScale();
 
     size = d.getVec("size", glm::vec3(1.0));
-    float scaleF = 2.0f
+    float scaleF = 2.0f;
 
     if (type == "box") {
         bodyCollider = std::make_unique<BodyBox>(pos, scale/scaleF, glm::vec3(0), mass);
