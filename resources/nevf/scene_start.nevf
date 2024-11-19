@@ -35,12 +35,25 @@ children:
         components: 
             camera: 
                 is_main: true 
+
+    prim_plane_0: 
+        name: "prim_plane"
+        point: 
+            position: [0.0,0.0,0.0]
+            rotation: [0.0,0.0,0.0]
+            scale: [1.0,1.0,1.0]
+        components: 
+            model_primitive: 
+                type: cube
+            body: 
+                size: [0.5, 0.5, 0.5]                
+                is_kinematic: true
     prim_plane: 
         name: "prim_plane"
         point: 
             position: [0.0,1.0,0.0]
             rotation: [0.0,0.0,0.0]
-            scale: [10.0,1.0,10.0]
+            scale: [2.0,1.0,2.0]
         components: 
             model_primitive: 
                 type: cube
