@@ -10,45 +10,54 @@ BodyBox::BodyBox(const glm::vec3& position, const glm::vec3& size, const glm::ve
 
 BodyBox::BodyBox() { type = "box"; }
 
+
 bool BodyBox::intersects(const BodyCollider& other) const {
     if (other.getType() == "box") {
-        return (abs(position.x - other.position.x) <= (size.x + other.size.x) * 0.5f) ||
-           (abs(position.y - other.position.y) <= (size.y + other.size.y) * 0.5f) ||
-           (abs(position.z - other.position.z) <= (size.z + other.size.z) * 0.5f);
+        return (abs(position.x - other.position.x) <= (size.x + other.size.x) * 0.5f) &&
+               (abs(position.y - other.position.y) <= (size.y + other.size.y) * 0.5f) &&
+               (abs(position.z - other.position.z) <= (size.z + other.size.z) * 0.5f);
     } else if (other.getType() == "mesh") {
         return other.intersects(*this);
-    }
+    } 
+    return false; // Add a default return statement
 }
 
 void BodyBox::resolveCollision(BodyCollider& other) {
     if (other.getType() == "box") {
-        if (((position.y - other.position.y) <= (size.y + other.size.y) * 0.5f)) {
-            //below
-            if (velocity.y < 0.0)
-                velocity.y = 0.0;
-        } else if ((abs(position.y - other.position.y) <= (size.y + other.size.y) * 0.5f)) {
-            // above
-            if (velocity.y > 0.1)
-                velocity.y = 0.0;
-        }
-        if (((position.x - other.position.x) <= (size.x + other.size.x) * 0.5f)) {
-            //left
-            if (velocity.x < 0.0)
-                velocity.x = 0.0;
-        } else if ((abs(position.x - other.position.x) <= (size.x + other.size.x) * 0.5f)) {
-            // right
-            if (velocity.x > 0.1)
-                velocity.x = 0.0;
-        }
-        if (((position.z - other.position.z) <= (size.z + other.size.z) * 0.5f)) {
-            // front
-            if (velocity.z > 0.1)
-                velocity.z = 0.0;
-        } else if ((abs(position.z - other.position.z) <= (size.z + other.size.z) * 0.5f)) {
-            // back
-            if (velocity.z < 0.0)
-                velocity.z = 0.0;
-        }
+        glm::vec3 penetration;
+        penetration.x = (size.x + other.size.x) * 0.5f - abs(position.x - other.position.x);
+        penetration.y = (size.y + other.size.y) * 0.5f - abs(position.y - other.position.y);
+        penetration.z = (size.z + other.size.z) * 0.5f - abs(position.z - other.position.z);
+
+        // Find the axis of minimum penetration
+        if (penetration.x < penetration.y && penetration.x < penetration.z) {
+            // Collision on the x-axis
+            if (position.x < other.position.x) {
+                position.x -= penetration.x; 
+                velocity.x = std::min(velocity.x, 0.0f); // Adjust velocity based on direction
+            } else {
+                position.x += penetration.x;
+                velocity.x = std::max(velocity.x, 0.0f); 
+            }
+        } else if (penetration.y < penetration.z) {
+            // Collision on the y-axis
+            if (position.y < other.position.y) {
+                position.y -= penetration.y;
+                velocity.y = std::min(velocity.y, 0.0f); 
+            } else {
+                position.y += penetration.y;
+                velocity.y = std::max(velocity.y, 0.0f); 
+            }
+        } else {
+            // Collision on the z-axis
+            if (position.z < other.position.z) {
+                position.z -= penetration.z;
+                velocity.z = std::min(velocity.z, 0.0f); 
+            } else {
+                position.z += penetration.z;
+                velocity.z = std::max(velocity.z, 0.0f); 
+            }
+        } 
     } else if (other.getType() == "mesh") {
         other.resolveCollision(*this);
     }
