@@ -104,13 +104,6 @@ public:
         }
     }
 
-    void updateShadows(Light* light) {
-         if (!shaderNames.empty()) {
-            Shader shader = Resources::getShader(shaderNames.begin()->second);
-            light->updateShadows(shader);
-        }
-    }
-
     int getShaderCount() const {
         return shaderNames.size();
     }

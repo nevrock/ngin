@@ -3,7 +3,7 @@ is_log: false
 shaders:
     depth: 0
     depth_2: 1
-    textured_1: 2
+    opaque: 2
     ui_1: 4
 
 models_primitive: 
