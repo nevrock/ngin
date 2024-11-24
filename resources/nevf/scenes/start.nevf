@@ -1,0 +1,14 @@
+objects:    
+    origin:
+        ports:
+            // we link this to another object child, and pass in TransformData when we cook this scene graph
+            child:
+                type: output
+                package: TransformData
+                connection: child
+    child:
+        ports:
+            parent:
+                type: input
+                package: TransformData
+                connection: origin

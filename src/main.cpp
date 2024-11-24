@@ -10,7 +10,10 @@
 #include <ngin/gl/window.h>
 #include <ngin/constants.h>
 #include <ngin/collections/nevf.h>
-#include <ngin/scene/game.h>
+#include <ngin/game.h>
+#include <ngin/resources.h>
+
+#include <ngin/scene/scene_graph.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -54,6 +57,9 @@ int main()
 
     Game::setState("loading");
     Game::setState("start");
+
+    Nevf n = Resources::loadNevf("game");
+    SceneGraph sceneGraph(n.getC<std::string>("start_scene", "scenes/start"));
 
     glfwSetFramebufferSizeCallback(win, framebuffer_size_callback);
     glfwSetCursorPosCallback(win, mouse_callback);

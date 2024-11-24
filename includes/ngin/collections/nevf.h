@@ -196,7 +196,7 @@ public:
     const std::map<std::string, std::any>& data() const { return data_; }
     void sync(const Nevf* other, bool overwrite = false) {
         if (other == nullptr) {
-            std::cerr << "Provided dictionary pointer is null" << std::endl;
+            std::cerr << "provided dictionary pointer is null" << std::endl;
             return;
         }
         for (const auto& pair : other->data()) {
@@ -250,25 +250,15 @@ public:
                 std::string key = line.substr(0, delimiterPos);
                 std::string value = delimiterPos < line.size() - 1 ? trim(line.substr(delimiterPos + 1)) : "";
                 if (value == "") {
-                    if (isLog_) std::cout << "# element is a collection! " << std::endl;
-                    //collections/nevfStack.push(parseNevf(dictStack.top(), key));
+                    // could be a list of a dict
+                    if (isLog_) std::cout << "# element is a list or collection! " << std::endl;
                     dictStack[indent] = parseNevf(dictStack[indent - 1], key); // putting new dict with key into currently opened dict, and adding to stack
-                    //currentIndex = indent;
                     if (isLog_) std::cout << "# addded dict at indent - " << indent << std::endl;
 
                 } else {
                     if (isLog_) std::cout << "# element is a part of a dict! " << std::endl;
                     parseNevfElement(dictStack[indent - 1], key, value);
                     if (isLog_) std::cout << "# added element to dict at indent - " << indent - 1 << std::endl;
-                    /*
-                    if (indent > 0) {
-                        if (isLog_) std::cout << "# element is a part of a dict! " << std::endl;
-                        parseNevfElement(dictStack.top(), key, value);
-                    } else {
-                        if (isLog_) std::cout << "# element is a value! " << std::endl;
-                        parseElement(dictStack.top(), key, value);
-                    }
-                    */
                 }
             }
 
@@ -287,8 +277,61 @@ public:
         file.close();
     }
 
+
+    auto begin() {
+        return data_.begin();
+    }
+    auto end() {
+        return data_.end();
+    }
+    auto begin() const {
+        return data_.begin();
+    }
+    auto end() const {
+        return data_.end();
+    }
+    // const auto& key : dict.keys()
+    std::vector<std::string> keys() const {
+        std::vector<std::string> keys;
+        keys.reserve(data_.size());
+        for (const auto& pair : data_) {
+            keys.push_back(pair.first);
+        }
+        return keys;
+    }
+    // Iterable object for keys (optional advanced version)
+    class KeyIterable {
+    public:
+        explicit KeyIterable(const std::map<std::string, std::any>& data) : data_(data) {}
+
+        auto begin() const { return data_.cbegin(); }
+        auto end() const { return data_.cend(); }
+
+    private:
+        const std::map<std::string, std::any>& data_;
+    };
+
+    // Method to provide iterable access to keys
+    KeyIterable keyIterable() const {
+        return KeyIterable(data_);
+    }
+
+
+    std::any& operator[](const std::string& key) {
+        return data_[key];
+    }
+
+    // Const operator[] for read-only access
+    const std::any& operator[](const std::string& key) const {
+        auto it = data_.find(key);
+        if (it != data_.end()) {
+            return it->second;
+        }
+        throw std::out_of_range("Key not found: " + key);
+    }
+
 private:
-    bool isLog_;
+    bool isLog_ = false;
     std::map<std::string, std::any> data_;
 
     std::string trim(const std::string& str) {
