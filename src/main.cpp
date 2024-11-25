@@ -13,7 +13,10 @@
 #include <ngin/game.h>
 #include <ngin/resources.h>
 
-#include <ngin/scene/scene_graph.h>
+#include <ngin/node/node_graph.h>
+#include <ngin/node/types/pass.h>
+#include <ngin/node/graph_state.h>
+#include <ngin/scene.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -21,6 +24,7 @@
 #include <iostream>
 #include <thread>
 #include <atomic>
+#include <memory>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -59,7 +63,18 @@ int main()
     Game::setState("start");
 
     Nevf n = Resources::loadNevf("game");
-    SceneGraph sceneGraph(n.getC<std::string>("start_scene", "scenes/start"));
+    Scene scene;
+    scene.load(n.getC<std::string>("start_scene", "scenes/start").c_str());
+    /*
+    NodeGraph nodeGraph(n.getC<std::string>("start_scene", "scenes/start"));
+    std::shared_ptr<Pass> passNode = nodeGraph.getNodeByType<Pass>();
+    if (passNode != nullptr) {
+        std::cout << "found pass node!" << std::endl;
+
+        GraphState graph(passNode);
+        graph.cook();
+    }
+    */
 
     glfwSetFramebufferSizeCallback(win, framebuffer_size_callback);
     glfwSetCursorPosCallback(win, mouse_callback);

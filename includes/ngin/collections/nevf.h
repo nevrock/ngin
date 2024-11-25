@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <optional>
 
+#include <glm/glm.hpp>
+
 #include <ngin/collections/collection.h>
 #include <ngin/collections/list.h>
 

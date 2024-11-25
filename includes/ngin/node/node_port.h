@@ -4,47 +4,70 @@
 #include <string>
 #include <memory> // For std::shared_ptr and std::weak_ptr
 
+#include <ngin/collections/nevf.h>
+
+#include <ngin/node/i_node_connection.h>
+#include <ngin/node/i_node.h>
+
+
 class NodePort {
 public:
-  enum class Type {
-    Input,
-    Output
-  };
-
-  NodePort(const std::string& name, Type type) 
-    : id_(++nextId_), name_(name), type_(type) {}
+  NodePort(const std::string& name, unsigned int id, const std::string& type, INode* node) 
+    : id_(id), name_(name), type_(type), node_(node) {}
   virtual ~NodePort() = default;
 
+  void setData(std::shared_ptr<Nevf> data) { 
+    data_ = data; 
+    if (linkedPort_) {
+      linkedPort_->setData(data);
+    }
+  }
+  std::shared_ptr<Nevf> getData() { return data_; }
+  void clearData() { 
+    data_ = nullptr;
+    if (linkedPort_) {
+      linkedPort_->clearData();
+    } 
+  } // Add this line
+
+
   std::string getName() const { return name_; }
-  int getId() const { return id_; }
-  Type getType() const { return type_; }
+  unsigned int getId() const { return id_; }
 
-  // Connect this port to another
-  void connect(const std::shared_ptr<NodePort>& otherPort) {
-    connectedPort_ = otherPort;
+  INode* getNode() {
+    return node_;
   }
 
-  // Disconnect this port
+
+  void connect(INodeConnection* connection) {
+    connection_ = connection;
+  }
   void disconnect() {
-    connectedPort_.reset();
+    connection_ = nullptr;
   }
-
-  // Get the connected port (if any)
-  std::shared_ptr<NodePort> getConnectedPort() const {
-    return connectedPort_.lock();
+  INodeConnection* getConnection() const {
+    return connection_;
   }
-
-  // Check if the port is connected
   bool isConnected() const {
-    return !connectedPort_.expired();
+    return connection_ != nullptr;
   }
+  void setLinkedPort(NodePort* port) { linkedPort_ = port; }
+  void clearLinkedPort() { linkedPort_ = nullptr; }
 
 private:
-  static int nextId_; // Static variable to generate unique IDs
-  int id_;
+
+  unsigned int id_;
   std::string name_;
-  Type type_;
-  std::weak_ptr<NodePort> connectedPort_; // Use weak_ptr to avoid cycles
+  std::string type_;
+
+  //bool isConnected_;
+
+  INodeConnection* connection_; // Use weak_ptr to avoid cycles
+  INode* node_;
+
+  std::shared_ptr<Nevf> data_; // Pointer to the Nevf instance
+  NodePort* linkedPort_ = nullptr; // Pointer to the linked port
+
 };
 
 #endif // NODE_PORT_H

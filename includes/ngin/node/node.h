@@ -6,103 +6,223 @@
 #include <functional> // For std::function
 #include <algorithm> // For std::find_if
 
-#include <ngin/node/node_port.h>
+#include <ngin/node/node_connection.h>
+#include <ngin/node/i_node.h>
+#include <ngin/collections/nevf.h>
 
-class Node {
+class Node : public INode, public std::enable_shared_from_this<Node> {
 public:
-  unsigned int depth;
+    unsigned int depth;
 
-  Node(const std::string& name, Nevf& dictionary) : name_(name), data_(dictionary) {
-    
-  }
-  virtual ~Node() = default;
-
-  void buildConnections() {
-    // TODO: setup ports from data_ dictionary
-    if (data_.contains("inputs")) {
-        Nevf inputs = data_.get("inputs");
-        for (auto& inputKey : inputs.keys()) {
-            Nevf inputData = inputs.get(inputKey);
-            // Create NodePort using inputData (type, connection, etc.)
-            auto inputPort = std::make_shared<NodePort>(/* ... */); 
-            addInputPort(inputPort);
-        }
+    Node(const std::string& name, Nevf& dictionary)
+        : name_(name), data_(dictionary) {
     }
 
-    if (data_.contains("outputs")) {
-        Nevf outputs = data_.get("outputs");
-        for (auto& outputKey : outputs.keys()) {
-            Nevf outputData = outputs.get(outputKey);
-            // Create NodePort using outputData (type, connection, etc.)
-            auto outputPort = std::make_shared<NodePort>(/* ... */); 
-            addOutputPort(outputPort);
-        }
+    virtual ~Node() {}
+
+    std::string getName() const override {
+        return name_;
     }
-  }
 
-  std::string getName() const { return name_; }
+    std::vector<std::shared_ptr<INode>> getParentNodes() override {
+        std::vector<std::shared_ptr<INode>> nodesOut;
+        for (const auto& inputPort : inputPorts_) {
+            if (inputPort->isConnected()) {
+                auto connection = inputPort->getConnection();
+                auto outputPort = connection->getInputPort();
+                INode* parentNodeRaw = outputPort->getNode(); // Get raw pointer to INode
 
-  // Add an input port to the node
-  void addInputPort(const std::shared_ptr<NodePort>& port) { inputPorts_.push_back(port); }
-  // Add an output port to the node
-  void addOutputPort(const std::shared_ptr<NodePort>& port) { outputPorts_.push_back(port); }
-  // Get input ports
-  std::vector<std::shared_ptr<NodePort>>& getInputPorts() { return inputPorts_; }
-  // Get output ports
-  std::vector<std::shared_ptr<NodePort>>& getOutputPorts() { return outputPorts_; }
+                // Assuming parentNodeRaw is managed by a shared_ptr, retrieve it safely
+                if (auto parentNodeShared = dynamic_cast<Node*>(parentNodeRaw)->shared_from_this()) {
+                    // Check if already in nodesOut
+                    if (std::find(nodesOut.begin(), nodesOut.end(), parentNodeShared) == nodesOut.end()) {
+                        nodesOut.push_back(parentNodeShared);
+                    }
+                }
+            }
+        }
+        return nodesOut;
+    }
 
-  // Get input port by ID
-  std::shared_ptr<NodePort> getInputPortById(int id) {
-    auto it = std::find_if(inputPorts_.begin(), inputPorts_.end(),
-                            [id](const std::shared_ptr<NodePort>& port) { return port->getId() == id; });
-    return (it != inputPorts_.end()) ? *it : nullptr;
-  }
+    std::shared_ptr<NodePort> createInputPort(const std::string& name, unsigned int id, const std::string& type) {
+        // Check if a port with the same ID already exists using getInputPortById
+        auto existingPort = getInputPortById(id);
+        if (existingPort) {
+            return existingPort; // Return the existing port if found
+        }
 
-  // Get input port by name
-  std::shared_ptr<NodePort> getInputPortByName(const std::string& name) {
-    auto it = std::find_if(inputPorts_.begin(), inputPorts_.end(),
-                            [&name](const std::shared_ptr<NodePort>& port) { return port->getName() == name; });
-    return (it != inputPorts_.end()) ? *it : nullptr;
-  }
+        // Create a new port if one with the specified ID doesn't exist
+        auto port = std::make_shared<NodePort>(name, id, type, this);
+        inputPorts_.push_back(port);
+        return port;
+    }
 
-  // Get output port by ID
-  std::shared_ptr<NodePort> getOutputPortById(int id) {
-    auto it = std::find_if(outputPorts_.begin(), outputPorts_.end(),
-                            [id](const std::shared_ptr<NodePort>& port) { return port->getId() == id; });
-    return (it != outputPorts_.end()) ? *it : nullptr;
-  }
+    std::shared_ptr<NodePort> createOutputPort(const std::string& name, unsigned int id, const std::string& type) {
+        // Check if a port with the same ID already exists using getOutputPortById
+        auto existingPort = getInputPortById(id); // Assuming similar getOutputPortById exists, like getInputPortById
+        if (existingPort) {
+            return existingPort; // Return the existing port if found
+        }
 
-  // Get output port by name
-  std::shared_ptr<NodePort> getOutputPortByName(const std::string& name) {
-    auto it = std::find_if(outputPorts_.begin(), outputPorts_.end(),
-                            [&name](const std::shared_ptr<NodePort>& port) { return port->getName() == name; });
-    return (it != outputPorts_.end()) ? *it : nullptr;
-  }
+        // Create a new port if one with the specified ID doesn't exist
+        auto port = std::make_shared<NodePort>(name, id, type, this);
+        outputPorts_.push_back(port);
+        return port;
+    }
 
-  void setGetNodeByNameFunc(std::function<std::shared_ptr<Node>(const std::string&)> func) {
-    getNodeByName_ = func;
-  }
+    unsigned int getDepth() const {
+        return depth;
+    }
 
-  std::shared_ptr<Node> getNeighbor(const std::string& neighborName) {
-      if (getNodeByName_) {
-          return getNodeByName_(neighborName);
-      } else {
-          return nullptr; // Or throw an exception
-      }
-  }
+    void setDepth(unsigned int depthIn) {
+        depth = depthIn;
+    }
 
-  // Execute the node's logic (default implementation does nothing)
-  virtual void execute() {
-    // Default implementation: No operation
-  }
+    void addInputPort(const std::shared_ptr<NodePort>& port) {
+        inputPorts_.push_back(port);
+    }
+
+    void addOutputPort(const std::shared_ptr<NodePort>& port) {
+        outputPorts_.push_back(port);
+    }
+
+    std::vector<std::shared_ptr<NodePort>>& getInputPorts() {
+        return inputPorts_;
+    }
+
+    std::vector<std::shared_ptr<NodePort>>& getOutputPorts() {
+        return outputPorts_;
+    }
+
+    std::shared_ptr<NodePort> getInputPortById(unsigned int id) {
+        auto it = std::find_if(inputPorts_.begin(), inputPorts_.end(),
+                               [id](const std::shared_ptr<NodePort>& port) { return port->getId() == id; });
+        return (it != inputPorts_.end()) ? *it : nullptr;
+    }
+
+    std::shared_ptr<NodePort> getInputPortByConnection(const std::string& type) {
+        for (const auto& inputPort : inputPorts_) {
+            if (inputPort->isConnected() && inputPort->getConnection()->getType() == type) {
+                return inputPort;
+            }
+        }
+        return nullptr; // Return nullptr if no match is found
+    }
+    std::shared_ptr<Nevf> getInputDataByType(const std::string& type) {
+        auto port = getInputPortByConnection(type);
+        if (port) {
+            std::shared_ptr<Nevf> data = port->getData(); // Retrieve the data from the port
+            return data;
+        }
+        throw std::runtime_error("No connected input port with the specified type: " + type);
+    }
+
+    std::shared_ptr<NodePort> getOutputPortByConnection(const std::string& type) {
+        for (const auto& outputPort : outputPorts_) {
+            if (outputPort->isConnected() && outputPort->getConnection()->getType() == type) {
+                return outputPort;
+            }
+        }
+        return nullptr; // Return nullptr if no match is found
+    }
+
+    void setOutputDataByType(const std::string& type, std::shared_ptr<Nevf> data) {
+        auto port = getOutputPortByConnection(type);
+        if (port) {
+            port->setData(data); // Set the data for the port
+            return;
+        }
+        throw std::runtime_error("No connected output port with the specified type: " + type);
+    }
+
+    std::shared_ptr<NodePort> getInputPortByName(const std::string& name) {
+        auto it = std::find_if(inputPorts_.begin(), inputPorts_.end(),
+                               [&name](const std::shared_ptr<NodePort>& port) { return port->getName() == name; });
+        return (it != inputPorts_.end()) ? *it : nullptr;
+    }
+
+    std::shared_ptr<NodePort> getOutputPortById(unsigned int id) {
+        auto it = std::find_if(outputPorts_.begin(), outputPorts_.end(),
+                               [id](const std::shared_ptr<NodePort>& port) { return port->getId() == id; });
+        return (it != outputPorts_.end()) ? *it : nullptr;
+    }
+
+    std::shared_ptr<NodePort> getOutputPortByName(const std::string& name) {
+        auto it = std::find_if(outputPorts_.begin(), outputPorts_.end(),
+                               [&name](const std::shared_ptr<NodePort>& port) { return port->getName() == name; });
+        return (it != outputPorts_.end()) ? *it : nullptr;
+    }
+
+    void log() const {
+        std::cout << "-------------" << std::endl;
+        std::cout << "NODE: " << name_ << std::endl;
+        std::cout << std::endl;
+
+        std::cout << "  input ports: " << inputPorts_.size() << std::endl;
+        for (const auto& port : inputPorts_) {
+            std::cout << "    - " << port->getName() << " (id: " << port->getId() << ")";
+            if (port->isConnected()) {
+                std::cout << " -> ";
+                port->getConnection()->log();
+            }
+        }
+
+        std::cout << "  output ports: " << outputPorts_.size() << std::endl;
+        for (const auto& port : outputPorts_) {
+            std::cout << "    - " << port->getName() << " (id: " << port->getId() << ")";
+            if (port->isConnected()) {
+                std::cout << " -> ";
+                port->getConnection()->log();
+            }
+        }
+        std::cout << std::endl;
+    }
+
+    void execute(std::string& pass) override {
+        retrieveInputData();
+    }
+
+    void setup() override { 
+        setupPorts();
+        std::cout << "node setup!" << std::endl; 
+        }
 
 protected:
-  std::string name_;
-  std::vector<std::shared_ptr<NodePort>> inputPorts_;
-  std::vector<std::shared_ptr<NodePort>> outputPorts_;
-  std::function<std::shared_ptr<Node>(const std::string&)> getNodeByName_;
+    std::string name_;
+    std::vector<std::shared_ptr<NodePort>> inputPorts_;
+    std::vector<std::shared_ptr<NodePort>> outputPorts_;
+    Nevf& data_;
 
-  Nevf& data_; 
+    void retrieveInputData() {
+        for (const auto& inputPort : inputPorts_) {
+            if (inputPort->isConnected()) {
+                auto connection = inputPort->getConnection();
+                connection->transferData();
+            }
+        }
+        // Now all data is sitting in input ports, ready to be pulled
+    }
+    void setupPorts() {
+        if (data_.contains("input_ports")) {
+            Nevf inputData = data_.getC<Nevf>("input_ports", Nevf());
+            for (const auto& key : inputData.keys()) {
+                Nevf portData = inputData.getC<Nevf>(key, Nevf());
+                auto id = portData.getC<unsigned int>("id", 0); // Access portData directly
+                auto type = portData.getC<std::string>("type", ""); // Access portData directly
+                createInputPort(key, id, type); 
+            }
+        }
+
+        if (data_.contains("output_ports")) {
+            Nevf outputData = data_.getC<Nevf>("output_ports", Nevf());
+            for (const auto& key : outputData.keys()) {
+                Nevf portData = outputData.getC<Nevf>(key, Nevf());
+                auto id = portData.getC<unsigned int>("id", 0); // Access portData directly
+                auto type = portData.getC<std::string>("type", ""); // Access portData directly
+                createOutputPort(key, id, type); 
+            }
+        }
+    }
 };
 
 #endif // NODE_H

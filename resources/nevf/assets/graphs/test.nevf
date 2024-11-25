@@ -2,8 +2,7 @@ nodes:
     origin:
         type: transform
     child:
-        type: object
-        graph: test
+        type: transform
     child_2:
         type: transform
 

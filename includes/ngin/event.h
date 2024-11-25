@@ -1,3 +1,6 @@
+#ifndef EVENT_H
+#define EVENT_H
+
 #include <iostream>
 #include <vector>
 #include <functional>
@@ -16,3 +19,5 @@ public:
 private:
     std::vector<std::function<void()>> listeners;
 };
+
+#endif // EVENT_H

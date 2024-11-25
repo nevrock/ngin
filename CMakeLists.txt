@@ -55,6 +55,8 @@ set(SOURCES
     includes/ngin/glad.c
     includes/ngin/stb_image.cpp
     includes/ngin/game.cpp
+    includes/ngin/node/types/node_types.cpp
+    
     src/main.cpp
 )
 
