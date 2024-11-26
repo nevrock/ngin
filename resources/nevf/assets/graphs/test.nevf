@@ -1,6 +1,10 @@
 nodes:    
     origin:
         type: transform
+        input_ports:
+            parent:
+                id: 0
+                type: transform
     child:
         type: transform
     child_2:
@@ -10,6 +14,10 @@ nodes:
         type: pass
         pass: transform
         id: 1
+        output_ports:
+            parent:
+                id: 0
+                type: transform
 
 connections:
 

@@ -12,7 +12,7 @@
 
 class NodePort {
 public:
-  NodePort(const std::string& name, unsigned int id, const std::string& type, INode* node) 
+  NodePort(const std::string& name, unsigned int id, const std::string& type, std::weak_ptr<INode> node) 
     : id_(id), name_(name), type_(type), node_(node) {}
   virtual ~NodePort() = default;
 
@@ -28,28 +28,26 @@ public:
     if (linkedPort_) {
       linkedPort_->clearData();
     } 
-  } // Add this line
-
+  }
 
   std::string getName() const { return name_; }
   unsigned int getId() const { return id_; }
 
-  INode* getNode() {
+  std::weak_ptr<INode> getNode() {
     return node_;
   }
 
-
-  void connect(INodeConnection* connection) {
+  void connect(std::weak_ptr<INodeConnection> connection) {
     connection_ = connection;
   }
   void disconnect() {
-    connection_ = nullptr;
+    connection_.reset(); // Use reset() to clear weak_ptr
   }
-  INodeConnection* getConnection() const {
+  std::weak_ptr<INodeConnection> getConnection() const {
     return connection_;
   }
   bool isConnected() const {
-    return connection_ != nullptr;
+    return !connection_.expired(); // Check if the connection is still alive
   }
   void setLinkedPort(NodePort* port) { linkedPort_ = port; }
   void clearLinkedPort() { linkedPort_ = nullptr; }
@@ -60,13 +58,11 @@ private:
   std::string name_;
   std::string type_;
 
-  //bool isConnected_;
+  std::weak_ptr<INodeConnection> connection_; 
+  std::weak_ptr<INode> node_; 
 
-  INodeConnection* connection_; // Use weak_ptr to avoid cycles
-  INode* node_;
-
-  std::shared_ptr<Nevf> data_; // Pointer to the Nevf instance
-  NodePort* linkedPort_ = nullptr; // Pointer to the linked port
+  std::shared_ptr<Nevf> data_; 
+  NodePort* linkedPort_ = nullptr; 
 
 };
 

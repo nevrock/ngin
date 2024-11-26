@@ -28,19 +28,27 @@ public:
         std::vector<std::shared_ptr<INode>> nodesOut;
         for (const auto& inputPort : inputPorts_) {
             if (inputPort->isConnected()) {
-                auto connection = inputPort->getConnection();
-                auto outputPort = connection->getInputPort();
-                INode* parentNodeRaw = outputPort->getNode(); // Get raw pointer to INode
+                std::cout << "node " << getName() << ", port: " << inputPort->getId() << " is connected!" << std::endl;
 
-                // Assuming parentNodeRaw is managed by a shared_ptr, retrieve it safely
-                if (auto parentNodeShared = dynamic_cast<Node*>(parentNodeRaw)->shared_from_this()) {
-                    // Check if already in nodesOut
-                    if (std::find(nodesOut.begin(), nodesOut.end(), parentNodeShared) == nodesOut.end()) {
+                auto connection = inputPort->getConnection().lock(); // Lock the weak_ptr
+                if (connection) { // Check if the connection is still valid
+                    auto outputPort = connection->getInputPort().lock();
+                    auto parentNodeWeak = outputPort->getNode(); // Get weak_ptr to INode
+                    auto parentNodeShared = parentNodeWeak.lock(); // Lock the weak_ptr
+
+                    if (parentNodeShared && std::find(nodesOut.begin(), nodesOut.end(), parentNodeShared) == nodesOut.end()) {
                         nodesOut.push_back(parentNodeShared);
+                    } else {
+                        std::cout << "node " << getName() << ", port: " << inputPort->getId() << " could not pass list check!" << std::endl;
                     }
+                } else {
+                    std::cout << "input port is connected but has invalid connection weak ptr" << std::endl;
                 }
+            } else {
+                std::cout << "node " << getName() << ", port: " << inputPort->getId() << " is NOT connected!" << std::endl;
             }
         }
+        std::cout << "node " << getName() << ", has parent size: " << nodesOut.size() << std::endl;
         return nodesOut;
     }
 
@@ -52,20 +60,20 @@ public:
         }
 
         // Create a new port if one with the specified ID doesn't exist
-        auto port = std::make_shared<NodePort>(name, id, type, this);
+        auto port = std::make_shared<NodePort>(name, id, type, weak_from_this()); 
         inputPorts_.push_back(port);
         return port;
     }
 
     std::shared_ptr<NodePort> createOutputPort(const std::string& name, unsigned int id, const std::string& type) {
         // Check if a port with the same ID already exists using getOutputPortById
-        auto existingPort = getInputPortById(id); // Assuming similar getOutputPortById exists, like getInputPortById
+        auto existingPort = getOutputPortById(id); // Assuming similar getOutputPortById exists, like getInputPortById
         if (existingPort) {
             return existingPort; // Return the existing port if found
         }
 
         // Create a new port if one with the specified ID doesn't exist
-        auto port = std::make_shared<NodePort>(name, id, type, this);
+        auto port = std::make_shared<NodePort>(name, id, type, weak_from_this()); 
         outputPorts_.push_back(port);
         return port;
     }
@@ -102,7 +110,8 @@ public:
 
     std::shared_ptr<NodePort> getInputPortByConnection(const std::string& type) {
         for (const auto& inputPort : inputPorts_) {
-            if (inputPort->isConnected() && inputPort->getConnection()->getType() == type) {
+            auto connection = inputPort->getConnection().lock(); // Lock the weak_ptr
+            if (connection && inputPort->isConnected() && connection->getType() == type) {
                 return inputPort;
             }
         }
@@ -119,7 +128,8 @@ public:
 
     std::shared_ptr<NodePort> getOutputPortByConnection(const std::string& type) {
         for (const auto& outputPort : outputPorts_) {
-            if (outputPort->isConnected() && outputPort->getConnection()->getType() == type) {
+            auto connection = outputPort->getConnection().lock(); // Lock the weak_ptr
+            if (connection && outputPort->isConnected() && connection->getType() == type) {
                 return outputPort;
             }
         }
@@ -162,17 +172,24 @@ public:
         for (const auto& port : inputPorts_) {
             std::cout << "    - " << port->getName() << " (id: " << port->getId() << ")";
             if (port->isConnected()) {
-                std::cout << " -> ";
-                port->getConnection()->log();
+                auto connection = port->getConnection().lock(); // Lock the weak_ptr
+                if (connection) { // Check if the connection is valid
+                    std::cout << " -> ";
+                    connection->log();
+                }
             }
         }
 
+        std::cout << std::endl;
         std::cout << "  output ports: " << outputPorts_.size() << std::endl;
         for (const auto& port : outputPorts_) {
             std::cout << "    - " << port->getName() << " (id: " << port->getId() << ")";
             if (port->isConnected()) {
-                std::cout << " -> ";
-                port->getConnection()->log();
+                auto connection = port->getConnection().lock(); // Lock the weak_ptr
+                if (connection) { // Check if the connection is valid
+                    std::cout << " -> ";
+                    connection->log();
+                }
             }
         }
         std::cout << std::endl;
@@ -183,8 +200,9 @@ public:
     }
 
     void setup() override { 
+        std::cout << "node setup: " << getName() << std::endl;
         setupPorts();
-        std::cout << "node setup!" << std::endl; 
+        //std::cout << "node setup!" << std::endl; 
         }
 
 protected:
@@ -196,19 +214,23 @@ protected:
     void retrieveInputData() {
         for (const auto& inputPort : inputPorts_) {
             if (inputPort->isConnected()) {
-                auto connection = inputPort->getConnection();
-                connection->transferData();
+                auto connection = inputPort->getConnection().lock(); // Lock the weak_ptr
+                if (connection) { // Check if the connection is valid
+                    connection->transferData();
+                }
             }
         }
         // Now all data is sitting in input ports, ready to be pulled
     }
     void setupPorts() {
+        std::cout << "setting up ports!" << std::endl;
+        data_.print();
         if (data_.contains("input_ports")) {
             Nevf inputData = data_.getC<Nevf>("input_ports", Nevf());
             for (const auto& key : inputData.keys()) {
                 Nevf portData = inputData.getC<Nevf>(key, Nevf());
-                auto id = portData.getC<unsigned int>("id", 0); // Access portData directly
-                auto type = portData.getC<std::string>("type", ""); // Access portData directly
+                auto id = portData.getC<unsigned int>("id", 0); 
+                auto type = portData.getC<std::string>("type", ""); 
                 createInputPort(key, id, type); 
             }
         }
@@ -217,8 +239,8 @@ protected:
             Nevf outputData = data_.getC<Nevf>("output_ports", Nevf());
             for (const auto& key : outputData.keys()) {
                 Nevf portData = outputData.getC<Nevf>(key, Nevf());
-                auto id = portData.getC<unsigned int>("id", 0); // Access portData directly
-                auto type = portData.getC<std::string>("type", ""); // Access portData directly
+                auto id = portData.getC<unsigned int>("id", 0); 
+                auto type = portData.getC<std::string>("type", ""); 
                 createOutputPort(key, id, type); 
             }
         }

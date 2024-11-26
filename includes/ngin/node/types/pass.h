@@ -19,6 +19,7 @@ public:
     }
 
     void setup() override {
+        Node::setup();
         pass_ = data_.getC<std::string>("pass", ""); // Get the "pass" value from data_
     }
 

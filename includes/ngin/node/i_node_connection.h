@@ -13,8 +13,8 @@ public:
 
     virtual std::string& getType() = 0;
 
-    virtual std::shared_ptr<NodePort> getInputPort() const = 0;
-    virtual std::shared_ptr<NodePort> getOutputPort() const = 0;
+    virtual std::weak_ptr<NodePort> getInputPort() const = 0;
+    virtual std::weak_ptr<NodePort> getOutputPort() const = 0;
     virtual void log() const = 0;
 };
 

@@ -18,7 +18,7 @@ public:
     }
 
     void setup() override {
-
+        Node::setup();
     }
 private:
 

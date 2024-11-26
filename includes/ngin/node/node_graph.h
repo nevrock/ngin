@@ -26,6 +26,12 @@ public:
     }
     
     void build() {
+        std::cout << "building node graph!" << std::endl;
+
+        data_.print();
+
+        std::cout << "-------------------" << std::endl;
+
         buildNodes();
         buildConnections();
         
@@ -158,7 +164,7 @@ private:
         Nevf* nodes = data_.get<Nevf>("nodes", nullptr);
         if (nodes != nullptr) {
              for (const auto& key : nodes->keys()) {
-                std::cout << "scene graph building object: " << key << std::endl;
+                std::cout << "node graph building object: " << key << std::endl;
                 createNode(key, *nodes->get<Nevf>(key, nullptr));
             }
         }
@@ -180,55 +186,11 @@ private:
         portOut = input.substr(tripleDash + 3, lastDash - tripleDash - 3); // Between triple dash and last dash
         nodeOut = input.substr(lastDash + 1);                             // After last dash
     }
-    void buildParentConnection(const std::string& key, std::string& type, std::string& nodeIn, int portIn, std::string& nodeOut, int portOut) {
-        if (!parent_) return;
-
-        if (nodeIn == "parent") {
-            // need to build connection between input port of parent node and
-            auto outputNode = getNode(nodeOut);
-            if (!outputNode) return;
-            auto inputPort = parent_->getInputPortById(portIn);
-            auto outputPort = outputNode->createInputPort(type, portOut, type);
-            if (inputPort && outputPort) {
-                // Avoid creating a connection if it already exists
-                auto existingConnection = connections_.find(key);
-                if (existingConnection == connections_.end()) {
-                    // Create and store the connection (using a shared_ptr for memory management)
-                    std::shared_ptr<NodeConnection> connection = std::make_shared<NodeConnection>(key, type, inputPort, outputPort);
-                    
-                    connections_[key] = connection; // Store the connection using the key
-                } else {
-                    std::cerr << "warning: Connection already exists: " << key << std::endl;
-                }
-            } else {
-                std::cerr << "error: one of the ports was not found for the connection: " << key << std::endl;
-            }
-        } else if (nodeOut == "parent") {
-            auto inputNode = getNode(nodeIn);
-            if (!inputNode) return;
-            auto inputPort = inputNode->createOutputPort(type, portIn, type);
-            auto outputPort = parent_->createOutputPort(type, portOut, type);
-            if (inputPort && outputPort) {
-                // Avoid creating a connection if it already exists
-                auto existingConnection = connections_.find(key);
-                if (existingConnection == connections_.end()) {
-                    // Create and store the connection (using a shared_ptr for memory management)
-                    std::shared_ptr<NodeConnection> connection = std::make_shared<NodeConnection>(key, type, inputPort, outputPort);
-                    
-                    connections_[key] = connection; // Store the connection using the key
-                } else {
-                    std::cerr << "warning: Connection already exists: " << key << std::endl;
-                }
-            } else {
-                std::cerr << "error: one of the ports was not found for the connection: " << key << std::endl;
-            }
-        }
-    }
     void buildConnections() {
         Nevf* connections = data_.get<Nevf>("connections", nullptr);
         if (connections != nullptr) {
             for (const auto& key : connections->keys()) {
-                std::cout << "scene graph building connection: " << key << std::endl;
+                std::cout << "node graph building connection: " << key << std::endl;
                 Nevf* data = connections->get<Nevf>(key, nullptr);
                 std::string type = data->getC<std::string>("type", "");
                 std::string nodeIn = "";
@@ -253,7 +215,11 @@ private:
                         auto existingConnection = connections_.find(key);
                         if (existingConnection == connections_.end()) {
                             // Create and store the connection (using a shared_ptr for memory management)
-                            std::shared_ptr<NodeConnection> connection = std::make_shared<NodeConnection>(key, type, inputPort, outputPort);
+                            auto connection = std::make_shared<NodeConnection>(key, type, inputPort, outputPort); 
+
+                            inputPort->connect(connection);
+                            outputPort->connect(connection);
+                            //std::shared_ptr<NodeConnection> connection = std::make_shared<NodeConnection>(key, type, inputPort, outputPort);
                             
                             connections_[key] = connection; // Store the connection using the key
                         } else {

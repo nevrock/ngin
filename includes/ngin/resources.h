@@ -24,7 +24,7 @@ public:
     static Nevf loadNevf(const std::string& name) {
         Nevf n;
         n.read(FileUtils::getResourcePath("nevf/" + name + ".nevf"));
-        n.print();
+        //n.print();
         return n;
     }
 };
