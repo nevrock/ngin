@@ -23,14 +23,15 @@ public:
 
     // Load a scene
     void load(const char* s) {
-        NodeGraph graph(s);
-
-        graph.build();
+        graph_ = std::make_unique<NodeGraph>(s);
+        graph_->build();
         
         current_ = std::string(s);
         eventState_.trigger();
     }
-
+    void executePass(const std::string& passName) {
+        graph_->executePass(passName);
+    }
     // Add a listener for graph events
     void addGraphListener(std::function<void()> listener) {
         eventState_.addListener(listener);
@@ -40,6 +41,8 @@ private:
     // Instance-level members
     std::string current_;
     Event eventState_;
+    
+    std::unique_ptr<NodeGraph> graph_;
 };
 
 #endif // SCENE_H

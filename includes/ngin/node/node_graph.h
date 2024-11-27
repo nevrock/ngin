@@ -40,6 +40,26 @@ public:
 
         buildGraphStates();
     }
+    void execute() {
+        std::cout << "executing all graph states..." << std::endl;
+
+        for (auto& [passType, graphState] : graphStates_) {
+            std::cout << "executing graph state for pass type: " << passType << std::endl;
+            graphState.execute();
+        }
+
+        std::cout << "executing complete." << std::endl;
+    }
+    void executePass(const std::string& passType) {
+        auto it = graphStates_.find(passType);
+        if (it != graphStates_.end()) {
+            // Retrieve the existing GraphState
+            GraphState& graphState = it->second;
+            graphState.execute();
+        } else {
+            //std::cerr << "error: graph state for pass type \"" << passType << "\" not found." << std::endl;
+        }
+    }
 
     // Node management
     std::shared_ptr<Node> createNode(const std::string& name, Nevf& data) {
@@ -84,6 +104,18 @@ public:
             allNodes.push_back(node);
         }
         return allNodes;
+    }
+    std::shared_ptr<Pass> getPassNodeByType(const std::string& passType) const {
+        // Retrieve all nodes of type Pass
+        auto passNodes = getNodesByType<Pass>();
+
+        // Search for the node with the matching passType
+        for (const auto& passNode : passNodes) {
+            if (passNode->getPass() == passType) {
+                return passNode;
+            }
+        }
+        return nullptr; // Return nullptr if no matching node is found
     }
     template<typename T>
     std::shared_ptr<T> getNodeByType() const {
@@ -149,6 +181,50 @@ public:
         std::cout << "logging node graph" << std::endl;
         for (const auto& [name, node] : nodes_) {
             node->log(); // Invoke log() on each node
+        }
+    }
+
+    void buildConnection(std::string key, Nevf& data) {
+        std::cout << "node graph building connection: " << key << std::endl;
+        std::string type = data.getC<std::string>("type", "");
+        std::string nodeIn = "";
+        std::string portIn = "";
+        std::string nodeOut = "";
+        std::string portOut = "";
+        parseConnectionString(key, nodeIn, portIn, nodeOut, portOut);
+
+        int inputPortId = std::stoi(portIn);
+        int outputPortId = std::stoi(portOut);
+        
+        auto inputNode = getNode(nodeIn);
+        auto outputNode = getNode(nodeOut);
+
+        if (inputNode && outputNode) {
+            auto inputPort = inputNode->createOutputPort(type, inputPortId, type);
+            auto outputPort = outputNode->createInputPort(type, outputPortId, type);
+
+            // If both ports are now available, create the connection
+            if (inputPort && outputPort) {
+                // Avoid creating a connection if it already exists
+                auto existingConnection = connections_.find(key);
+                if (existingConnection == connections_.end()) {
+                    // Create and store the connection (using a shared_ptr for memory management)
+                    auto connection = std::make_shared<NodeConnection>(key, type, inputPort, outputPort); 
+                    refreshGraphState(type);
+
+                    inputPort->connect(connection);
+                    outputPort->connect(connection);
+                    //std::shared_ptr<NodeConnection> connection = std::make_shared<NodeConnection>(key, type, inputPort, outputPort);
+                    
+                    connections_[key] = connection; // Store the connection using the key
+                } else {
+                    std::cerr << "warning: connection already exists: " << key << std::endl;
+                }
+            } else {
+                std::cerr << "error: one of the ports was not found for the connection: " << key << std::endl;
+            }
+        } else {
+            std::cerr << "error: one of the nodes was not found for the connection: " << key << std::endl;
         }
     }
 
@@ -229,7 +305,7 @@ private:
                             
                             connections_[key] = connection; // Store the connection using the key
                         } else {
-                            std::cerr << "warning: Connection already exists: " << key << std::endl;
+                            std::cerr << "warning: connection already exists: " << key << std::endl;
                         }
                     } else {
                         std::cerr << "error: one of the ports was not found for the connection: " << key << std::endl;
@@ -245,12 +321,33 @@ private:
         std::vector<std::shared_ptr<Pass>> passNodes = getNodesByType<Pass>(); 
         for (const auto& passNode : passNodes) {
             if (passNode != nullptr) {
-                std::cout << "found pass node: " << passNode->getName() << std::endl;
+                //std::cout << "found pass node: " << passNode->getName() << std::endl;
 
                 // Create and store the graph state
-                graphStates_[passNode->getName()] = GraphState(); 
-                graphStates_[passNode->getName()].cook(passNode); 
+                graphStates_[passNode->getPass()] = GraphState(); 
+                graphStates_[passNode->getPass()].cook(passNode); 
             }
+        }
+    }
+    void refreshGraphState(const std::string& passType) {
+        // Check if a graph state exists for the given pass type
+        auto it = graphStates_.find(passType);
+        if (it != graphStates_.end()) {
+            // Retrieve the existing GraphState
+            GraphState& graphState = it->second;
+
+            // Find the pass node corresponding to the pass type
+            auto passNode = getPassNodeByType(passType);
+            if (passNode) {
+                std::cout << "refreshing graph state for pass type: " << passType << std::endl;
+
+                // Re-cook the graph state to update its structure
+                graphState.cook(passNode);
+            } else {
+                std::cerr << "error: pass node for pass type \"" << passType << "\" not found." << std::endl;
+            }
+        } else {
+            std::cerr << "error: graph state for pass type \"" << passType << "\" not found." << std::endl;
         }
     }
 

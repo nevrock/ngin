@@ -21,12 +21,15 @@ public:
     void setup() override {
         Node::setup();
         pass_ = data_.getC<std::string>("pass", ""); // Get the "pass" value from data_
+        order_ = data_.getC<int>("order", 0);
     }
 
     std::string getPass() const { return pass_; } // Public getter method
+    int getOrder() const { return order_; }
 
 private:
     std::string pass_; // Private string variable to store the pass
+    int order_;
 };
 
 #endif // PASS_H

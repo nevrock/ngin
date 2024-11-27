@@ -7,13 +7,6 @@ nodes:
                 type: transform
     child:
         type: transform
-    child_2:
-        type: transform
-
-    output_transform:
-        type: pass
-        pass: transform
-        id: 1
         output_ports:
             parent:
                 id: 0
@@ -23,11 +16,4 @@ connections:
 
     // Define Transform pass connections (for positional inheritance)
     origin-0---0-child:
-        type: transform
-    origin-1---0-child_2:
-        type: transform
-
-    child-0---0-output_transform:
-        type: transform
-    child_2-0---1-output_transform:
         type: transform

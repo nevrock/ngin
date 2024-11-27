@@ -28,7 +28,7 @@ public:
         std::vector<std::shared_ptr<INode>> nodesOut;
         for (const auto& inputPort : inputPorts_) {
             if (inputPort->isConnected()) {
-                std::cout << "node " << getName() << ", port: " << inputPort->getId() << " is connected!" << std::endl;
+               // std::cout << "node " << getName() << ", port: " << inputPort->getId() << " is connected!" << std::endl;
 
                 auto connection = inputPort->getConnection().lock(); // Lock the weak_ptr
                 if (connection) { // Check if the connection is still valid
@@ -39,16 +39,16 @@ public:
                     if (parentNodeShared && std::find(nodesOut.begin(), nodesOut.end(), parentNodeShared) == nodesOut.end()) {
                         nodesOut.push_back(parentNodeShared);
                     } else {
-                        std::cout << "node " << getName() << ", port: " << inputPort->getId() << " could not pass list check!" << std::endl;
+                       // std::cout << "node " << getName() << ", port: " << inputPort->getId() << " could not pass list check!" << std::endl;
                     }
                 } else {
-                    std::cout << "input port is connected but has invalid connection weak ptr" << std::endl;
+                   // std::cout << "input port is connected but has invalid connection weak ptr" << std::endl;
                 }
             } else {
-                std::cout << "node " << getName() << ", port: " << inputPort->getId() << " is NOT connected!" << std::endl;
+               // std::cout << "node " << getName() << ", port: " << inputPort->getId() << " is NOT connected!" << std::endl;
             }
         }
-        std::cout << "node " << getName() << ", has parent size: " << nodesOut.size() << std::endl;
+        //std::cout << "node " << getName() << ", has parent size: " << nodesOut.size() << std::endl;
         return nodesOut;
     }
 

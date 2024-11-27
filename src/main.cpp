@@ -56,25 +56,16 @@ Window* Window::mainWindow = nullptr; // Initialize static member
 
 int main()
 {
-    Window window(SCR_WIDTH, SCR_HEIGHT, "nev_v1");
+    Window window(SCR_WIDTH, SCR_HEIGHT, "ngin");
     GLFWwindow* win = Window::getGLFWwindow();
 
     Game::setState("loading");
-    Game::setState("start");
 
     Nevf n = Resources::loadNevf("game");
     Scene scene;
     scene.load(n.getC<std::string>("start_scene", "scenes/start").c_str());
-    /*
-    NodeGraph nodeGraph(n.getC<std::string>("start_scene", "scenes/start"));
-    std::shared_ptr<Pass> passNode = nodeGraph.getNodeByType<Pass>();
-    if (passNode != nullptr) {
-        std::cout << "found pass node!" << std::endl;
 
-        GraphState graph(passNode);
-        graph.cook();
-    }
-    */
+    Game::setState("start");
 
     glfwSetFramebufferSizeCallback(win, framebuffer_size_callback);
     glfwSetCursorPosCallback(win, mouse_callback);
@@ -101,18 +92,24 @@ int main()
         window.clear();
 
         if (state != "loading") {
+
+            scene.executePass("transform");
             
             // 1. render depth of scene to texture (from light's perspective)
             // --------------------------------------------------------------
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
 
+            scene.executePass("pre_render_directional_depth");
             window.updateDepthMap();
+            scene.executePass("render_directional_depth");
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             // render scene from light's point of view
+            scene.executePass("pre_render_points_depth");
             window.updateCubeMap();
+            scene.executePass("render_points_depth");
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             
@@ -122,15 +119,18 @@ int main()
 
             // 2. render scene as normal using the generated depth/shadow map  
             // --------------------------------------------------------------
-
-            for (int i = ngin::RENDER_LAYER_THRESHOLD_SHADOWS; i < ngin::RENDER_LAYER_THRESHOLD_UI; i++) {
-                window.bindDepthMap();
-                window.bindCubeMap();
-            }
+            scene.executePass("pre_render");
+            window.bindDepthMap();
+            window.bindCubeMap();
+            scene.executePass("render");
+            
 
             // 3. render ui
             // --------------------------------------------------------------
             glDisable(GL_DEPTH_TEST);
+
+            scene.executePass("pre_render_gui");
+            scene.executePass("render_gui");
             
 
             std::this_thread::sleep_for(std::chrono::milliseconds(5));  // Simulate the passage of time between frames

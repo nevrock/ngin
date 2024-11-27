@@ -7,10 +7,42 @@ nodes:
     child_2:
         type: transform
 
-    output_transform:
+
+    // passes
+    
+    pass_transform:
         type: pass
         pass: transform
-        id: 1
+
+    pass_pre_render_directional_depth:
+        type: pass
+        pass: pre_render_directional_depth
+    pass_render_directional_depth:
+        type: pass
+        pass: render_directional_depth
+
+    pass_pre_render_points_depth:
+        type: pass
+        pass: pre_render_points_depth
+    pass_render_points_depth:
+        type: pass
+        pass: render_points_depth
+
+    pass_pre_render:
+        type: pass
+        pass: pre_render
+    pass_render:
+        type: pass
+        pass: render
+
+    pass_pre_render_gui:
+        type: pass
+        pass: pre_render_gui
+    pass_render_gui:
+        type: pass
+        pass: render_gui
+
+
 
 connections:
 
@@ -20,7 +52,7 @@ connections:
     origin-1---0-child_2:
         type: transform
 
-    child-0---0-output_transform:
+    child-0---0-pass_transform:
         type: transform
-    child_2-0---1-output_transform:
+    child_2-0---1-pass_transform:
         type: transform

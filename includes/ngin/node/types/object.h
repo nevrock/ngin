@@ -49,10 +49,10 @@ protected:
         std::shared_ptr<NodePort> inputPort = getInputPortById(inputPorts[0]->getId());
         std::shared_ptr<NodePort> outputPort = getOutputPortById(outputPorts[0]->getId());
         if (inputPort) {
-            inputPort->setLinkedPort(inputPorts[0]);
+            inputPort->addLinkedPort(inputPorts[0]);
         }
         if (outputPort) {
-            outputPorts[0]->setLinkedPort(outputPort);
+            outputPorts[0]->addLinkedPort(outputPort);
         }
         std::cout << "--- object graph has input ports: " << inputPorts.size() << ", " << outputPorts.size() << std::endl;
     }
