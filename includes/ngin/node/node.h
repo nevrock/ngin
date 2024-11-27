@@ -205,6 +205,9 @@ public:
         //std::cout << "node setup!" << std::endl; 
         }
 
+    void launch() override { 
+        }
+
 protected:
     std::string name_;
     std::vector<std::shared_ptr<NodePort>> inputPorts_;

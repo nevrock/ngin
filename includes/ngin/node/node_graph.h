@@ -34,6 +34,7 @@ public:
 
         buildNodes();
         buildConnections();
+        launchNodes();
         
         log();
 
@@ -167,6 +168,11 @@ private:
                 std::cout << "node graph building object: " << key << std::endl;
                 createNode(key, *nodes->get<Nevf>(key, nullptr));
             }
+        }
+    }
+    void launchNodes() {
+        for (const auto& [name, node] : nodes_) {
+            node->launch();
         }
     }
 

@@ -41,13 +41,17 @@ public:
             return nullptr; 
         }
     }
-
+    
     void transferData() override {
-        if (auto input = inputPort_.lock() && auto output = outputPort_.lock()) { 
-            output->setData(input->getData());
-            input->clearData();
+        if (auto input = inputPort_.lock(); input) {
+            if (auto output = outputPort_.lock()) {
+                output->setData(input->getData());
+                input->clearData();
+            } else { 
+                // Handle the case where output port is gone
+            }
         } else {
-            // Handle the case where either port is gone
+            // Handle the case where input port is gone 
         }
     }
 

@@ -15,6 +15,7 @@ public:
 
     virtual void execute(std::string& pass) = 0;
     virtual void setup() = 0;
+    virtual void launch() = 0;
 };
 
 #endif // I_NODE_H

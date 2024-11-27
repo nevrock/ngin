@@ -18,15 +18,15 @@ public:
 
   void setData(std::shared_ptr<Nevf> data) { 
     data_ = data; 
-    if (linkedPort_) {
-      linkedPort_->setData(data);
+    if (linkedPort_.lock()) {
+      linkedPort_.lock()->setData(data);
     }
   }
   std::shared_ptr<Nevf> getData() { return data_; }
   void clearData() { 
     data_ = nullptr;
-    if (linkedPort_) {
-      linkedPort_->clearData();
+    if (linkedPort_.lock()) {
+      linkedPort_.lock()->clearData();
     } 
   }
 
@@ -49,8 +49,8 @@ public:
   bool isConnected() const {
     return !connection_.expired(); // Check if the connection is still alive
   }
-  void setLinkedPort(NodePort* port) { linkedPort_ = port; }
-  void clearLinkedPort() { linkedPort_ = nullptr; }
+  void setLinkedPort(std::weak_ptr<NodePort> port) { linkedPort_ = port; std::cout << "set linked port! " << port.lock()->getName() << std::endl; }
+  void clearLinkedPort() { linkedPort_.reset(); }
 
 private:
 
@@ -62,7 +62,7 @@ private:
   std::weak_ptr<INode> node_; 
 
   std::shared_ptr<Nevf> data_; 
-  NodePort* linkedPort_ = nullptr; 
+  std::weak_ptr<NodePort> linkedPort_; 
 
 };
 

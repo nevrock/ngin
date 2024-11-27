@@ -1,5 +1,5 @@
-#ifndef OBJECT_GRAPH_H
-#define OBJECT_GRAPH_H
+#ifndef OBJECT_H
+#define OBJECT_H
 
 #include <ngin/node/node_graph.h>
 
@@ -35,11 +35,26 @@ public:
         }
     }
 
+    void launch() override {
+        preprocessGraph();
+    }
+
 protected:
     std::unique_ptr<NodeGraph> graph_;
 
     void preprocessGraph() {
-        
+        std::vector<std::shared_ptr<NodePort>> inputPorts = graph_->getInputPortsByName("parent");
+        std::vector<std::shared_ptr<NodePort>> outputPorts = graph_->getOutputPortsByName("parent");
+        std::cout << "preprocess graph: " << inputPorts[0]->getId() << std::endl;
+        std::shared_ptr<NodePort> inputPort = getInputPortById(inputPorts[0]->getId());
+        std::shared_ptr<NodePort> outputPort = getOutputPortById(outputPorts[0]->getId());
+        if (inputPort) {
+            inputPort->setLinkedPort(inputPorts[0]);
+        }
+        if (outputPort) {
+            outputPorts[0]->setLinkedPort(outputPort);
+        }
+        std::cout << "--- object graph has input ports: " << inputPorts.size() << ", " << outputPorts.size() << std::endl;
     }
 };
 
