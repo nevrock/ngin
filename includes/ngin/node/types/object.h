@@ -2,24 +2,25 @@
 #define OBJECT_H
 
 #include <ngin/node/node_graph.h>
+#include <ngin/node/types/sub_graph.h>
 
-class Object : public Node {
+class Object : public SubGraph {
 public:
     explicit Object(const std::string& name, Nevf& dictionary)
-        : Node(name, dictionary)
+        : SubGraph(name, dictionary)
     {
     }
 
     ~Object() override = default;
 
     void execute(std::string& pass) override {
-        Node::execute(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
+        SubGraph::execute(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
 
         graph_->executePass(pass);
     }
 
     void setup() override {
-        Node::setup();
+        SubGraph::setup();
         //std::cout << "object setup!" << std::endl;
         //std::cout << data_.getString() << std::endl;
         if (data_.contains("graph")) {
@@ -31,6 +32,14 @@ public:
 
     void launch() override {
         preprocessGraph();
+    }
+
+    template <typename T>
+    std::vector<std::shared_ptr<T>> getNodesByType(bool deepSearch = false) const {
+        if (graph_) {
+            return graph_->getNodesByType<T>(deepSearch); 
+        }
+        return {}; // Return an empty vector if graph_ is null
     }
 
 protected:
