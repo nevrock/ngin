@@ -1,3 +1,6 @@
 name: test_game
 
 start_scene: scenes/start
+
+env:
+    

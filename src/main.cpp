@@ -26,6 +26,8 @@
 #include <atomic>
 #include <memory>
 
+static int gameInit = (Game::init(), 0); 
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -64,6 +66,9 @@ int main()
     Nevf n = Resources::loadNevf("game");
     Scene scene;
     scene.load(n.getC<std::string>("start_scene", "scenes/start").c_str());
+
+    Nevf env = n.getC<Nevf>("env", Nevf());
+    Game::setEnv(std::make_shared<Nevf>(env));
 
     Game::setState("start");
 

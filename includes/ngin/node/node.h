@@ -24,9 +24,12 @@ public:
         return name_;
     }
 
-    std::vector<std::shared_ptr<INode>> getParentNodes() override {
+    std::vector<std::shared_ptr<INode>> getParentNodes(std::string type) override {
         std::vector<std::shared_ptr<INode>> nodesOut;
         for (const auto& inputPort : inputPorts_) {
+            if (inputPort->getType() != type) {
+                continue;
+            }
             if (inputPort->isConnected()) {
                // std::cout << "node " << getName() << ", port: " << inputPort->getId() << " is connected!" << std::endl;
 
@@ -107,7 +110,20 @@ public:
                                [id](const std::shared_ptr<NodePort>& port) { return port->getId() == id; });
         return (it != inputPorts_.end()) ? *it : nullptr;
     }
-
+    std::shared_ptr<NodePort> getInputPortByType(std::string type) {
+        auto it = std::find_if(inputPorts_.begin(), inputPorts_.end(),
+                               [type](const std::shared_ptr<NodePort>& port) { return port->getType() == type; });
+        return (it != inputPorts_.end()) ? *it : nullptr;
+    }
+    std::vector<std::shared_ptr<NodePort>> getOutputPortsByType(const std::string& type) const {
+        std::vector<std::shared_ptr<NodePort>> result;
+        for (const auto& port : outputPorts_) {
+            if (port->getType() == type) {
+            result.push_back(port);
+            }
+        }
+        return result;
+    }
     std::shared_ptr<NodePort> getInputPortByConnection(const std::string& type) {
         for (const auto& inputPort : inputPorts_) {
             auto connection = inputPort->getConnection().lock(); // Lock the weak_ptr
@@ -117,10 +133,10 @@ public:
         }
         return nullptr; // Return nullptr if no match is found
     }
-    std::shared_ptr<Nevf> getInputDataByType(const std::string& type) {
+    std::shared_ptr<IData> getInputDataByType(const std::string& type) {
         auto port = getInputPortByConnection(type);
         if (port) {
-            std::shared_ptr<Nevf> data = port->getData(); // Retrieve the data from the port
+            std::shared_ptr<IData> data = port->getRawData(); // Retrieve the data from the port
             return data;
         }
         throw std::runtime_error("No connected input port with the specified type: " + type);
@@ -136,10 +152,10 @@ public:
         return nullptr; // Return nullptr if no match is found
     }
 
-    void setOutputDataByType(const std::string& type, std::shared_ptr<Nevf> data) {
+    void setOutputDataByType(const std::string& type, std::shared_ptr<IData> data) {
         auto port = getOutputPortByConnection(type);
         if (port) {
-            port->setData(data); // Set the data for the port
+            port->setRawData(data); // Set the data for the port
             return;
         }
         throw std::runtime_error("No connected output port with the specified type: " + type);

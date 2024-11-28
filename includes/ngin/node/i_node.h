@@ -11,7 +11,7 @@ public:
     virtual unsigned int getDepth() const = 0;
     virtual void setDepth(unsigned int depth) = 0;
     
-    virtual std::vector<std::shared_ptr<INode>> getParentNodes() = 0;
+    virtual std::vector<std::shared_ptr<INode>> getParentNodes(std::string type) = 0;
 
     virtual void execute(std::string& pass) = 0;
     virtual void setup() = 0;

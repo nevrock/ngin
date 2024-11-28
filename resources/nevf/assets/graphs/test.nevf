@@ -1,12 +1,14 @@
 nodes:    
     origin:
         type: transform
+        position: [0.0, 2.0, 0.0]
         input_ports:
             parent:
                 id: 0
                 type: transform
     child:
         type: transform
+        position: [0.0, 2.0, 0.0]
         output_ports:
             parent:
                 id: 0

@@ -10,9 +10,12 @@
 class GraphState {
 public:
 
-    GraphState() = default;
-    ~GraphState() {
+    GraphState(std::string type) : type_(type) {}
+    GraphState() {} // Add a default constructor
+    ~GraphState() {}
 
+    std::string getType() {
+        return type_;
     }
 
     void cook(std::shared_ptr<INode> node) {
@@ -49,8 +52,6 @@ public:
 
         
     void execute() {
-        std::string passType = static_cast<Pass*>(root_.get())->getPass(); 
-
         // Iterate from totalDepth down to 0
         for (int depth = totalDepth_; depth >= 0; --depth) {
             // Get nodes at the current depth
@@ -58,7 +59,7 @@ public:
 
             // Execute each node at the current depth
             for (const auto& node : nodesAtDepth) {
-                node->execute(passType); // Pass passType as an argument
+                node->execute(type_); // Pass passType as an argument
             }
         }
     }
@@ -67,13 +68,13 @@ public:
 private:
     void resetDepth(std::shared_ptr<INode> node) {
         node->setDepth(-1);
-        for (const auto& parent : node->getParentNodes()) {
+        for (const auto& parent : node->getParentNodes(type_)) {
             resetDepth(parent);
         }
     }
     void calculateDepth(std::shared_ptr<INode> node) {
         unsigned int depthC = 0;
-        for (const auto& parent : node->getParentNodes()) {
+        for (const auto& parent : node->getParentNodes(type_)) {
             if (parent->getDepth() == -1) { // Not visited yet
                 depthC = node->getDepth() + 1;
                 if (depthC > totalDepth_) {
@@ -106,7 +107,7 @@ private:
             nodesAtDepth.push_back(node);
         }
         // Recursively process parent nodes
-        for (const auto& parent : node->getParentNodes()) {
+        for (const auto& parent : node->getParentNodes(type_)) {
             populateNodesMap(parent);
         }
     }
@@ -121,6 +122,7 @@ private:
     }
 
     std::shared_ptr<INode> root_;
+    std::string type_;
     std::unordered_map<int, std::vector<std::shared_ptr<INode>>> nodes_; // Changed to map of int and vector of nodes
     unsigned int totalDepth_;
 };

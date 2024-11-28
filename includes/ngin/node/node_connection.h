@@ -5,6 +5,7 @@
 #include <string>
 #include <ngin/node/node_port.h>
 #include <ngin/node/i_node_connection.h>
+#include <ngin/data/i_data.h>
 #include <ngin/collections/nevf.h>
 
 class NodeConnection : public INodeConnection, public std::enable_shared_from_this<NodeConnection> {
@@ -32,12 +33,11 @@ public:
     // Getter for output port
     std::weak_ptr<NodePort> getOutputPort() const override { return outputPort_; }
 
-    std::shared_ptr<Nevf> getData() {
-        if (auto spt = inputPort_.lock()) { // Check if the port is alive
-            return spt->getData();        // Access data through the shared_ptr
+    template <typename T>
+    std::shared_ptr<T> getData() {
+        if (auto spt = inputPort_.lock()) { 
+            return spt->getData<T>();        
         } else {
-            // Handle the case where the input port is gone
-            // (e.g., return a default value, throw an exception, etc.)
             return nullptr; 
         }
     }
@@ -45,7 +45,9 @@ public:
     void transferData() override {
         if (auto input = inputPort_.lock(); input) {
             if (auto output = outputPort_.lock()) {
-                output->setData(input->getData());
+                // Get the raw IData pointer
+                std::shared_ptr<IData> dataToTransfer = input->getRawData(); 
+                output->setRawData(dataToTransfer); 
                 input->clearData();
             } else { 
                 // Handle the case where output port is gone
@@ -55,7 +57,7 @@ public:
         }
     }
 
-    std::string& getType() override {
+    std::string getType() override {
         return type_;
     }
 

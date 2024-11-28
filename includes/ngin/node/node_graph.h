@@ -324,7 +324,7 @@ private:
                 //std::cout << "found pass node: " << passNode->getName() << std::endl;
 
                 // Create and store the graph state
-                graphStates_[passNode->getPass()] = GraphState(); 
+                graphStates_[passNode->getPass()] = GraphState(passNode->getPass()); 
                 graphStates_[passNode->getPass()].cook(passNode); 
             }
         }

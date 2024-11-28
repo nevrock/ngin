@@ -2,12 +2,22 @@
 #define GAME_H
 
 #include <ngin/event.h>
+#include <ngin/collections/nevf.h>
 #include <memory>
 #include <functional>
 #include <atomic>
 
 class Game {
 public:
+    static void init() {
+        std::cout << "!!!   game started   !!!" << std::endl;
+    }
+    static void setEnv(std::shared_ptr<Nevf> nevf) {
+        env_ = nevf;
+    }
+    static std::shared_ptr<Nevf> getEnv() {
+        return env_;
+    }
     static std::string& getState() {
         return state_;
     }
@@ -27,6 +37,8 @@ private:
 
     static std::string state_;
     static Event eventState_;
+
+    static std::shared_ptr<Nevf> env_;
 };
 
 #endif // GAME_H

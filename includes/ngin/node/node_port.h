@@ -6,7 +6,7 @@
 #include <vector> // For std::vector
 #include <algorithm> // For std::remove_if
 
-#include <ngin/collections/nevf.h>
+#include <ngin/data/i_data.h>
 #include <ngin/node/i_node_connection.h>
 #include <ngin/node/i_node.h>
 
@@ -16,16 +16,22 @@ public:
     : id_(id), name_(name), type_(type), node_(node) {}
   virtual ~NodePort() = default;
 
-  void setData(std::shared_ptr<Nevf> data) { 
-    data_ = data; 
+  template <typename T>
+  void setData(std::shared_ptr<T> data) { 
+    // Use static_pointer_cast to cast from Nevf to IData if necessary
+    data_ = std::static_pointer_cast<IData>(data); 
+
     for (const auto& weakPort : linkedPorts_) {
       if (auto port = weakPort.lock()) {
-        port->setData(data);
+        port->setData(data); 
       }
     }
   }
 
-  std::shared_ptr<Nevf> getData() { return data_; }
+  template <typename T>
+  std::shared_ptr<T> getData() { 
+    return std::dynamic_pointer_cast<T>(data_); 
+  }
 
   void clearData() { 
     data_ = nullptr;
@@ -36,8 +42,22 @@ public:
     }
   }
 
+  std::shared_ptr<IData> getRawData() { 
+    return data_; 
+  }
+
+  void setRawData(std::shared_ptr<IData> data) {
+    data_ = data;
+    for (const auto& weakPort : linkedPorts_) {
+      if (auto port = weakPort.lock()) {
+        port->setRawData(data); // Propagate the raw data
+      }
+    }
+  }
+
   std::string getName() const { return name_; }
   unsigned int getId() const { return id_; }
+  std::string getType() const { return type_; }
 
   std::weak_ptr<INode> getNode() {
     return node_;
@@ -89,7 +109,7 @@ private:
   std::weak_ptr<INodeConnection> connection_; 
   std::weak_ptr<INode> node_; 
 
-  std::shared_ptr<Nevf> data_; 
+  std::shared_ptr<IData> data_;  // Now stores an IData pointer
   std::vector<std::weak_ptr<NodePort>> linkedPorts_; // Collection of linked ports
 };
 

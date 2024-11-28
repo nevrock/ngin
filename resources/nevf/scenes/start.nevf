@@ -1,15 +1,17 @@
 nodes:    
     origin:
         type: transform
+        position: [0.0, 2.0, 0.0]
     child:
         type: object
         graph: test
     child_2:
         type: transform
+        position: [0.0, 1.0, 0.0]
 
 
     // passes
-    
+
     pass_transform:
         type: pass
         pass: transform

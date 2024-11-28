@@ -11,7 +11,7 @@ public:
 
     virtual void transferData() = 0;
 
-    virtual std::string& getType() = 0;
+    virtual std::string getType() = 0;
 
     virtual std::weak_ptr<NodePort> getInputPort() const = 0;
     virtual std::weak_ptr<NodePort> getOutputPort() const = 0;
