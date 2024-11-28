@@ -15,13 +15,7 @@ public:
     void execute(std::string& pass) override {
         Node::execute(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
 
-        if (pass == "transform") {
-            // update transform data
-            std::shared_ptr<NodePort> port = getInputPortByName("transform");
-            if (port->isConnected()) {
-
-            }
-        }
+        graph_->executePass(pass);
     }
 
     void setup() override {
@@ -45,16 +39,25 @@ protected:
     void preprocessGraph() {
         std::vector<std::shared_ptr<NodePort>> inputPorts = graph_->getInputPortsByName("parent");
         std::vector<std::shared_ptr<NodePort>> outputPorts = graph_->getOutputPortsByName("parent");
-        std::cout << "preprocess graph: " << inputPorts[0]->getId() << std::endl;
-        std::shared_ptr<NodePort> inputPort = getInputPortById(inputPorts[0]->getId());
-        std::shared_ptr<NodePort> outputPort = getOutputPortById(outputPorts[0]->getId());
-        if (inputPort) {
-            inputPort->addLinkedPort(inputPorts[0]);
+
+        // Iterate through input ports
+        for (const auto& graphInputPort : inputPorts) {
+            std::shared_ptr<NodePort> objectInputPort = getInputPortById(graphInputPort->getId());
+            if (objectInputPort) {
+                objectInputPort->addLinkedPort(graphInputPort); 
+            }
         }
-        if (outputPort) {
-            outputPorts[0]->addLinkedPort(outputPort);
+
+        // Iterate through output ports
+        for (const auto& graphOutputPort : outputPorts) {
+            std::shared_ptr<NodePort> objectOutputPort = getOutputPortById(graphOutputPort->getId());
+            if (objectOutputPort) {
+                graphOutputPort->addLinkedPort(objectOutputPort); 
+            }
         }
-        std::cout << "--- object graph has input ports: " << inputPorts.size() << ", " << outputPorts.size() << std::endl;
+
+        std::cout << "--- object graph has input ports: " << inputPorts.size() 
+                  << ", " << outputPorts.size() << std::endl;
     }
 };
 

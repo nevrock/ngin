@@ -37,6 +37,7 @@ public:
         std::cout << "transform " << getName() << ", has position: " 
                 << glm::to_string(transform_->getWorldPosition()) << std::endl; 
 
+        // pass to output ports:
         std::vector<std::shared_ptr<NodePort>> outputPorts = getOutputPortsByType("transform");
         for (const auto& port : outputPorts) {
             // Do something with each port

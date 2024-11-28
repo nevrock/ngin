@@ -16,6 +16,18 @@ public:
     void execute(std::string& pass) override {
         // Example: Logic specific to Object
         // This can be customized based on requirements
+
+        Node::execute(pass); // retrieve inputs
+
+        std::vector<std::shared_ptr<NodePort>> outputPorts = getOutputPortsByType(pass);
+        std::shared_ptr<NodePort> inputPort = getInputPortByType(pass);
+        if (!inputPort) {
+            return;
+        }
+        for (const auto& port : outputPorts) {
+            // Do something with each port
+            port->setRawData(inputPort->getRawData());
+        }
     }
 
     void setup() override {

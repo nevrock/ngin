@@ -1,14 +1,19 @@
 nodes:    
-    origin:
+    origin_subgraph:
         type: transform
         position: [0.0, 2.0, 0.0]
         input_ports:
             parent:
                 id: 0
                 type: transform
-    child:
+
+    child_subgraph:
         type: transform
         position: [0.0, 2.0, 0.0]
+
+    pass_transform:
+        type: pass
+        pass: transform
         output_ports:
             parent:
                 id: 0
@@ -17,5 +22,8 @@ nodes:
 connections:
 
     // Define Transform pass connections (for positional inheritance)
-    origin-0---0-child:
+    origin_subgraph-0---0-child_subgraph:
+        type: transform
+
+    child_subgraph-0---0-pass_transform:
         type: transform
