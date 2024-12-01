@@ -3,6 +3,7 @@
 #include <ngin/node/types/object.h>
 #include <ngin/node/types/transform.h>
 #include <ngin/node/types/pass.h>
+#include <ngin/node/types/camera.h>
 
 
 bool pass_registered = []() {
@@ -22,6 +23,13 @@ bool obj_registered = []() {
 bool transform_registered = []() {
     NodeGraph::registerNodeType("transform", [](const std::string& name, Nevf& dictionary) {
         return std::make_shared<Transform>(name, dictionary);
+    });
+    return true;
+}();
+
+bool camera_registered = []() {
+    NodeGraph::registerNodeType("camera", [](const std::string& name, Nevf& dictionary) {
+        return std::make_shared<Camera>(name, dictionary);
     });
     return true;
 }();

@@ -9,9 +9,12 @@
 
 class Window {
 public:
-    int width, height;
+    static int width, height;
 
-    Window(int width, int height, const std::string& title) : width(width), height(height) {
+    Window(int windowWidth, int windowHeight, const std::string& title) {
+        width = windowWidth;
+        height = windowHeight;
+
         // glfw: initialize and configure
         // ------------------------------
         glfwInit();
@@ -25,7 +28,7 @@ public:
 
         // glfw window creation
         // --------------------
-        window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+        window = glfwCreateWindow(windowWidth, windowHeight, title.c_str(), NULL, NULL);
         if (window == NULL)
         {
             std::cout << "Failed to create GLFW window" << std::endl;

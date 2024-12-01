@@ -20,13 +20,20 @@
 
 class Resources {
 public:
+    static void init() {
+        std::cout << "!!!   resources started   !!!" << std::endl;
 
+        // need to load in resources
+    }
     static Nevf loadNevf(const std::string& name) {
         Nevf n;
         n.read(FileUtils::getResourcePath("nevf/" + name + ".nevf"));
         //n.print();
         return n;
     }
+
+private:
+    // static std::vector<std::shared_ptr<Shader>> shaders_;
 };
 
 #endif // RESOURCES_H

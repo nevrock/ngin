@@ -48,7 +48,7 @@ public:
                 // Get the raw IData pointer
                 std::shared_ptr<IData> dataToTransfer = input->getRawData(); 
                 output->setRawData(dataToTransfer); 
-                input->clearData();
+                //input->clearData();
             } else { 
                 // Handle the case where output port is gone
             }

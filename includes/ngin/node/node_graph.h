@@ -10,7 +10,6 @@
 #include <iostream>
 
 #include <ngin/node/node.h>
-#include <ngin/node/types/sub_graph.h>
 #include <ngin/node/types/pass.h>
 #include <ngin/node/node_port.h>
 #include <ngin/node/node_connection.h>
@@ -128,32 +127,17 @@ public:
         }
         return nullptr;
     }
-    template <typename T>
-    std::vector<std::shared_ptr<T>> getNodesByType(bool deepSearch = false) const {
+    template<typename T>
+    std::vector<std::shared_ptr<T>> getNodesByType() const {
         std::vector<std::shared_ptr<T>> matchingComponents;
-
         for (const auto& [name, node] : nodes_) {
             std::shared_ptr<T> casted = std::dynamic_pointer_cast<T>(node);
             if (casted) {
                 matchingComponents.push_back(casted);
             }
-
-            if (deepSearch) {
-                // If deepSearch is true and the node is an Object, 
-                // recursively get nodes of type T from its graph
-                if (auto objectNode = std::dynamic_pointer_cast<SubGraph>(node)) {
-                    std::vector<std::shared_ptr<T>> nestedComponents = objectNode->template getNodesByType<T>(true); 
-
-                    // Add the nested components to the main result
-                    matchingComponents.insert(matchingComponents.end(), 
-                                            nestedComponents.begin(), 
-                                            nestedComponents.end());
-                }
-            }
         }
         return matchingComponents;
     }
-
     void setParent(std::shared_ptr<Node> parentIn) {
         parent_ = parentIn;
     }

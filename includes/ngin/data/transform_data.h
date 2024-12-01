@@ -1,3 +1,6 @@
+#ifndef TRANSFORM_DATA_H
+#define TRANSFORM_DATA_H
+
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -33,6 +36,16 @@ public:
     glm::vec4 localPosition(position_, 1.0f); // Create a vec4 with w = 1
     glm::vec4 worldPosition = parent_ * localPosition; 
     return glm::vec3(worldPosition); // Extract the vec3 part
+  }
+
+  glm::vec3 getForward() const {
+      glm::vec3 forward(0.0f, 0.0f, -1.0f); // Assuming forward is -Z
+      return glm::mat3_cast(rotation_) * forward; // Use mat3_cast
+  }
+
+  glm::vec3 getUp() const {
+      glm::vec3 up(0.0f, 1.0f, 0.0f); // Assuming up is +Y
+      return glm::mat3_cast(rotation_) * up; // Use mat3_cast
   }
 
   // Rotation
@@ -87,3 +100,5 @@ private:
   // this gets set when the graph is cooked from the parent node
   glm::mat4 parent_;
 };
+
+#endif

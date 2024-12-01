@@ -6,12 +6,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <ngin/utils/fileutils.h>
 #include <ngin/gl/window.h>
 #include <ngin/constants.h>
 #include <ngin/collections/nevf.h>
 #include <ngin/game.h>
 #include <ngin/resources.h>
+#include <ngin/physics.h>
+#include <ngin/preferences.h>
 
 #include <ngin/node/node_graph.h>
 #include <ngin/node/types/pass.h>
@@ -27,6 +28,9 @@
 #include <memory>
 
 static int gameInit = (Game::init(), 0); 
+static int resourcesInit = (Resources::init(), 0); 
+static int preferencesInit = (Preferences::init(), 0); 
+static int physicsInit = (Physics::init(), 0); 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -55,6 +59,11 @@ unsigned int screenWidth, screenHeight;
 
 GLFWwindow* Window::window = nullptr; // Initialize static member
 Window* Window::mainWindow = nullptr; // Initialize static member
+int Window::width = SCR_WIDTH;
+int Window::height = SCR_HEIGHT;
+std::atomic<bool> Physics::running = false;
+Scene* Physics::scene_ = nullptr; 
+
 
 int main()
 {
@@ -80,7 +89,9 @@ int main()
     window.setupDepthMap();
     window.setupCubeMap();
 
-    std::atomic<bool> running(true);
+    //std::atomic<bool> running(true);
+    Physics::connectScene(&scene);
+    Physics::run();
 
     while (!glfwWindowShouldClose(win))
     {
@@ -98,6 +109,7 @@ int main()
 
         if (state != "loading") {
 
+            scene.executePass("logic");
             scene.executePass("transform");
             
             // 1. render depth of scene to texture (from light's perspective)
@@ -147,7 +159,7 @@ int main()
         glfwPollEvents();
     }
 
-    running = false;
+    Physics::running = false;
 
     glfwTerminate();
 
