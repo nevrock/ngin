@@ -14,12 +14,16 @@ public:
     GraphState() {} // Add a default constructor
     ~GraphState() {}
 
+    unsigned int id;
+
     std::string getType() {
         return type_;
     }
 
     void cook(std::shared_ptr<INode> node) {
         root_ = node;
+
+        id = node->getId();
 
         totalDepth_ = 0;
         // 1. Set all depthTemp values to -1

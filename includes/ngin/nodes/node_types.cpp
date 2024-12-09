@@ -1,9 +1,9 @@
 #include <ngin/node/node_graph.h>
 
-#include <ngin/node/types/object.h>
-#include <ngin/node/types/transform.h>
-#include <ngin/node/types/pass.h>
-#include <ngin/node/types/camera.h>
+#include <ngin/nodes/object.h>
+#include <ngin/nodes/transform.h>
+#include <ngin/nodes/pass.h>
+#include <ngin/nodes/camera.h>
 
 
 bool pass_registered = []() {

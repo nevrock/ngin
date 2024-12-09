@@ -15,7 +15,7 @@
 #include <ngin/preferences.h>
 
 #include <ngin/node/node_graph.h>
-#include <ngin/node/types/pass.h>
+#include <ngin/nodes/pass.h>
 #include <ngin/node/graph_state.h>
 #include <ngin/scene.h>
 

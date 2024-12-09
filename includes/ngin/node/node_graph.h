@@ -10,7 +10,7 @@
 #include <iostream>
 
 #include <ngin/node/node.h>
-#include <ngin/node/types/pass.h>
+#include <ngin/nodes/pass.h>
 #include <ngin/node/node_port.h>
 #include <ngin/node/node_connection.h>
 #include <ngin/node/graph_state.h>
@@ -327,6 +327,23 @@ private:
                 graphStates_[passNode->getPass()] = GraphState(passNode->getPass()); 
                 graphStates_[passNode->getPass()].cook(passNode); 
             }
+        }
+
+        sortGraphStatesById();
+    }
+    void sortGraphStatesById() {
+        // Copy the elements of the unordered_map into a vector for sorting
+        std::vector<std::pair<std::string, GraphState>> graphStatesVector(graphStates_.begin(), graphStates_.end());
+        
+        // Sort the vector based on the id of GraphState
+        std::sort(graphStatesVector.begin(), graphStatesVector.end(), [](const auto& a, const auto& b) {
+            return a.second.id < b.second.id; // Assuming GraphState has an `id` member
+        });
+
+        // Clear the unordered_map and re-insert the sorted elements
+        graphStates_.clear();
+        for (const auto& pair : graphStatesVector) {
+            graphStates_.emplace(pair.first, pair.second);
         }
     }
     void refreshGraphState(const std::string& passType) {

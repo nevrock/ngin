@@ -7,6 +7,7 @@ public:
 
     // Define interface methods for Node
     virtual std::string getName() const = 0;
+    virtual unsigned int getId() const = 0;
 
     virtual unsigned int getDepth() const = 0;
     virtual void setDepth(unsigned int depth) = 0;

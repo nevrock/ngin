@@ -15,13 +15,16 @@ public:
     unsigned int depth;
 
     Node(const std::string& name, Nevf& dictionary)
-        : name_(name), data_(dictionary) {
+        : name_(name), data_(dictionary), id_(dictionary.getC<int>("id", 0)) {
     }
 
     virtual ~Node() {}
 
     std::string getName() const override {
         return name_;
+    }
+    unsigned int getId() const override {
+        return id_;
     }
 
     std::vector<std::shared_ptr<INode>> getParentNodes(std::string type) override {
@@ -229,6 +232,8 @@ protected:
     std::vector<std::shared_ptr<NodePort>> inputPorts_;
     std::vector<std::shared_ptr<NodePort>> outputPorts_;
     Nevf& data_;
+    
+    unsigned int id_;
 
     void retrieveInputData() {
         for (const auto& inputPort : inputPorts_) {

@@ -23,34 +23,43 @@ nodes:
     pass_transform:
         type: pass
         pass: transform
+        id: 0
 
     pass_pre_render_directional_depth:
         type: pass
         pass: pre_render_directional_depth
+        id: 1
     pass_render_directional_depth:
         type: pass
         pass: render_directional_depth
+        id: 2
 
     pass_pre_render_points_depth:
         type: pass
         pass: pre_render_points_depth
+        id: 3
     pass_render_points_depth:
         type: pass
         pass: render_points_depth
+        id: 4
 
     pass_pre_render:
         type: pass
         pass: pre_render
+        id: 5
     pass_render:
         type: pass
         pass: render
+        id: 6
 
     pass_pre_render_gui:
         type: pass
         pass: pre_render_gui
+        id: 7
     pass_render_gui:
         type: pass
         pass: render_gui
+        id: 8
 
 
 
