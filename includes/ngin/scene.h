@@ -32,6 +32,9 @@ public:
     void executePass(const std::string& passName) {
         graph_->executePass(passName);
     }
+    void executePasses() {
+        graph_->execute();
+    }
     // Add a listener for graph events
     void addGraphListener(std::function<void()> listener) {
         eventState_.addListener(listener);

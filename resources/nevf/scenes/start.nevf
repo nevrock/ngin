@@ -1,85 +1,113 @@
 nodes:    
-    // tree 01
-    origin:
-        type: transform
-        position: [0.0, 2.0, 0.0]
-    child:
+    // ------------
+    // Default/mandatory setup
+    // ------------
+    gui_depth_test:
+        type: gl_depth_test
+        is_enable: false
+    scene_depth_test:
+        type: gl_depth_test
+        is_enable: true
+
+    camera:
+        type: object
+        graph: camera
+
+
+    // ------------
+    // Dynamic scene
+    // ------------
+    scene:
         type: object
         graph: test
-    child_2:
-        type: transform
-        position: [0.0, 1.0, 0.0]
 
-    // tree camera
-    camera_transform:
-        type: transform
-        position: [0.0, 10.0, 0.0]
-    camera:
-        type: camera
+    gui:
+        type: object
+        graph: gui/canvas
 
 
-    // passes
+    // ------------
+    // Shaders
+    // ------------
+    shader_gui:
+        type: shader
+        shader: gui/gui
 
+
+    // ------------
+    // Passes
+    // ------------
+
+    // Cook scene
+    pass_logic:
+        type: pass
+        pass: logic
+        id: 0
     pass_transform:
         type: pass
         pass: transform
-        id: 0
-
-    pass_pre_render_directional_depth:
-        type: pass
-        pass: pre_render_directional_depth
         id: 1
-    pass_render_directional_depth:
+
+    // Render scene
+    pass_render_depthmap:
         type: pass
-        pass: render_directional_depth
+        pass: render_depthmap
         id: 2
-
-    pass_pre_render_points_depth:
+    pass_render_cubemap:
         type: pass
-        pass: pre_render_points_depth
+        pass: render_cubemap
         id: 3
-    pass_render_points_depth:
+    pass_render_opaque:
         type: pass
-        pass: render_points_depth
+        pass: render_opaque
         id: 4
-
-    pass_pre_render:
+    pass_render_transparent:
         type: pass
-        pass: pre_render
+        pass: render_transparent
         id: 5
-    pass_render:
-        type: pass
-        pass: render
-        id: 6
-
-    pass_pre_render_gui:
-        type: pass
-        pass: pre_render_gui
-        id: 7
     pass_render_gui:
         type: pass
         pass: render_gui
-        id: 8
-
+        id: 6
 
 
 connections:
 
     // Define Transform pass connections (for positional inheritance)
 
-    // tree 01
-    origin-0---0-child:
-        type: transform
-    origin-1---0-child_2:
-        type: transform
+    // Scene defaults
+    scene_depth_test-0---0-scene:
+        type: logic
 
-    child-0---0-pass_transform:
+    // Gui defaults
+    gui_depth_test-0---0-shader_gui:
+        type: render_gui
+    shader_gui-0---0-camera:
+        type: render_gui
+    camera-0---0-gui:
+        type: logic
+    camera-1---1-gui:
         type: transform
-    child_2-0---1-pass_transform:
-        type: transform
+    camera-2---2-gui:
+        type: render_gui
 
-    // tree camera
-    camera_transform-0---0-camera:
+    // Pass connections
+    scene-0---0-pass_logic:
+        type: logic
+    scene-1---0-pass_transform:
         type: transform
-    camera-0---2-pass_transform:
+    scene-2---0-pass_render_depthmap:
+        type: render_depthmap
+    scene-3---0-pass_render_cubemap:
+        type: render_cubemap
+    scene-4---0-pass_render_opaque:
+        type: render_opaque
+    scene-5---0-pass_render_transparent:
+        type: render_transparent
+    
+    gui-0---1-pass_logic:
+        type: logic
+    gui-1---1-pass_transform:
         type: transform
+    gui-2---0-pass_render_gui:
+        type: render_gui

@@ -30,7 +30,8 @@ public:
     std::vector<std::shared_ptr<INode>> getParentNodes(std::string type) override {
         std::vector<std::shared_ptr<INode>> nodesOut;
         for (const auto& inputPort : inputPorts_) {
-            if (inputPort->getType() != type) {
+            std::string portType = inputPort->getType();
+            if (portType != "all" && portType != type) {
                 continue;
             }
             if (inputPort->isConnected()) {
@@ -153,6 +154,28 @@ public:
             }
         }
         return nullptr; // Return nullptr if no match is found
+    }
+
+    template <typename T>
+    std::shared_ptr<NodePort> getInputPort() const {
+        for (const auto& port : inputPorts_) {
+            auto data = port->getData<T>();
+            if (data) {
+                return port;
+            }
+        }
+        return nullptr; // Return nullptr if no matching port is found
+    }
+
+    template <typename T>
+    std::shared_ptr<NodePort> getOutputPort() const {
+        for (const auto& port : outputPorts_) {
+            auto data = port->getData<T>();
+            if (data) {
+                return port;
+            }
+        }
+        return nullptr; // Return nullptr if no matching port is found
     }
 
     void setOutputDataByType(const std::string& type, std::shared_ptr<IData> data) {

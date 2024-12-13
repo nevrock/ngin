@@ -1,0 +1,71 @@
+nodes:    
+    // ------------
+    // Default/mandatory setup
+    // ------------
+    camera_transform:
+        type: transform
+    camera:
+        type: camera
+
+    // ------------
+    // Passes
+    // ------------
+
+    // Cook scene
+    pass_logic:
+        type: pass
+        pass: logic
+        id: 0
+    pass_transform:
+        type: pass
+        pass: transform
+        id: 1
+
+    // Render scene
+    pass_render_depthmap:
+        type: pass
+        pass: render_depthmap
+        id: 2
+    pass_render_cubemap:
+        type: pass
+        pass: render_cubemap
+        id: 3
+    pass_render_opaque:
+        type: pass
+        pass: render_opaque
+        id: 4
+    pass_render_transparent:
+        type: pass
+        pass: render_transparent
+        id: 5
+    pass_render_gui:
+        type: pass
+        pass: render_gui
+        id: 6
+
+
+connections:
+
+    // Define Transform pass connections (for positional inheritance)
+
+    // Scene defaults
+    camera_transform-0---0-camera:
+        type: transform
+
+
+    // Passes
+    camera-0---0-pass_logic:
+        type: logic
+    camera-1---0-pass_transform:
+        type: transform
+    camera-2---0-pass_render_depthmap:
+        type: render_depthmap
+    camera-3---0-pass_render_cubemap:
+        type: render_cubemap
+    camera-4---0-pass_render_opaque:
+        type: render_opaque
+    camera-5---0-pass_render_transparent:
+        type: render_transparent
+    camera-6---0-pass_render_gui:
+        type: render_gui
+    

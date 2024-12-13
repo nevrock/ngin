@@ -41,15 +41,26 @@ public:
         buildGraphStates();
     }
     void execute() {
-        std::cout << "executing all graph states..." << std::endl;
+        //std::cout << "executing all graph states..." << std::endl;
 
-        for (auto& [passType, graphState] : graphStates_) {
-            std::cout << "executing graph state for pass type: " << passType << std::endl;
+        // Create a vector of pairs to sort by graphState.id
+        std::vector<std::pair<std::string, GraphState>> sortedGraphStates(graphStates_.begin(), graphStates_.end());
+
+        // Sort based on graphState.id
+        std::sort(sortedGraphStates.begin(), sortedGraphStates.end(),
+            [](auto& a, const auto& b) {
+                return a.second.id < b.second.id;
+            });
+
+        // Execute graph states in sorted order
+        for (auto& [passType, graphState] : sortedGraphStates) {
+            //std::cout << "executing graph state for pass type: " << passType << ", id: " << graphState.id << std::endl;
             graphState.execute();
         }
 
-        std::cout << "executing complete." << std::endl;
+        //std::cout << "executing complete." << std::endl;
     }
+
     void executePass(const std::string& passType) {
         auto it = graphStates_.find(passType);
         if (it != graphStates_.end()) {
@@ -327,23 +338,6 @@ private:
                 graphStates_[passNode->getPass()] = GraphState(passNode->getPass()); 
                 graphStates_[passNode->getPass()].cook(passNode); 
             }
-        }
-
-        sortGraphStatesById();
-    }
-    void sortGraphStatesById() {
-        // Copy the elements of the unordered_map into a vector for sorting
-        std::vector<std::pair<std::string, GraphState>> graphStatesVector(graphStates_.begin(), graphStates_.end());
-        
-        // Sort the vector based on the id of GraphState
-        std::sort(graphStatesVector.begin(), graphStatesVector.end(), [](const auto& a, const auto& b) {
-            return a.second.id < b.second.id; // Assuming GraphState has an `id` member
-        });
-
-        // Clear the unordered_map and re-insert the sorted elements
-        graphStates_.clear();
-        for (const auto& pair : graphStatesVector) {
-            graphStates_.emplace(pair.first, pair.second);
         }
     }
     void refreshGraphState(const std::string& passType) {

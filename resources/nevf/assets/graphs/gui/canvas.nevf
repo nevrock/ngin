@@ -1,0 +1,22 @@
+nodes:    
+    
+    // ------------
+    // Passes
+    // ------------
+    pass_logic:
+        type: pass
+        pass: logic
+        output_ports:
+            parent:
+                id: 0
+                type: logic
+    pass_transform:
+        type: pass
+        pass: transform
+
+    pass_render_gui:
+        type: pass
+        pass: render_gui
+
+
+connections:

@@ -54,7 +54,6 @@ public:
         return {}; // Return an empty vector if the depth doesn't exist
     }
 
-        
     void execute() {
         // Iterate from totalDepth down to 0
         for (int depth = totalDepth_; depth >= 0; --depth) {

@@ -4,6 +4,9 @@
 #include <ngin/nodes/transform.h>
 #include <ngin/nodes/pass.h>
 #include <ngin/nodes/camera.h>
+#include <ngin/nodes/shader.h>
+
+#include <ngin/nodes/gl/gl_depth_test.h>
 
 
 bool pass_registered = []() {
@@ -30,6 +33,20 @@ bool transform_registered = []() {
 bool camera_registered = []() {
     NodeGraph::registerNodeType("camera", [](const std::string& name, Nevf& dictionary) {
         return std::make_shared<Camera>(name, dictionary);
+    });
+    return true;
+}();
+
+bool gl_depth_test_registered = []() {
+    NodeGraph::registerNodeType("gl_depth_test", [](const std::string& name, Nevf& dictionary) {
+        return std::make_shared<GlDepthTest>(name, dictionary);
+    });
+    return true;
+}();
+
+bool shader_registered = []() {
+    NodeGraph::registerNodeType("shader", [](const std::string& name, Nevf& dictionary) {
+        return std::make_shared<Shader>(name, dictionary);
     });
     return true;
 }();

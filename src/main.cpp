@@ -109,6 +109,10 @@ int main()
 
         if (state != "loading") {
 
+            scene.executePasses();
+
+            /*
+
             scene.executePass("logic");
             scene.executePass("transform");
             
@@ -151,6 +155,8 @@ int main()
             
 
             std::this_thread::sleep_for(std::chrono::milliseconds(5));  // Simulate the passage of time between frames
+        
+            */
         }
         
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
