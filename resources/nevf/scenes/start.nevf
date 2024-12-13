@@ -18,8 +18,7 @@ nodes:
     // Dynamic scene
     // ------------
     scene:
-        type: object
-        graph: test
+        type: transform
 
     gui:
         type: object

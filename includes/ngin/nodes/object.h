@@ -14,7 +14,6 @@ public:
 
     void execute(std::string& pass) override {
         Node::execute(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
-
         graph_->executePass(pass);
     }
 
@@ -25,6 +24,7 @@ public:
         if (data_.contains("graph")) {
             graph_ = std::make_unique<NodeGraph>("assets/graphs/" + data_.getC<std::string>("graph", ""));
             graph_->setParent(Node::shared_from_this());
+            std::cout << "object building node graph: " << getName() << std::endl;
             graph_->build();
         }
     }
@@ -40,11 +40,20 @@ protected:
         std::vector<std::shared_ptr<NodePort>> inputPorts = graph_->getInputPortsByName("parent");
         std::vector<std::shared_ptr<NodePort>> outputPorts = graph_->getOutputPortsByName("parent");
 
+        std::cout << "sub graph has INPUT port count: " << inputPorts.size() << ", sub graph has OUTPUT port count: " << outputPorts.size() << std::endl;
+
         // Iterate through input ports
         for (const auto& graphInputPort : inputPorts) {
             std::shared_ptr<NodePort> objectInputPort = getInputPortById(graphInputPort->getId());
             if (objectInputPort) {
+                std::cout << "adding linked port, from: " << objectInputPort->getName() << " to " << graphInputPort->getName() << std::endl;
                 objectInputPort->addLinkedPort(graphInputPort); 
+            } else {
+                std::cout << "adding linked port failed, with id: " << graphInputPort->getId() << std::endl;
+                std::cout << "current port has ids: " << "(length: " << inputPorts_.size() << ")" << std::endl;
+                for (const auto& port : inputPorts_) {
+                    std::cout << port->getId() << std::endl;
+                }
             }
         }
 
@@ -56,8 +65,8 @@ protected:
             }
         }
 
-        std::cout << "--- object graph has input ports: " << inputPorts.size() 
-                  << ", " << outputPorts.size() << std::endl;
+        //std::cout << "--- object graph has input ports: " << inputPorts.size() 
+        //          << ", " << outputPorts.size() << std::endl;
     }
 };
 

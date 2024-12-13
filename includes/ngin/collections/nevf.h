@@ -230,19 +230,19 @@ public:
         dictStack[-1] = this;
 
 
-        if (isLog_) std::cout << "### dict parsing ### - " << filename << std::endl;
+        //if (isLog_) std::cout << "### dict parsing ### - " << filename << std::endl;
 
         std::string collectionName = std::string("");
 
         for (std::string line; getline(file, line); ) {
             if (line.empty() || (line[0] == '/' && line[1] == '/')) continue;
 
-            if (isLog_) std::cout << line << std::endl;
+            //if (isLog_) std::cout << line << std::endl;
             
             int indent = line.find_first_not_of(' ');
             indent = indent / 4;
 
-            if (isLog_) std::cout << "# indent - " << indent << std::endl;
+            //if (isLog_) std::cout << "# indent - " << indent << std::endl;
 
             line = trim(line);
             int delimiterPos = line.find(':');
@@ -253,14 +253,14 @@ public:
                 std::string value = delimiterPos < line.size() - 1 ? trim(line.substr(delimiterPos + 1)) : "";
                 if (value == "") {
                     // could be a list of a dict
-                    if (isLog_) std::cout << "# element is a list or collection! " << std::endl;
+                    //if (isLog_) std::cout << "# element is a list or collection! " << std::endl;
                     dictStack[indent] = parseNevf(dictStack[indent - 1], key); // putting new dict with key into currently opened dict, and adding to stack
-                    if (isLog_) std::cout << "# addded dict at indent - " << indent << std::endl;
+                    //if (isLog_) std::cout << "# addded dict at indent - " << indent << std::endl;
 
                 } else {
-                    if (isLog_) std::cout << "# element is a part of a dict! " << std::endl;
+                    //if (isLog_) std::cout << "# element is a part of a dict! " << std::endl;
                     parseNevfElement(dictStack[indent - 1], key, value);
-                    if (isLog_) std::cout << "# added element to dict at indent - " << indent - 1 << std::endl;
+                    //if (isLog_) std::cout << "# added element to dict at indent - " << indent - 1 << std::endl;
                 }
             }
 
@@ -378,7 +378,7 @@ private:
     std::any parseValue(const std::string& value) {
         std::string type = getType(value);
         if (isLog_) {
-            std::cout << "parsing value - " << value << ", with type - " << type << std::endl;
+            //std::cout << "parsing value - " << value << ", with type - " << type << std::endl;
         }
         if (value.empty()) {
             return {};
@@ -419,7 +419,7 @@ private:
                     std::string itemS = trim(item);
                     itemS.erase(std::remove(itemS.begin(), itemS.end(), '"'), itemS.end());
                     if (isLog_) {
-                        std::cout << "parsing value - " << itemS << std::endl;
+                        //std::cout << "parsing value - " << itemS << std::endl;
                     }
                     vecString.push_back(itemS);
                 }

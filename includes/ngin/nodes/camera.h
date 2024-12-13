@@ -20,9 +20,13 @@ public:
         Node::execute(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
     
         std::shared_ptr<NodePort> inputPortTransform = getInputPortByType("transform");
-        std::shared_ptr<NodePort> inputPortRenderGui = getInputPort<ShaderData>();
+        std::shared_ptr<NodePort> inputPortRenderGui = getInputPortByType("render_gui");
 
+        //for (const auto& port : getInputPorts()) {
+            //std::cout << "camera has port: " << port->getName() << std::endl;
+        //}
 
+        /**/
         if (inputPortTransform) {
             std::shared_ptr<TransformData> parentData = inputPortTransform->getData<TransformData>();
             if (parentData) {
@@ -39,18 +43,29 @@ public:
                 env->set("camera_inverse_projection_matrix", inverseProjectionMatrix);
 
                 if (inputPortRenderGui) {
-                    std::shared_ptr<ShaderData> shader = inputPortRenderGui->getData();
-                    shader->setMat4("M_CAMERA_VIEW", view);
-                    shader->setMat4("M_CAMERA_PROJECTION", projection);
-                    shader->setMat4("M_CAMERA_I_VIEW", inverseViewMatrix);
-                    shader->setMat4("M_CAMERA_I_PROJECTION", inverseProjectionMatrix);
-                    shader->setVec3("CAMERA_POS", worldPos);
-                    shader->setFloat("CAMERA_NEAR_PLANE", 0.1f);
-                    shader->setFloat("CAMERA_FAR_PLANE", 100.0f);
+                    std::shared_ptr<ShaderData> shader = inputPortRenderGui->getData<ShaderData>();
+                    if (shader) {
+                        shader->setMat4("M_CAMERA_VIEW", view);
+                        shader->setMat4("M_CAMERA_PROJECTION", projection);
+                        shader->setMat4("M_CAMERA_I_VIEW", inverseViewMatrix);
+                        shader->setMat4("M_CAMERA_I_PROJECTION", inverseProjectionMatrix);
+                        shader->setVec3("CAMERA_POS", worldPos);
+                        shader->setFloat("CAMERA_NEAR_PLANE", 0.1f);
+                        shader->setFloat("CAMERA_FAR_PLANE", 100.0f);
+                        
+                        std::cout << "camera execute has input port render gui, set shader vars" << std::endl;
 
-                    std::cout << "camera execute has input port render gui, set shader vars" << std::endl;
+                    } else {
+                        std::cout << "camera execute has input port render gui, NO SHADER" << std::endl;
+                    }
+                } else {
+                    //std::cout << "camera found no input render gui port" << std::endl;
                 }
+            } else {
+               // std::cout << "camera found no parent data" << std::endl;
             }
+        } else {
+            //std::cout << "camera found no input transform" << std::endl;
         }
         
     }

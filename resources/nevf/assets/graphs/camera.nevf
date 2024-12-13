@@ -6,6 +6,10 @@ nodes:
         type: transform
     camera:
         type: camera
+        input_ports:
+            parent:
+                id: 0
+                type: render_gui
 
     // ------------
     // Passes
@@ -49,7 +53,7 @@ connections:
     // Define Transform pass connections (for positional inheritance)
 
     // Scene defaults
-    camera_transform-0---0-camera:
+    camera_transform-0---1-camera:
         type: transform
 
 

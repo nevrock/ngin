@@ -168,6 +168,18 @@ public:
     }
 
     template <typename T>
+    std::vector<std::shared_ptr<NodePort>> getInputPorts() const {
+        std::vector<std::shared_ptr<NodePort>> result;
+        for (const auto& port : inputPorts_) {
+            auto data = port->getData<T>();
+            if (data) {
+                result.push_back(port);
+            }
+        }
+        return result;
+    }
+
+    template <typename T>
     std::shared_ptr<NodePort> getOutputPort() const {
         for (const auto& port : outputPorts_) {
             auto data = port->getData<T>();
@@ -178,6 +190,18 @@ public:
         return nullptr; // Return nullptr if no matching port is found
     }
 
+    template <typename T>
+    std::vector<std::shared_ptr<NodePort>> getOutputPorts() const {
+        std::vector<std::shared_ptr<NodePort>> result;
+        for (const auto& port : outputPorts_) {
+            auto data = port->getData<T>();
+            if (data) {
+                result.push_back(port);
+            }
+        }
+        return result;
+    }
+    
     void setOutputDataByType(const std::string& type, std::shared_ptr<IData> data) {
         auto port = getOutputPortByConnection(type);
         if (port) {
@@ -208,7 +232,6 @@ public:
     void log() const {
         std::cout << "-------------" << std::endl;
         std::cout << "NODE: " << name_ << std::endl;
-        std::cout << std::endl;
 
         std::cout << "  input ports: " << inputPorts_.size() << std::endl;
         for (const auto& port : inputPorts_) {
@@ -216,8 +239,8 @@ public:
             if (port->isConnected()) {
                 auto connection = port->getConnection().lock(); // Lock the weak_ptr
                 if (connection) { // Check if the connection is valid
-                    std::cout << " -> ";
-                    connection->log();
+                    //std::cout << " -> ";
+                    //connection->log();
                 }
             }
         }
@@ -229,11 +252,12 @@ public:
             if (port->isConnected()) {
                 auto connection = port->getConnection().lock(); // Lock the weak_ptr
                 if (connection) { // Check if the connection is valid
-                    std::cout << " -> ";
-                    connection->log();
+                    //std::cout << " -> ";
+                    //connection->log();
                 }
             }
         }
+        std::cout << std::endl;
         std::cout << std::endl;
     }
 
@@ -242,12 +266,13 @@ public:
     }
 
     void setup() override { 
-        std::cout << "node setup: " << getName() << std::endl;
+        //std::cout << "node setup: " << getName() << std::endl;
         setupPorts();
         //std::cout << "node setup!" << std::endl; 
         }
 
     void launch() override { 
+        setupPorts();
         }
 
 protected:
@@ -263,6 +288,7 @@ protected:
             if (inputPort->isConnected()) {
                 auto connection = inputPort->getConnection().lock(); // Lock the weak_ptr
                 if (connection) { // Check if the connection is valid
+                    //std::cout << "transferring data " << std::endl;
                     connection->transferData();
                 }
             }
@@ -270,13 +296,13 @@ protected:
         // Now all data is sitting in input ports, ready to be pulled
     }
     void setupPorts() {
-        std::cout << "setting up ports!" << std::endl;
-        data_.print();
+        //std::cout << "setting up ports!" << std::endl;
+        //data_.print();
         if (data_.contains("input_ports")) {
             Nevf inputData = data_.getC<Nevf>("input_ports", Nevf());
             for (const auto& key : inputData.keys()) {
                 Nevf portData = inputData.getC<Nevf>(key, Nevf());
-                auto id = portData.getC<unsigned int>("id", 0); 
+                auto id = portData.getC<int>("id", 0); 
                 auto type = portData.getC<std::string>("type", ""); 
                 createInputPort(key, id, type); 
             }
@@ -286,10 +312,41 @@ protected:
             Nevf outputData = data_.getC<Nevf>("output_ports", Nevf());
             for (const auto& key : outputData.keys()) {
                 Nevf portData = outputData.getC<Nevf>(key, Nevf());
-                auto id = portData.getC<unsigned int>("id", 0); 
+                auto id = portData.getC<int>("id", 0); 
                 auto type = portData.getC<std::string>("type", ""); 
                 createOutputPort(key, id, type); 
             }
+        }
+    }
+    void logPorts() const {
+        std::cout << "-------------" << std::endl;
+        std::cout << "NODE: " << name_ << std::endl;
+        std::cout << std::endl;
+
+        std::cout << "  input ports: " << inputPorts_.size() << std::endl;
+        for (const auto& port : inputPorts_) {
+            std::cout << "    - " << port->getName() << " (id: " << port->getId() << ")";
+            if (port->isConnected()) {
+                auto connection = port->getConnection().lock(); // Lock the weak_ptr
+                if (connection) { // Check if the connection is valid
+                    std::cout << " -> ";
+                    connection->log();
+                }
+            }
+            std::cout << std::endl;
+        }
+
+        std::cout << "  output ports: " << outputPorts_.size() << std::endl;
+        for (const auto& port : outputPorts_) {
+            std::cout << "    - " << port->getName() << " (id: " << port->getId() << ")";
+            if (port->isConnected()) {
+                auto connection = port->getConnection().lock(); // Lock the weak_ptr
+                if (connection) { // Check if the connection is valid
+                    std::cout << " -> ";
+                    connection->log();
+                }
+            }
+            std::cout << std::endl;
         }
     }
 };

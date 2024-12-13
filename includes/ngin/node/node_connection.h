@@ -14,7 +14,7 @@ public:
     NodeConnection(std::string name, std::string type, const std::shared_ptr<NodePort>& inputPort, const std::shared_ptr<NodePort>& outputPort)
         : name_(name), type_(type), inputPort_(inputPort), outputPort_(outputPort) {
 
-        std::cout << "new node connection! " << inputPort->getName() << ", " << inputPort->getId() << " --> " << outputPort->getName() << ", " << outputPort->getId() << std::endl;
+        //std::cout << "new node connection! " << inputPort->getName() << ", " << inputPort->getId() << " --> " << outputPort->getName() << ", " << outputPort->getId() << std::endl;
     }
 
     // Destructor: Disconnect both ports if they are not nullptr
@@ -63,9 +63,9 @@ public:
 
 
     void log() const override {
-        std::cout << "connection: " << name_ << std::endl; // Print connection name
+        //std::cout << "connection: " << name_ << std::endl; // Print connection name
         if (outputPort_.lock()) {
-            std::cout << "       - connection output port: " << outputPort_.lock()->getName() << " (id: " << outputPort_.lock()->getId() << ")" << std::endl; // Print output port name and ID
+            //std::cout << "       - connection output port: " << outputPort_.lock()->getName() << " (id: " << outputPort_.lock()->getId() << ")" << std::endl; // Print output port name and ID
         }
     }
 

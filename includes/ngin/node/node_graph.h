@@ -26,17 +26,20 @@ public:
     }
     
     void build() {
-        std::cout << "building node graph!" << std::endl;
+        std::cout << "" << std::endl;
+        std::cout << "~~~NODE~GRAPH~BUILD~~~" << std::endl;
 
-        data_.print();
+        //std::cout << "building node graph!" << std::endl;
 
-        std::cout << "-------------------" << std::endl;
+        //data_.print();
+
+        //std::cout << "-------------------" << std::endl;
 
         buildNodes();
         buildConnections();
         launchNodes();
         
-        log();
+        //log();
 
         buildGraphStates();
     }
@@ -196,7 +199,7 @@ public:
     }
 
     void buildConnection(std::string key, Nevf& data) {
-        std::cout << "node graph building connection: " << key << std::endl;
+        //std::cout << "node graph building connection: " << key << std::endl;
         std::string type = data.getC<std::string>("type", "");
         std::string nodeIn = "";
         std::string portIn = "";
@@ -252,7 +255,7 @@ private:
         Nevf* nodes = data_.get<Nevf>("nodes", nullptr);
         if (nodes != nullptr) {
              for (const auto& key : nodes->keys()) {
-                std::cout << "node graph building object: " << key << std::endl;
+                //std::cout << "node graph building object: " << key << std::endl;
                 createNode(key, *nodes->get<Nevf>(key, nullptr));
             }
         }
@@ -283,7 +286,7 @@ private:
         Nevf* connections = data_.get<Nevf>("connections", nullptr);
         if (connections != nullptr) {
             for (const auto& key : connections->keys()) {
-                std::cout << "node graph building connection: " << key << std::endl;
+                //std::cout << "node graph building connection: " << key << std::endl;
                 Nevf* data = connections->get<Nevf>(key, nullptr);
                 std::string type = data->getC<std::string>("type", "");
                 std::string nodeIn = "";
@@ -350,7 +353,7 @@ private:
             // Find the pass node corresponding to the pass type
             auto passNode = getPassNodeByType(passType);
             if (passNode) {
-                std::cout << "refreshing graph state for pass type: " << passType << std::endl;
+                //std::cout << "refreshing graph state for pass type: " << passType << std::endl;
 
                 // Re-cook the graph state to update its structure
                 graphState.cook(passNode);
