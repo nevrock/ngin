@@ -9,6 +9,7 @@
 #include <ngin/node/node_connection.h>
 #include <ngin/node/i_node.h>
 #include <ngin/collections/nevf.h>
+#include <ngin/log.h>
 
 class Node : public INode, public std::enable_shared_from_this<Node> {
 public:
@@ -230,12 +231,13 @@ public:
     }
 
     void log() const {
-        std::cout << "-------------" << std::endl;
-        std::cout << "NODE: " << name_ << std::endl;
+        Log::console("-------------");
+        Log::console("NODE: " + name_);
 
-        std::cout << "  input ports: " << inputPorts_.size() << std::endl;
+        Log::console("");
+        Log::console("input ports: " + inputPorts_.size(), 1);
         for (const auto& port : inputPorts_) {
-            std::cout << "    - " << port->getName() << " (id: " << port->getId() << ")";
+            Log::console(port->getName() + " (id: " + std::to_string(port->getId()) + ")", 2);
             if (port->isConnected()) {
                 auto connection = port->getConnection().lock(); // Lock the weak_ptr
                 if (connection) { // Check if the connection is valid
@@ -245,10 +247,10 @@ public:
             }
         }
 
-        std::cout << std::endl;
-        std::cout << "  output ports: " << outputPorts_.size() << std::endl;
+        Log::console("");
+        Log::console("output ports: " + outputPorts_.size(), 1);
         for (const auto& port : outputPorts_) {
-            std::cout << "    - " << port->getName() << " (id: " << port->getId() << ")";
+            Log::console(port->getName() + " (id: " + std::to_string(port->getId()) + ")", 2);
             if (port->isConnected()) {
                 auto connection = port->getConnection().lock(); // Lock the weak_ptr
                 if (connection) { // Check if the connection is valid
@@ -257,8 +259,8 @@ public:
                 }
             }
         }
-        std::cout << std::endl;
-        std::cout << std::endl;
+        Log::console("");
+        Log::console("");
     }
 
     void execute(std::string& pass) override {
@@ -267,7 +269,7 @@ public:
 
     void setup() override { 
         //std::cout << "node setup: " << getName() << std::endl;
-        setupPorts();
+        //setupPorts();
         //std::cout << "node setup!" << std::endl; 
         }
 
@@ -316,37 +318,6 @@ protected:
                 auto type = portData.getC<std::string>("type", ""); 
                 createOutputPort(key, id, type); 
             }
-        }
-    }
-    void logPorts() const {
-        std::cout << "-------------" << std::endl;
-        std::cout << "NODE: " << name_ << std::endl;
-        std::cout << std::endl;
-
-        std::cout << "  input ports: " << inputPorts_.size() << std::endl;
-        for (const auto& port : inputPorts_) {
-            std::cout << "    - " << port->getName() << " (id: " << port->getId() << ")";
-            if (port->isConnected()) {
-                auto connection = port->getConnection().lock(); // Lock the weak_ptr
-                if (connection) { // Check if the connection is valid
-                    std::cout << " -> ";
-                    connection->log();
-                }
-            }
-            std::cout << std::endl;
-        }
-
-        std::cout << "  output ports: " << outputPorts_.size() << std::endl;
-        for (const auto& port : outputPorts_) {
-            std::cout << "    - " << port->getName() << " (id: " << port->getId() << ")";
-            if (port->isConnected()) {
-                auto connection = port->getConnection().lock(); // Lock the weak_ptr
-                if (connection) { // Check if the connection is valid
-                    std::cout << " -> ";
-                    connection->log();
-                }
-            }
-            std::cout << std::endl;
         }
     }
 };

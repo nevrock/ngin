@@ -115,12 +115,11 @@ private:
         }
     }
     void printDepthLayers() const {
-        std::cout << "-------------------" << std::endl;
-        std::cout << "logging graph state - " << type_ << std::endl;
+        Log::console("-------------------");
+        Log::console("logging graph state!");
         for (const auto& [depth, nodes] : nodes_) {
-            std::cout << "  depth layer " << depth << ":" << std::endl;
             for (const auto& node : nodes) {
-                std::cout << "    - " << node->getName() << std::endl;
+                Log::console(" - " + node->getName(), depth);
             }
         }
     }

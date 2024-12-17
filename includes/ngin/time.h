@@ -9,7 +9,7 @@
 class Time {
 public:
     static void init() {
-        std::cout << "!!!   time started   !!!" << std::endl;
+        Log::console("!!!   time started   !!!");
     }
     static void setData(std::shared_ptr<Nevf> nevf) {
         data_ = nevf;

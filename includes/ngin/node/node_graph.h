@@ -14,6 +14,7 @@
 #include <ngin/node/node_port.h>
 #include <ngin/node/node_connection.h>
 #include <ngin/node/graph_state.h>
+#include <ngin/log.h>
 
 #include <ngin/resources.h>
 #include <ngin/collections/nevf.h>
@@ -26,8 +27,8 @@ public:
     }
     
     void build() {
-        std::cout << "" << std::endl;
-        std::cout << "~~~NODE~GRAPH~BUILD~~~" << std::endl;
+        Log::console("");
+        Log::console("~~~NODE~GRAPH~BUILD~~~");
 
         //std::cout << "building node graph!" << std::endl;
 
@@ -192,7 +193,7 @@ public:
     }
 
     void log() const {
-        std::cout << "logging node graph" << std::endl;
+        Log::console("logging node graph!");
         for (const auto& [name, node] : nodes_) {
             node->log(); // Invoke log() on each node
         }

@@ -2,6 +2,7 @@
 #define PREFERENCES_H
 
 #include <ngin/event.h>
+#include <ngin/log.h>
 #include <ngin/collections/nevf.h>
 #include <memory>
 #include <functional>
@@ -10,7 +11,7 @@
 class Preferences {
 public:
     static void init() {
-        std::cout << "!!!   preferences started   !!!" << std::endl;
+        Log::console("!!!   preferences started   !!!");
     }
     static void setData(std::shared_ptr<Nevf> nevf) {
         data_ = nevf;

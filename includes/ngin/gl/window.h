@@ -31,7 +31,7 @@ public:
         window = glfwCreateWindow(windowWidth, windowHeight, title.c_str(), NULL, NULL);
         if (window == NULL)
         {
-            std::cout << "Failed to create GLFW window" << std::endl;
+            Log::error("Failed to create GLFW window!");
             glfwTerminate();
             return;
         }
@@ -46,7 +46,7 @@ public:
         // ---------------------------------------
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
-            std::cout << "Failed to initialize GLAD" << std::endl;
+            Log::error("Failed to create GLAD!");
             return;
         }
 

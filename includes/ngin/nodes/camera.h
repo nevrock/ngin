@@ -53,10 +53,10 @@ public:
                         shader->setFloat("CAMERA_NEAR_PLANE", 0.1f);
                         shader->setFloat("CAMERA_FAR_PLANE", 100.0f);
                         
-                        std::cout << "camera execute has input port render gui, set shader vars" << std::endl;
+                        //std::cout << "camera execute has input port render gui, set shader vars" << std::endl;
 
                     } else {
-                        std::cout << "camera execute has input port render gui, NO SHADER" << std::endl;
+                        //std::cout << "camera execute has input port render gui, NO SHADER" << std::endl;
                     }
                 } else {
                     //std::cout << "camera found no input render gui port" << std::endl;

@@ -23,7 +23,7 @@ public:
 
     for (const auto& weakPort : linkedPorts_) {
       if (auto port = weakPort.lock()) {
-        std::cout << "node port setting data: " << port->getName() << std::endl;
+        //std::cout << "node port setting data: " << port->getName() << std::endl;
         port->setData(data); 
       }
     }
@@ -51,7 +51,7 @@ public:
     data_ = data;
     for (const auto& weakPort : linkedPorts_) {
       if (auto port = weakPort.lock()) {
-        std::cout << "node port setting raw data: " << port->getName() << std::endl;
+        //std::cout << "node port setting raw data: " << port->getName() << std::endl;
         port->setRawData(data); // Propagate the raw data
       }
     }
@@ -83,7 +83,7 @@ public:
 
   // Methods for managing linked ports
   void addLinkedPort(std::weak_ptr<NodePort> port) {
-    std::cout << "add linked port! " << port.lock()->getName() << std::endl;
+    //std::cout << "add linked port! " << port.lock()->getName() << std::endl;
     if (auto strongPort = port.lock()) {
       if (std::find_if(linkedPorts_.begin(), linkedPorts_.end(), 
           [&strongPort](const std::weak_ptr<NodePort>& p) { return p.lock() == strongPort; }) == linkedPorts_.end()) {

@@ -4,6 +4,8 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <ngin/data/i_data.h>
+#include <ngin/log.h>
+
 
 class ShaderData : public IData {
 public:
@@ -202,22 +204,22 @@ private:
     {
         GLint success;
         GLchar infoLog[1024];
-        if(type != "PROGRAM")
+        if (type != "PROGRAM")
         {
             glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-            if(!success)
+            if (!success)
             {
                 glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-                std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+                Log::error("program compilation error of type: " + type + "\n" + std::string(infoLog)); // Convert infoLog to std::string
             }
         }
         else
         {
             glGetProgramiv(shader, GL_LINK_STATUS, &success);
-            if(!success)
+            if (!success)
             {
                 glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-                std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+                Log::error("program linking error of type: " + type + "\n" + std::string(infoLog)); // Convert infoLog to std::string
             }
         }
     }

@@ -13,7 +13,9 @@
 #include <ngin/utils/fileutils.h>
 #include <ngin/collections/nevf.h>
 #include <ngin/constants.h>
+#include <ngin/log.h>
 #include <ngin/data/shader_data.h>
+#include <ngin/data/mesh_data.h>
 
 #if defined(_MSC_VER)
     #include <io.h>
@@ -23,10 +25,11 @@
 class Resources {
 public:
     static void init() {
-        std::cout << "!!!   resources started   !!!" << std::endl;
-
+        Log::console("!!!   resources started   !!!");
         // need to load in resources
     }
+
+    // resources, data you can load from files
     static Nevf loadNevf(const std::string& name) {
         Nevf n;
         n.read(FileUtils::getResourcePath("nevf/" + name + ".nevf"));
@@ -35,8 +38,8 @@ public:
     }
     static std::shared_ptr<ShaderData> loadShaderData(const std::string& name)
     {
-        std::cout << "loading shader! " << name << std::endl;
-
+        Log::console("loading shader! " + name);
+        
         std::string vShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".nvs");
         std::string fShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".vfs");
         std::string gShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".vgs");
@@ -61,6 +64,15 @@ public:
             }
         }    
         return nullptr;
+    }
+    static std::shared_ptr<MeshData> loadMeshData(const std::string& name)
+    {
+        Log::console("loading mesh! " + name);
+        
+        Nevf n;
+        n.read(FileUtils::getResourcePath("meshes/" + name + ".mesh"));        
+
+        return std::make_shared<MeshData>(n);
     }
 
 private:

@@ -3,6 +3,7 @@
 
 #include <ngin/event.h>
 #include <ngin/collections/nevf.h>
+#include <ngin/log.h>
 #include <memory>
 #include <functional>
 #include <atomic>
@@ -10,7 +11,7 @@
 class Game {
 public:
     static void init() {
-        std::cout << "!!!   game started   !!!" << std::endl;
+        Log::console("!!!   game started   !!!");
     }
     static void setEnv(std::shared_ptr<Nevf> nevf) {
         env_ = nevf;

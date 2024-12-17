@@ -7,12 +7,13 @@
 #include <thread>
 
 #include <ngin/scene.h>
+#include <ngin/log.h>
 
 
 class Physics {
 public:
     static void init() {
-        std::cout << "!!!   physics started   !!!" << std::endl;
+        Log::console("!!!   physics started   !!!");
     }
     static void connectScene(Scene* scene) {
         scene_ = scene;
