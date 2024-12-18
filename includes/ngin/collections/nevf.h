@@ -1,5 +1,5 @@
-#ifndef DICT_H
-#define DICT_H
+#ifndef NEVF_H
+#define NEVF_H
 
 #include <fstream>
 #include <map>
@@ -359,11 +359,9 @@ private:
             return "vector_"+vectorType;
         } else if (std::all_of(value.begin(), value.end(), ::isdigit)) {
             return "int";
-        } else if (value.find('.') != std::string::npos) {
+        } else if (std::count_if(value.begin(), value.end(), [](char c) { return ::isdigit(c) || c == '.'; }) == value.size() && std::count(value.begin(), value.end(), '.') <= 1) {
             return "float";
-        } else if (value == "true") {
-            return "bool";
-        } else if (value == "false") {
+        } else if (value == "true" || value == "false") {
             return "bool";
         } else {
             return "string";
@@ -467,4 +465,4 @@ private:
     }
 };
 
-#endif // DICT_H
+#endif // NEVF_H

@@ -1,7 +1,7 @@
 #ifndef SHADER_DRAWER_H
 #define SHADER_DRAWER_H
 
-#include <ngin/nodes/node.h>
+#include <ngin/node/node.h>
 #include <ngin/data/shader_data.h>
 #include <ngin/drawer.h>
 
@@ -13,16 +13,14 @@ public:
 
     void execute(std::string& pass) override {
         Node::execute(pass); // Call base class execute to retrieve input data
-
-        // Retrieve ShaderData from input port
-        auto shaderPort = getInputPortByType(pass);
-        if (shaderPort) {
-            auto shaderData = shaderPort->getData<ShaderData>();
-            if (shaderData) {
-                shaderData->use(); // Use the shader
-                Drawer::render(name_, *shaderData); // Call Drawer::render with the shader
-            }
+        
+        std::shared_ptr<NodePort> inputPortRenderGui = getInputPortByType(pass);
+        if (!inputPortRenderGui) {
+            return;
         }
+        std::shared_ptr<ShaderData> shaderData = inputPortRenderGui->getData<ShaderData>();
+        
+        Drawer::render(pass, *shaderData);
     }
 
     void setup() override {

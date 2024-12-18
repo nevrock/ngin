@@ -12,7 +12,9 @@
 #include <ngin/log.h>
 
 class Node : public INode, public std::enable_shared_from_this<Node> {
+
 public:
+
     unsigned int depth;
 
     Node(const std::string& name, Nevf& dictionary)
@@ -24,6 +26,7 @@ public:
     std::string getName() const override {
         return name_;
     }
+    
     unsigned int getId() const override {
         return id_;
     }
@@ -115,11 +118,13 @@ public:
                                [id](const std::shared_ptr<NodePort>& port) { return port->getId() == id; });
         return (it != inputPorts_.end()) ? *it : nullptr;
     }
+    
     std::shared_ptr<NodePort> getInputPortByType(std::string type) {
         auto it = std::find_if(inputPorts_.begin(), inputPorts_.end(),
                                [type](const std::shared_ptr<NodePort>& port) { return port->getType() == type; });
         return (it != inputPorts_.end()) ? *it : nullptr;
     }
+    
     std::vector<std::shared_ptr<NodePort>> getOutputPortsByType(const std::string& type) const {
         std::vector<std::shared_ptr<NodePort>> result;
         for (const auto& port : outputPorts_) {
@@ -129,6 +134,13 @@ public:
         }
         return result;
     }
+    
+    std::shared_ptr<NodePort> getOutputPortByType(std::string type) {
+        auto it = std::find_if(outputPorts_.begin(), outputPorts_.end(),
+                               [type](const std::shared_ptr<NodePort>& port) { return port->getType() == type; });
+        return (it != outputPorts_.end()) ? *it : nullptr;
+    }
+    
     std::shared_ptr<NodePort> getInputPortByConnection(const std::string& type) {
         for (const auto& inputPort : inputPorts_) {
             auto connection = inputPort->getConnection().lock(); // Lock the weak_ptr
@@ -138,6 +150,7 @@ public:
         }
         return nullptr; // Return nullptr if no match is found
     }
+    
     std::shared_ptr<IData> getInputDataByType(const std::string& type) {
         auto port = getInputPortByConnection(type);
         if (port) {
@@ -297,6 +310,7 @@ protected:
         }
         // Now all data is sitting in input ports, ready to be pulled
     }
+    
     void setupPorts() {
         //std::cout << "setting up ports!" << std::endl;
         //data_.print();

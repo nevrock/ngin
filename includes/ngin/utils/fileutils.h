@@ -26,11 +26,13 @@ public:
 
   static std::string getResourcePath(const std::string& path) 
   {
-    std::string pathN = getPath("resources/" + path);
+    size_t pos = path.find("resources/");
+    std::string cleanPath = (pos != std::string::npos) ? path.substr(pos + 10) : path;
+    std::string pathN = getPath("resources/" + cleanPath);
     if (doesPathExist(pathN)) {
       return pathN;
     } else {
-      return getProjPath("resources/" + path);
+      return getProjPath("resources/" + cleanPath);
     }
   }
 

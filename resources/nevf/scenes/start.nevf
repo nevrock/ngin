@@ -1,112 +1,214 @@
-nodes:    
-    // ------------
-    // Default/mandatory setup
-    // ------------
-    gui_depth_test:
+nodes: 
+    gui_depth_test: 
         type: gl_depth_test
         is_enable: false
-    scene_depth_test:
+        input_ports: 
+        output_ports: 
+            render_gui: 
+                id: 0
+                type: render_gui
+                name: render_gui
+        name: gui_depth_test
+    scene_depth_test: 
         type: gl_depth_test
         is_enable: true
-
-    camera:
+        input_ports: 
+        output_ports: 
+        name: scene_depth_test
+    camera: 
         type: object
         graph: camera
-
-
-    // ------------
-    // Dynamic scene
-    // ------------
-    scene:
-        type: transform
-
-    gui:
+        file: /home/nev/github/ngin/resources/nevf/assets/graphs/camera.nevf
+        input_ports: 
+            render_gui: 
+                id: 0
+                type: render_gui
+                name: render_gui
+        output_ports: 
+            render_gui: 
+                id: 0
+                type: render_gui
+                name: render_gui
+        name: camera
+    scene: 
+        type: object
+        position: [0.0, 0.0, 0.0]
+        input_ports: 
+        output_ports: 
+            logic: 
+                id: 0
+                type: logic
+                name: logic
+            transform: 
+                id: 1
+                type: transform
+                name: transform
+        name: scene
+        file: Enter a file...
+        graph: test
+    gui: 
         type: object
         graph: gui/canvas
-
-
-    // ------------
-    // Shaders
-    // ------------
-    shader_gui:
+        file: /home/nev/github/ngin/resources/nevf/assets/graphs/gui/canvas.nevf
+        input_ports: 
+        output_ports: 
+            logic: 
+                id: 0
+                type: logic
+                name: logic
+            transform: 
+                id: 1
+                type: transform
+                name: transform
+        name: gui
+    shader_gui: 
         type: shader
         shader: gui/gui
-
-
-    // ------------
-    // Passes
-    // ------------
-
-    // Cook scene
-    pass_logic:
+        input_ports: 
+            render_gui: 
+                id: 0
+                type: render_gui
+                name: render_gui
+        output_ports: 
+            render_gui: 
+                id: 0
+                type: render_gui
+                name: render_gui
+        name: shader_gui
+    pass_logic: 
         type: pass
         pass: logic
         id: 0
-    pass_transform:
+        input_ports: 
+            logic: 
+                id: 1
+                type: logic
+                name: logic
+        output_ports: 
+        name: pass_logic
+    pass_transform: 
         type: pass
         pass: transform
         id: 1
-
-    // Render scene
-    pass_render_depthmap:
+        input_ports: 
+            transform: 
+                id: 1
+                type: transform
+                name: transform
+        output_ports: 
+        name: pass_transform
+    pass_render_depthmap: 
         type: pass
         pass: render_depthmap
         id: 2
-    pass_render_cubemap:
+        input_ports: 
+        output_ports: 
+        name: pass_render_depthmap
+    pass_render_cubemap: 
         type: pass
         pass: render_cubemap
         id: 3
-    pass_render_opaque:
+        input_ports: 
+        output_ports: 
+        name: pass_render_cubemap
+    pass_render_opaque: 
         type: pass
         pass: render_opaque
         id: 4
-    pass_render_transparent:
+        input_ports: 
+        output_ports: 
+        name: pass_render_opaque
+    pass_render_transparent: 
         type: pass
         pass: render_transparent
         id: 5
-    pass_render_gui:
+        input_ports: 
+        output_ports: 
+        name: pass_render_transparent
+    pass_render_gui: 
         type: pass
         pass: render_gui
         id: 6
-
-
-connections:
-
-    // Define Transform pass connections (for positional inheritance)
-
-    // Scene defaults
-    scene_depth_test-0---0-scene:
-        type: logic
-
-    // Gui defaults
-    gui_depth_test-0---0-shader_gui:
+        input_ports: 
+            render_gui: 
+                id: 0
+                type: render_gui
+                name: render_gui
+        output_ports: 
+        name: pass_render_gui
+    shader_drawer_gui: 
+        type: shader_drawer
+        input_ports: 
+            render_gui: 
+                id: 0
+                type: render_gui
+                name: render_gui
+        output_ports: 
+            render_gui: 
+                id: 0
+                type: render_gui
+                name: render_gui
+        name: shader_drawer_gui
+connections: 
+    gui_depth_test-0---0-shader_gui: 
         type: render_gui
-    shader_gui-0---0-camera:
+    shader_gui-0---0-camera: 
         type: render_gui
-    camera-0---0-gui:
+    scene-0---0-pass_logic: 
         type: logic
-    camera-1---1-gui:
+    scene-1---0-pass_transform: 
         type: transform
-    camera-2---2-gui:
-        type: render_gui
-
-    // Pass connections
-    scene-0---0-pass_logic:
+    gui-0---1-pass_logic: 
         type: logic
-    scene-1---0-pass_transform:
+    gui-1---1-pass_transform: 
         type: transform
-    scene-2---0-pass_render_depthmap:
-        type: render_depthmap
-    scene-3---0-pass_render_cubemap:
-        type: render_cubemap
-    scene-4---0-pass_render_opaque:
-        type: render_opaque
-    scene-5---0-pass_render_transparent:
-        type: render_transparent
-    
-    gui-0---1-pass_logic:
-        type: logic
-    gui-1---1-pass_transform:
-        type: transform
-    gui-2---0-pass_render_gui:
+    camera-0---0-shader_drawer_gui: 
         type: render_gui
+    shader_drawer_gui-0---0-pass_render_gui: 
+        type: render_gui
+gui: 
+    gui_depth_test: 
+        x: -450.0
+        y: 100.0
+    scene_depth_test: 
+        x: -450.0
+        y: 50.0
+    camera: 
+        x: 50.0
+        y: 100.0
+    scene: 
+        x: 300.0
+        y: -300.0
+    gui: 
+        x: 300.0
+        y: -200.0
+    shader_gui: 
+        x: -200.0
+        y: 100.0
+    pass_logic: 
+        x: 550.0
+        y: -300.0
+    pass_transform: 
+        x: 550.0
+        y: -200.0
+    pass_render_depthmap: 
+        x: 550.0
+        y: -100.0
+    pass_render_cubemap: 
+        x: 550.0
+        y: -50.0
+    pass_render_opaque: 
+        x: 550.0
+        y: 0.0
+    pass_render_transparent: 
+        x: 550.0
+        y: 50.0
+    pass_render_gui: 
+        x: 550.0
+        y: 100.0
+    shader_dawer_gui: 
+        x: 50
+        y: 50
+    shader_drawer_gui: 
+        x: 300.0
+        y: 100.0

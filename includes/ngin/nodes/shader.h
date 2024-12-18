@@ -20,11 +20,9 @@ public:
         // TODO: Communicate pointer to output port
         shader_->use();
 
-        for (const auto& port : outputPorts_) {
-            if (port->getName().find("render") != std::string::npos) {
-                port->setData<ShaderData>(shader_);
-                //std::cout << "shader execute and set data: " << port->getName() << std::endl;
-            }
+        std::shared_ptr<NodePort> outputPort = getOutputPortByType(pass);
+        if (outputPort) {
+            outputPort->setData<ShaderData>(shader_);
         }
     }
 

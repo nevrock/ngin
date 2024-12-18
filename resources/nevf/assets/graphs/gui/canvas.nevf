@@ -1,25 +1,113 @@
-nodes:    
-    
-    // ------------
-    // Passes
-    // ------------
-    pass_logic:
+nodes: 
+    pass_logic: 
         type: pass
         pass: logic
-        output_ports:
-            parent:
+        output_ports: 
+        id: 1
+        input_ports: 
+            logic: 
                 id: 0
                 type: logic
-    pass_transform:
+                name: logic
+        name: pass_logic
+    pass_transform: 
         type: pass
         pass: transform
-
-    pass_render_gui:
-        type: pass
-        pass: render_gui
-
-
-connections:
-
-
-// all this loading issue is because object is loading within graph when connection is not setup
+        id: 1
+        input_ports: 
+            transform: 
+                id: 0
+                type: transform
+                name: transform
+        output_ports: 
+        name: pass_transform
+    model_test: 
+        type: model_drawer
+        file: /home/nev/github/ngin/resources/meshes/quad.mesh
+        input_ports: 
+            transform: 
+                id: 0
+                type: transform
+                name: transform
+        output_ports: 
+            logic: 
+                id: 0
+                type: logic
+                name: logic
+            transform: 
+                id: 1
+                type: transform
+                name: transform
+        name: model_test
+    test: 
+        type: transform
+        position: [0.0, 0.0, 0.0]
+        input_ports: 
+        output_ports: 
+            transform: 
+                id: 0
+                type: transform
+                name: transform
+        name: test
+connections: 
+    model_test-0---0-pass_logic: 
+        type: logic
+    model_test-1---0-pass_transform: 
+        type: transform
+    test-0---0-model_test: 
+        type: transform
+gui: 
+    gui_depth_test: 
+        x: -450
+        y: 200
+    scene_depth_test: 
+        x: -150
+        y: -250
+    camera: 
+        x: -50
+        y: 200
+    scene: 
+        x: 150
+        y: -100
+    gui: 
+        x: 150
+        y: 200
+    shader_gui: 
+        x: -250
+        y: 200
+    pass_logic: 
+        x: 550.0
+        y: 0.0
+    pass_transform: 
+        x: 550.0
+        y: 100.0
+    pass_render_depthmap: 
+        x: 550
+        y: -100
+    pass_render_cubemap: 
+        x: 550
+        y: -50
+    pass_render_opaque: 
+        x: 550
+        y: 50
+    pass_render_transparent: 
+        x: 550
+        y: 100
+    pass_render_gui: 
+        x: 550
+        y: 200
+    model_test: 
+        x: 300.0
+        y: 50.0
+    test: 
+        x: 50.0
+        y: 50.0
+    test_2: 
+        x: 0
+        y: -50
+    test_02: 
+        x: -150
+        y: -50
+    test_03: 
+        x: 0
+        y: -150

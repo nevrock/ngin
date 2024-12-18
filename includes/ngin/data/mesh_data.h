@@ -38,11 +38,28 @@ public:
     std::string getName() override { return name_; } 
 
     MeshData() {}
+    MeshData(const std::string& name) : name_(name) {
+        // Default constructor
+
+    }
     MeshData(const Nevf& data) : name_(data.getC<std::string>("name", "")) {
         std::vector<float> verticesFlattened = data.getC<std::vector<float>>("vertices", std::vector<float>());
         std::vector<int> triangles = data.getC<std::vector<int>>("triangles", std::vector<int>());
-    }
 
+        // Assuming each vertex has 8 attributes: position (3), normal (3), uv (2)
+        for (size_t i = 0; i < verticesFlattened.size(); i += 8) {
+            Vertex vertex;
+            vertex.position = glm::vec3(verticesFlattened[i], verticesFlattened[i + 1], verticesFlattened[i + 2]);
+            vertex.normal = glm::vec3(verticesFlattened[i + 3], verticesFlattened[i + 4], verticesFlattened[i + 5]);
+            vertex.uv = glm::vec2(verticesFlattened[i + 6], verticesFlattened[i + 7]);
+            vertex.color = glm::vec3(1.0f, 1.0f, 1.0f); // Default color, can be modified as needed
+            vertices.push_back(vertex);
+        }
+
+        indices = std::vector<unsigned int>(triangles.begin(), triangles.end());
+
+        setupMesh();
+    }
     MeshData(std::vector<Vertex> vertices, std::vector<unsigned int> indices) {
         this->vertices = vertices;
         this->indices = indices;

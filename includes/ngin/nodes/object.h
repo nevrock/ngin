@@ -19,12 +19,10 @@ public:
 
     void setup() override {
         Node::setup();
-        //std::cout << "object setup!" << std::endl;
-        //std::cout << data_.getString() << std::endl;
-        if (data_.contains("graph")) {
-            graph_ = std::make_unique<NodeGraph>("assets/graphs/" + data_.getC<std::string>("graph", ""));
+
+        if (data_.contains("file")) {
+            graph_ = std::make_unique<NodeGraph>(data_.getC<std::string>("file", ""));
             graph_->setParent(Node::shared_from_this());
-            //std::cout << "object building node graph: " << getName() << std::endl;
             graph_->build();
         }
     }

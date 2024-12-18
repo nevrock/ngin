@@ -14,6 +14,8 @@
 #include <ngin/collections/nevf.h>
 #include <ngin/constants.h>
 #include <ngin/log.h>
+
+// data
 #include <ngin/data/shader_data.h>
 #include <ngin/data/mesh_data.h>
 
@@ -27,23 +29,30 @@ public:
     static void init() {
         Log::console("!!!   resources started   !!!");
         // need to load in resources
+
+        shaderManifest_ = loadNevf("shaders/manifest.nevf");
+        meshManifest_ = loadNevf("meshes/manifest.nevf");
     }
 
     // resources, data you can load from files
     static Nevf loadNevf(const std::string& name) {
         Nevf n;
-        n.read(FileUtils::getResourcePath("nevf/" + name + ".nevf"));
+        std::string filePath = fixFilePath("nevf/", name);
+        n.read(FileUtils::getResourcePath(filePath));
         //n.print();
         return n;
     }
     static std::shared_ptr<ShaderData> loadShaderData(const std::string& name)
     {
-        Log::console("loading shader! " + name);
+        Nevf shaderManifestData = shaderManifest_.getC<Nevf>(name, Nevf());
+        std::string location = shaderManifestData.getC<std::string>("location", "");
+
+        Log::console("loading shader! " + name + ", at location: " + location);
         
-        std::string vShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".nvs");
-        std::string fShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".vfs");
-        std::string gShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".vgs");
-        std::string iShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".ninc");
+        std::string vShaderFilePath = FileUtils::getResourcePath("shaders/" + location + ".nvtx");
+        std::string fShaderFilePath = FileUtils::getResourcePath("shaders/" + location + ".nfrg");
+        std::string gShaderFilePath = FileUtils::getResourcePath("shaders/" + location + ".ngeo");
+        std::string iShaderFilePath = FileUtils::getResourcePath("shaders/" + location + ".ninc");
         std::string hShaderFilePath = FileUtils::getResourcePath("shaders/" + std::string(ngin::SHADER_INCLUDE_MANDATORY) + ".ninc");
 
         if (FileUtils::doesPathExist(gShaderFilePath)) {
@@ -65,18 +74,37 @@ public:
         }    
         return nullptr;
     }
-    static std::shared_ptr<MeshData> loadMeshData(const std::string& name)
-    {
-        Log::console("loading mesh! " + name);
-        
+    static std::shared_ptr<MeshData> loadMeshData(const std::string& name) {
+        Nevf meshManifestData = meshManifest_.getC<Nevf>(name, Nevf());
+        std::string location = meshManifestData.getC<std::string>("location", "");
+
+        Log::console("loading mesh! " + name + ", at location: " + location);
+
+        std::string meshFilePath = FileUtils::getResourcePath("meshes/" + location + ".nmsh");
+
         Nevf n;
-        n.read(FileUtils::getResourcePath("meshes/" + name + ".mesh"));        
+        n.read(meshFilePath);
 
         return std::make_shared<MeshData>(n);
     }
 
 private:
     // static std::vector<std::shared_ptr<Shader>> shaders_;
+    static Nevf shaderManifest_;
+    static Nevf meshManifest_;
+
+    static std::string fixFilePath(const std::string& prefix, const std::string& name) {
+        std::string filePath = name;
+        if (filePath.find(prefix) == std::string::npos) {
+            filePath = prefix + filePath;
+        } else {
+            filePath = filePath.substr(filePath.find(prefix));
+        }
+        if (filePath.find(".nevf") == std::string::npos) {
+            filePath += ".nevf";
+        }
+        return filePath;
+    }
 };
 
 #endif // RESOURCES_H
