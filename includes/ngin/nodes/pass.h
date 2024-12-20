@@ -19,29 +19,32 @@ public:
 
         Node::execute(pass); // retrieve inputs
 
+
         std::vector<std::shared_ptr<NodePort>> outputPorts = getOutputPortsByType(pass);
         std::shared_ptr<NodePort> inputPort = getInputPortByType(pass);
         if (!inputPort) {
             return;
         }
         for (const auto& port : outputPorts) {
+            if (!inputPort->getRawData()) {
+                Log::console("No input data at pass level found for " + inputPort->getName());
+                continue;
+            }
             // Do something with each port
             port->setRawData(inputPort->getRawData());
+            Log::console("Passing data from " + inputPort->getName() + " to " + port->getName());
         }
     }
 
     void setup() override {
         Node::setup();
         pass_ = data_.getC<std::string>("pass", ""); // Get the "pass" value from data_
-        order_ = data_.getC<int>("order", 0);
     }
 
     std::string getPass() const { return pass_; } // Public getter method
-    int getOrder() const { return order_; }
 
 private:
     std::string pass_; // Private string variable to store the pass
-    int order_;
 };
 
 #endif // PASS_H

@@ -44,7 +44,7 @@ nodes:
                 type: transform
                 name: transform
         name: scene
-        file: Enter a file...
+        file: /home/nev/github/ngin/resources/nevf/assets/graphs/scene.nevf
         graph: test
     gui: 
         type: object
@@ -63,7 +63,7 @@ nodes:
         name: gui
     shader_gui: 
         type: shader
-        shader: gui/gui
+        shader: gui
         input_ports: 
             render_gui: 
                 id: 0
@@ -75,13 +75,14 @@ nodes:
                 type: render_gui
                 name: render_gui
         name: shader_gui
+        passes: ['render_gui']
     pass_logic: 
         type: pass
         pass: logic
         id: 0
         input_ports: 
             logic: 
-                id: 1
+                id: 0
                 type: logic
                 name: logic
         output_ports: 
@@ -92,7 +93,7 @@ nodes:
         id: 1
         input_ports: 
             transform: 
-                id: 1
+                id: 0
                 type: transform
                 name: transform
         output_ports: 
@@ -171,8 +172,8 @@ gui:
         x: -450.0
         y: 100.0
     scene_depth_test: 
-        x: -450.0
-        y: 50.0
+        x: -200.0
+        y: -200.0
     camera: 
         x: 50.0
         y: 100.0

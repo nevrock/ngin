@@ -39,6 +39,8 @@ nodes:
                 type: transform
                 name: transform
         name: model_test
+        model: quad
+        passes: ['render_gui']
     test: 
         type: transform
         position: [0.0, 0.0, 0.0]

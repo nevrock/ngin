@@ -10,7 +10,6 @@
 #include <ngin/data/i_data.h>
 #include <ngin/log.h>
 #include <ngin/collections/nevf.h>
-#include <fmt/core.h>
 
 
 struct Vertex {
@@ -38,14 +37,29 @@ public:
     std::string getName() override { return name_; } 
 
     MeshData() {}
-    MeshData(const std::string& name) : name_(name) {
-        // Default constructor
-
-    }
     MeshData(const Nevf& data) : name_(data.getC<std::string>("name", "")) {
+        fromNevf(data);
+    }
+    MeshData(std::vector<Vertex> vertices, std::vector<unsigned int> indices) {
+        this->vertices = vertices;
+        this->indices = indices;
+        Log::console("constructing mesh with " + std::to_string(vertices.size()) + " vertices and " + std::to_string(indices.size()) + " indices");
+        setupMesh();
+    }
+    ~MeshData() {
+        Log::console("destroying mesh with VAO: " + std::to_string(VAO));
+        // Proper cleanup
+        glDeleteVertexArrays(1, &VAO);
+        glDeleteBuffers(1, &VBO);
+        glDeleteBuffers(1, &EBO);
+    }
+    void fromNevf(const Nevf& data) {
         std::vector<float> verticesFlattened = data.getC<std::vector<float>>("vertices", std::vector<float>());
         std::vector<int> triangles = data.getC<std::vector<int>>("triangles", std::vector<int>());
 
+        Log::console("constructing mesh with " + std::to_string(verticesFlattened.size()) + " vertices and " + std::to_string(triangles.size()) + " indices");
+
+        data.print();
         // Assuming each vertex has 8 attributes: position (3), normal (3), uv (2)
         for (size_t i = 0; i < verticesFlattened.size(); i += 8) {
             Vertex vertex;
@@ -60,19 +74,6 @@ public:
 
         setupMesh();
     }
-    MeshData(std::vector<Vertex> vertices, std::vector<unsigned int> indices) {
-        this->vertices = vertices;
-        this->indices = indices;
-        Log::console(fmt::format("constructing mesh with {1} vertices and {0} indices", vertices.size(), indices.size()));
-        setupMesh();
-    }
-    ~MeshData() {
-        Log::console(fmt::format("Destroying Mesh with VAO: {}", VAO));
-        // Proper cleanup
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        glDeleteBuffers(1, &EBO);
-    }
     void render() {
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
@@ -83,7 +84,7 @@ public:
         glGenBuffers(1, &VBO);
         glGenBuffers(1, &EBO);
 
-        Log::console(fmt::format("Setting up Mesh with VAO: ", VAO));
+        Log::console("setting up mesh with VAO: " + std::to_string(VAO));
         glBindVertexArray(VAO);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -113,6 +114,22 @@ public:
         
 
         glBindVertexArray(0); // Unbind VAO
+    }
+
+    void log() {
+        Log::console("mesh data loaded, has name: " + name_);
+        Log::console("vertices:");
+        for (const auto& vertex : vertices) {
+            Log::console("position: (" + std::to_string(vertex.position.x) + ", " + std::to_string(vertex.position.y) + ", " + std::to_string(vertex.position.z) + "), " +
+                 "normal: (" + std::to_string(vertex.normal.x) + ", " + std::to_string(vertex.normal.y) + ", " + std::to_string(vertex.normal.z) + "), " +
+                 "uv: (" + std::to_string(vertex.uv.x) + ", " + std::to_string(vertex.uv.y) + "), " +
+                 "color: (" + std::to_string(vertex.color.x) + ", " + std::to_string(vertex.color.y) + ", " + std::to_string(vertex.color.z) + ")", 1);
+            Log::console("");
+        }
+        Log::console("indices:");
+        for (size_t i = 0; i < indices.size(); i += 3) {
+            Log::console("triangle: (" + std::to_string(indices[i]) + ", " + std::to_string(indices[i + 1]) + ", " + std::to_string(indices[i + 2]) + ")", 1);
+        }
     }
 
 private:

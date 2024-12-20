@@ -11,7 +11,10 @@
 
 class Drawer {
 public:
-    std::vector<std::shared_ptr<IDrawer>> getDrawers(const std::string& key) const {
+
+    static std::map<std::string, std::vector<IDrawer*>> drawers_; 
+
+    std::vector<IDrawer*> getDrawers(const std::string& key) const {
         auto it = drawers_.find(key);
         if (it != drawers_.end()) {
             return it->second; // Return the vector of drawers
@@ -20,31 +23,37 @@ public:
         }
     }
 
-    static void registerDrawer(const std::string& key, std::shared_ptr<IDrawer> drawer) {
+    static void registerDrawer(const std::string& key, IDrawer* drawer) {
+        Log::console("Registering drawer: " + drawer->getName() + " for key: " + key);  
         drawers_[key].push_back(drawer); 
     }
 
     static void unregisterDrawer(const std::string& key, IDrawer* drawer) {
         auto& drawers = drawers_[key];
-        drawers.erase(std::remove_if(drawers.begin(), drawers.end(),
-                                     [drawer](const std::shared_ptr<IDrawer>& d) { return d.get() == drawer; }), 
-                      drawers.end());
+        drawers.erase(std::remove(drawers.begin(), drawers.end(), drawer), drawers.end());
         if (drawers.empty()) {
             drawers_.erase(key);
         }
     }
 
-    static void render(const std::string& key, ShaderData& shader) {
+    static void render(const std::string& key, std::shared_ptr<ShaderData> shader) {
+        if (!shader) {
+            Log::console("Shader is null in drawer render");
+            return;
+        }
+        
         auto it = drawers_.find(key);
         if (it != drawers_.end()) {
             for (const auto& drawer : it->second) {
+                //Log::console("Rendering drawer: " + drawer->getName());
                 drawer->render(shader); // Call the render method on each drawer
             }
+        } else {
+            //Log::console("No drawers found for key: " + key);
         }
     }
 
 private:
-    static std::map<std::string, std::vector<std::shared_ptr<IDrawer>>> drawers_; 
 };
 
 #endif

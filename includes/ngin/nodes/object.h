@@ -38,20 +38,13 @@ protected:
         std::vector<std::shared_ptr<NodePort>> inputPorts = graph_->getInputPortsByName("parent");
         std::vector<std::shared_ptr<NodePort>> outputPorts = graph_->getOutputPortsByName("parent");
 
-        //std::cout << "sub graph has INPUT port count: " << inputPorts.size() << ", sub graph has OUTPUT port count: " << outputPorts.size() << std::endl;
+        Log::console("preprocessing graph with " + std::to_string(inputPorts.size()) + " input ports and " + std::to_string(outputPorts.size()) + " output ports");
 
         // Iterate through input ports
         for (const auto& graphInputPort : inputPorts) {
             std::shared_ptr<NodePort> objectInputPort = getInputPortById(graphInputPort->getId());
             if (objectInputPort) {
-                //std::cout << "adding linked port, from: " << objectInputPort->getName() << " to " << graphInputPort->getName() << std::endl;
                 objectInputPort->addLinkedPort(graphInputPort); 
-            } else {
-                //std::cout << "adding linked port failed, with id: " << graphInputPort->getId() << std::endl;
-                //std::cout << "current port has ids: " << "(length: " << inputPorts_.size() << ")" << std::endl;
-                //for (const auto& port : inputPorts_) {
-                //    std::cout << port->getId() << std::endl;
-                //}
             }
         }
 
@@ -62,9 +55,6 @@ protected:
                 graphOutputPort->addLinkedPort(objectOutputPort); 
             }
         }
-
-        //std::cout << "--- object graph has input ports: " << inputPorts.size() 
-        //          << ", " << outputPorts.size() << std::endl;
     }
 };
 

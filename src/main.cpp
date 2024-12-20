@@ -13,6 +13,7 @@
 #include <ngin/resources.h>
 #include <ngin/physics.h>
 #include <ngin/preferences.h>
+#include <ngin/drawer.h>
 
 #include <ngin/node/node_graph.h>
 #include <ngin/nodes/pass.h>
@@ -26,6 +27,10 @@
 #include <thread>
 #include <atomic>
 #include <memory>
+
+Nevf Resources::shaderManifest_ = {}; 
+Nevf Resources::meshManifest_ = {}; 
+std::map<std::string, std::vector<IDrawer*>> Drawer::drawers_ = {}; 
 
 static int gameInit = (Game::init(), 0); 
 static int resourcesInit = (Resources::init(), 0); 

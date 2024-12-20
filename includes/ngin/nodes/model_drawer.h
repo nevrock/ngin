@@ -13,7 +13,7 @@
 #include <memory>
 #include <vector>
 
-class ModelDrawer : public IDrawer, public std::enable_shared_from_this<ModelDrawer> { // Inherit from IDrawer and enable_shared_from_this
+class ModelDrawer : public IDrawer { // Inherit from IDrawer and enable_shared_from_this
 public:
     explicit ModelDrawer(const std::string& name, Nevf& dictionary)
         : IDrawer(name, dictionary) // Initialize IDrawer
@@ -24,21 +24,24 @@ public:
 
     ~ModelDrawer() override {
         for (const auto& pass : passes_) {
-            Drawer::unregisterDrawer(pass, ModelDrawer::shared_from_this());
+            Log::console("Unregistering drawer: " + pass);
+            Drawer::unregisterDrawer(pass, this);
         }
     }
 
     void setup() override { 
         IDrawer::setup();
 
-        data_ = std::make_shared<MeshData>(model_);
+        data_ = Resources::loadMeshData(model_);
+        data_->log();
     }
 
     void launch() override { 
         IDrawer::launch();
 
         for (const auto& pass : passes_) {
-            Drawer::registerDrawer(pass, ModelDrawer::shared_from_this());
+            Log::console("Registering drawer: " + pass);
+            Drawer::registerDrawer(pass, this);
         }
     }
 
@@ -46,10 +49,18 @@ public:
         IDrawer::execute(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
     }
 
-    void render(ShaderData& shader) override {
+    void render(std::shared_ptr<ShaderData> shader) override {
+        if (!shader) {
+            Log::console("Shader is null in model drawer render");
+            return;
+        }
+        Log::console("Rendering model: " + model_ + " with shader: " + shader->getName());
+        //return;
         // Implement the render method
-        shader.setMat4("M_MODEL", getTransformation());
-        data_->render();
+        //shader.setMat4("M_MODEL", getTransformation());
+        //if (data_) {
+        //    data_->render();
+        //}
     }
 
 protected:

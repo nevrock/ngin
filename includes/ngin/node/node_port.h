@@ -31,7 +31,16 @@ public:
 
   template <typename T>
   std::shared_ptr<T> getData() { 
-    return std::dynamic_pointer_cast<T>(data_); 
+    if (!data_) {
+      //std::cerr << "Data is null. " << name_ << std::endl;
+      return nullptr;
+    } 
+    auto castedData = std::dynamic_pointer_cast<T>(data_);
+    if (!castedData) {
+      // Log the failure
+      std::cerr << "Failed to cast data to the requested type." << std::endl;
+    }
+    return castedData;
   }
 
   void clearData() { 

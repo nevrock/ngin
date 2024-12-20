@@ -30,14 +30,17 @@ public:
         Log::console("!!!   resources started   !!!");
         // need to load in resources
 
-        shaderManifest_ = loadNevf("shaders/manifest.nevf");
-        meshManifest_ = loadNevf("meshes/manifest.nevf");
+        shaderManifest_ = loadNevf("manifest.nevf", "shaders/");
+        meshManifest_ = loadNevf("manifest.nevf", "meshes/");
     }
 
+    static Nevf shaderManifest_;
+    static Nevf meshManifest_;
+
     // resources, data you can load from files
-    static Nevf loadNevf(const std::string& name) {
+    static Nevf loadNevf(const std::string& name, const std::string& prefix = "nevf/") {
         Nevf n;
-        std::string filePath = fixFilePath("nevf/", name);
+        std::string filePath = fixFilePath(prefix, name);
         n.read(FileUtils::getResourcePath(filePath));
         //n.print();
         return n;
@@ -76,6 +79,8 @@ public:
     }
     static std::shared_ptr<MeshData> loadMeshData(const std::string& name) {
         Nevf meshManifestData = meshManifest_.getC<Nevf>(name, Nevf());
+        meshManifest_.print();
+        meshManifestData.print();
         std::string location = meshManifestData.getC<std::string>("location", "");
 
         Log::console("loading mesh! " + name + ", at location: " + location);
@@ -90,8 +95,6 @@ public:
 
 private:
     // static std::vector<std::shared_ptr<Shader>> shaders_;
-    static Nevf shaderManifest_;
-    static Nevf meshManifest_;
 
     static std::string fixFilePath(const std::string& prefix, const std::string& name) {
         std::string filePath = name;

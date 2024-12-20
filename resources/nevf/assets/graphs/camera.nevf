@@ -21,10 +21,6 @@ nodes:
                 type: transform
                 name: transform
         output_ports: 
-            logic: 
-                id: 0
-                type: logic
-                name: logic
             transform: 
                 id: 1
                 type: transform
@@ -50,17 +46,6 @@ nodes:
                 type: render_gui
                 name: render_gui
         name: camera
-    pass_logic: 
-        type: pass
-        pass: logic
-        id: 0
-        input_ports: 
-            logic: 
-                id: 0
-                type: logic
-                name: logic
-        output_ports: 
-        name: pass_logic
     pass_transform: 
         type: pass
         pass: transform
@@ -126,12 +111,14 @@ nodes:
                 type: render_gui
                 name: render_gui
         output_ports: 
+            parent: 
+                id: 0
+                type: render_gui
+                name: parent
         name: pass_render_gui
 connections: 
     camera_transform-0---1-camera: 
         type: transform
-    camera-0---0-pass_logic: 
-        type: logic
     camera-1---0-pass_transform: 
         type: transform
     camera-2---0-pass_render_depthmap: 
@@ -164,8 +151,8 @@ gui:
         x: -250
         y: 200
     pass_logic: 
-        x: 550.0
-        y: -250.0
+        x: 550
+        y: -250
     pass_transform: 
         x: 550.0
         y: -200.0
@@ -185,5 +172,5 @@ gui:
         x: 550.0
         y: 200.0
     camera_transform: 
-        x: -150.0
+        x: -200.0
         y: 0.0

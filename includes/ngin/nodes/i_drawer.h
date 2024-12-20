@@ -4,11 +4,11 @@
 #include <ngin/node/node.h>
 #include <ngin/data/shader_data.h>
 
-class IDrawer : public Node {
+class IDrawer : public Node, public std::enable_shared_from_this<IDrawer> {
 public:
     using Node::Node; // Inherit constructors from Node
 
-    virtual void render(ShaderData& shader) = 0; // Pure virtual method for rendering
+    virtual void render(std::shared_ptr<ShaderData> shader) = 0; // Pure virtual method for rendering
 
     void setup() override {
         Node::setup();

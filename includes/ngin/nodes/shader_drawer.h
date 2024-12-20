@@ -16,11 +16,15 @@ public:
         
         std::shared_ptr<NodePort> inputPortRenderGui = getInputPortByType(pass);
         if (!inputPortRenderGui) {
+            Log::console("No input port found for pass: " + pass);
             return;
         }
         std::shared_ptr<ShaderData> shaderData = inputPortRenderGui->getData<ShaderData>();
-        
-        Drawer::render(pass, *shaderData);
+        if (shaderData) {
+            Drawer::render(pass, shaderData);
+        } else {
+            Log::console("No shader data found for pass: " + pass);
+        }
     }
 
     void setup() override {

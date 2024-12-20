@@ -218,7 +218,7 @@ public:
             data_.erase(it);
         }
     }
-    void print(int indent = 0) {
+    void print(int indent = 0) const {
         std::cout << "## dict print! ##" << std::endl;
         std::cout << getString(indent) << std::endl;
     }
@@ -357,9 +357,14 @@ private:
                 break;
             }
             return "vector_"+vectorType;
+        } else if (value.front() == '"' && value.back() == '"') {
+            return "string";
+        } else if (value.front() == '\'' && value.back() == '\'') {
+            return "string";
         } else if (std::all_of(value.begin(), value.end(), ::isdigit)) {
             return "int";
-        } else if (std::count_if(value.begin(), value.end(), [](char c) { return ::isdigit(c) || c == '.'; }) == value.size() && std::count(value.begin(), value.end(), '.') <= 1) {
+        } else if ((value.front() == '-' && std::count_if(value.begin() + 1, value.end(), [](char c) { return ::isdigit(c) || c == '.'; }) == value.size() - 1 && std::count(value.begin() + 1, value.end(), '.') <= 1) ||
+                   (std::count_if(value.begin(), value.end(), [](char c) { return ::isdigit(c) || c == '.'; }) == value.size() && std::count(value.begin(), value.end(), '.') <= 1)) {
             return "float";
         } else if (value == "true" || value == "false") {
             return "bool";
@@ -398,7 +403,7 @@ private:
                 }
                 return vecInt;
             } else if (type == "vector_bool") {
-                std::vector<float> vecBool;
+                std::vector<bool> vecBool;
                 std::stringstream ss(value.substr(1, value.size() - 2)); // Remove the brackets
                 std::string item;
                 while (getline(ss, item, ',')) {
@@ -416,6 +421,7 @@ private:
                 while (getline(ss, item, ',')) {
                     std::string itemS = trim(item);
                     itemS.erase(std::remove(itemS.begin(), itemS.end(), '"'), itemS.end());
+                    itemS.erase(std::remove(itemS.begin(), itemS.end(), '\''), itemS.end());
                     if (isLog_) {
                         //std::cout << "parsing value - " << itemS << std::endl;
                     }
@@ -433,11 +439,12 @@ private:
         } else {
             if (value.front() == '"' && value.back() == '"') {
                 return value.substr(1, value.length() - 2);
+            } else if (value.front() == '\'' && value.back() == '\'') {
+                return value.substr(1, value.length() - 2); 
             } else {
                 return value;
             }
         }
-
     }
     void parseNevfElement(Nevf* dict, std::string& key, std::string& value) {
         //std::cout << "## setting element of dict " << std::endl;
