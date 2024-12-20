@@ -12,11 +12,8 @@ public:
     unsigned int ID;
 
     ShaderData() {} 
-    ShaderData(const Nevf& data) {
-
-    }
-    ShaderData(const char* vertexPath, const char* fragmentPath, const char* headerPath,
-        const char* geometryPath = nullptr, const char* includePath = nullptr) : vertPath_(vertexPath),
+    ShaderData(const std::string name, const char* vertexPath, const char* fragmentPath, const char* headerPath,
+        const char* geometryPath = nullptr, const char* includePath = nullptr) : name_(name), vertPath_(vertexPath),
         fragPath_(fragmentPath), headPath_(headerPath), geomPath_(geometryPath), inclPath_(includePath)
     {
     }
@@ -198,7 +195,7 @@ private:
     const char* geomPath_;
     const char* inclPath_;
 
-    std::string name_;
+    const std::string name_;
 
     void checkCompileErrors(GLuint shader, std::string type)
     {

@@ -11,8 +11,8 @@ public:
         : Node(name, dictionary) {
     }
 
-    void execute(std::string& pass) override {
-        Node::execute(pass); // Call base class execute to retrieve input data
+    void update(std::string& pass) override {
+        Node::update(pass); // Call base class execute to retrieve input data
         
         std::shared_ptr<NodePort> inputPortRenderGui = getInputPortByType(pass);
         if (!inputPortRenderGui) {

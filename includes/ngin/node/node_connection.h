@@ -8,6 +8,8 @@
 #include <ngin/data/i_data.h>
 #include <ngin/collections/nevf.h>
 
+#include <ngin/log.h>   
+
 class NodeConnection : public INodeConnection, public std::enable_shared_from_this<NodeConnection> {
 public:
     // Constructor: Automatically connects the ports
@@ -48,6 +50,8 @@ public:
                 // Get the raw IData pointer
                 std::shared_ptr<IData> dataToTransfer = input->getRawData(); 
                 output->setRawData(dataToTransfer); 
+
+                //Log::console("Transferring data from " + input->getName() + " to " + output->getName());
                 //input->clearData();
             } else { 
                 // Handle the case where output port is gone

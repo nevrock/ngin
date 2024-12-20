@@ -9,8 +9,8 @@ public:
     }
     ~GlDepthTest() override = default;
 
-    void execute(std::string& pass) override {
-        Node::execute(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
+    void update(std::string& pass) override {
+        Node::update(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
         if (isEnable_) {
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);

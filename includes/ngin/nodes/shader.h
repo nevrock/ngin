@@ -15,15 +15,15 @@ public:
     ~Shader() override = default;
 
     void execute(std::string& pass) override {
-        Node::execute(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
+        retrieveInputData(pass);
+        update(pass);
+    }
+    void update(std::string& pass) override {
+        Node::update(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
         
-        // TODO: Communicate pointer to output port
         shader_->use();
 
-        std::shared_ptr<NodePort> outputPort = getOutputPortByType(pass);
-        if (outputPort) {
-            outputPort->setData<ShaderData>(shader_);
-        }
+        setOutputData(pass, shader_);
     }
 
     void setup() override {

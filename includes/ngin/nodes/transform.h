@@ -16,13 +16,14 @@ public:
     Transform(const std::string& name, Nevf& data) : Node(name, data) {
         transform_ = std::make_shared<TransformData>(data);
     }
-
     void execute(std::string& pass) override {
-        Node::execute(pass);
+        retrieveInputData(pass);
+        update(pass);
+    }
+    void update(std::string& pass) override {
+        Node::update(pass);
 
-        if (pass != "transform") return;
-
-        std::shared_ptr<NodePort> inputPort = getInputPortByType("transform");
+        std::shared_ptr<NodePort> inputPort = getInputPortByType(pass);
         if (inputPort) {
             std::shared_ptr<TransformData> parentData = inputPort->getData<TransformData>();
             if (parentData) {
@@ -30,20 +31,14 @@ public:
             } else {
                 transform_->setParentModel(glm::mat4(1.0f));
             }
+        } else {
+            transform_->setParentModel(glm::mat4(1.0f));
         }
-
         transform_->execute();
 
-        //std::cout << "transform " << getName() << ", has position: " 
-        //        << glm::to_string(transform_->getWorldPosition()) << std::endl; 
-
-        // pass to output ports:
-        std::vector<std::shared_ptr<NodePort>> outputPorts = getOutputPortsByType("transform");
-        for (const auto& port : outputPorts) {
-            // Do something with each port
-            port->setData<TransformData>(transform_);
-        }
+        setOutputData(pass, transform_);
     }
+
     void setup() override {
         Node::setup();
     }

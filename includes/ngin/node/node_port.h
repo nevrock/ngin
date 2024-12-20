@@ -32,7 +32,7 @@ public:
   template <typename T>
   std::shared_ptr<T> getData() { 
     if (!data_) {
-      //std::cerr << "Data is null. " << name_ << std::endl;
+      std::cerr << "Data is null. " << name_ << ", on node: " << node_.lock()->getName() << std::endl;
       return nullptr;
     } 
     auto castedData = std::dynamic_pointer_cast<T>(data_);

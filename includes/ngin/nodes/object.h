@@ -12,8 +12,21 @@ public:
 
     ~Object() override = default;
 
-    void execute(std::string& pass) override {
-        Node::execute(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
+    void update(std::string& pass) override {
+        Node::update(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
+        
+        std::shared_ptr<NodePort> inputPort = getInputPortByType(pass);
+        if (inputPort) {
+            std::shared_ptr<IData> data = inputPort->getRawData();
+            if (data) {
+               // Log::console("object: " + getName() + " received data for pass: " + pass);
+            } else {
+                //Log::console("object: " + getName() + " did not receive data for pass: " + pass);
+            }
+        } else {
+            //Log::console("object: " + getName() + " did not receive data for pass: " + pass);
+        }
+        
         graph_->executePass(pass);
     }
 

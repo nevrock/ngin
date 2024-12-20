@@ -18,7 +18,7 @@ public:
     unsigned int depth;
 
     Node(const std::string& name, Nevf& dictionary)
-        : name_(name), data_(dictionary), id_(dictionary.getC<int>("id", 0)) {
+        : name_(name), data_(dictionary), id_(dictionary.getC<int>("id", 0)),  isLog_(dictionary.getC<bool>("is_log", false)) {
     }
 
     virtual ~Node() {}
@@ -277,18 +277,20 @@ public:
     }
 
     void execute(std::string& pass) override {
-        retrieveInputData();
+        retrieveInputData(pass);
+        update(pass);
+        setOutputData(pass);
     }
 
     void setup() override { 
-        //std::cout << "node setup: " << getName() << std::endl;
-        //setupPorts();
-        //std::cout << "node setup!" << std::endl; 
-        }
+    }
 
     void launch() override { 
         setupPorts();
-        }
+    }
+
+    void update(std::string& pass) override {
+    }
 
 protected:
     std::string name_;
@@ -298,9 +300,11 @@ protected:
     
     unsigned int id_;
 
-    void retrieveInputData() {
+    bool isLog_;
+
+    void retrieveInputData(std::string pass) {
         for (const auto& inputPort : inputPorts_) {
-            if (inputPort->isConnected()) {
+            if (inputPort->isConnected() && inputPort->getType() == pass) {
                 auto connection = inputPort->getConnection().lock(); // Lock the weak_ptr
                 if (connection) { // Check if the connection is valid
                     //std::cout << "transferring data " << std::endl;
@@ -309,6 +313,20 @@ protected:
             }
         }
         // Now all data is sitting in input ports, ready to be pulled
+    }
+    void setOutputData(std::string pass, std::shared_ptr<IData> data = nullptr) {
+        for (const auto& outputPort : outputPorts_) {
+            if (outputPort->getType() == pass) {
+                if (data) {
+                    outputPort->setRawData(data);
+                } else {
+                    auto inputPort = getInputPortByType(pass);
+                    if (inputPort) {
+                        outputPort->setRawData(inputPort->getRawData());
+                    }
+                }
+            }
+        }
     }
     
     void setupPorts() {

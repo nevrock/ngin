@@ -19,6 +19,9 @@ public:
     void execute(std::string& pass) override {
         Node::execute(pass);
     }
+    void update(std::string& pass) override {
+        Node::update(pass);
+    }
 };
 
 #endif // I_DRAWER_H

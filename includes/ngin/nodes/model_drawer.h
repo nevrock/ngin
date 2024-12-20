@@ -45,8 +45,8 @@ public:
         }
     }
 
-    void execute(std::string& pass) override {
-        IDrawer::execute(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
+    void update(std::string& pass) override {
+        IDrawer::update(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
     }
 
     void render(std::shared_ptr<ShaderData> shader) override {
@@ -57,10 +57,10 @@ public:
         Log::console("Rendering model: " + model_ + " with shader: " + shader->getName());
         //return;
         // Implement the render method
-        //shader.setMat4("M_MODEL", getTransformation());
-        //if (data_) {
-        //    data_->render();
-        //}
+        shader->setMat4("M_MODEL", getTransformation());
+        if (data_) {
+            data_->render();
+        }
     }
 
 protected:

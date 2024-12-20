@@ -60,18 +60,18 @@ public:
 
         if (FileUtils::doesPathExist(gShaderFilePath)) {
             if (FileUtils::doesPathExist(iShaderFilePath)) {
-                return std::make_shared<ShaderData>(vShaderFilePath.c_str(), 
+                return std::make_shared<ShaderData>(name, vShaderFilePath.c_str(), 
                     fShaderFilePath.c_str(), hShaderFilePath.c_str(), gShaderFilePath.c_str(), iShaderFilePath.c_str());
             } else {
-                return std::make_shared<ShaderData>(vShaderFilePath.c_str(), 
+                return std::make_shared<ShaderData>(name, vShaderFilePath.c_str(), 
                     fShaderFilePath.c_str(), hShaderFilePath.c_str(), gShaderFilePath.c_str(), nullptr);
             }
         } else {
             if (FileUtils::doesPathExist(iShaderFilePath)) {
-                return std::make_shared<ShaderData>(vShaderFilePath.c_str(), 
+                return std::make_shared<ShaderData>(name, vShaderFilePath.c_str(), 
                     fShaderFilePath.c_str(), hShaderFilePath.c_str(), nullptr, iShaderFilePath.c_str());
             } else {
-                return std::make_shared<ShaderData>(vShaderFilePath.c_str(), 
+                return std::make_shared<ShaderData>(name, vShaderFilePath.c_str(), 
                     fShaderFilePath.c_str(), hShaderFilePath.c_str(), nullptr, nullptr);
             }
         }    

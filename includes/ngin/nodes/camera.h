@@ -17,7 +17,12 @@ public:
     ~Camera() override = default;
 
     void execute(std::string& pass) override {
-        Node::execute(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
+        retrieveInputData(pass);
+        update(pass);
+    }
+
+    void update(std::string& pass) override {
+        Node::update(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
     
         if (pass.find("render") == std::string::npos) {
             // Only execute on render passes
@@ -51,16 +56,12 @@ public:
                     shader->setVec3("CAMERA_POS", worldPos);
                     shader->setFloat("CAMERA_NEAR_PLANE", 0.1f);
                     shader->setFloat("CAMERA_FAR_PLANE", 100.0f);
-                    
-                    //std::cout << "camera execute has input port render gui, set shader vars" << std::endl;
-                
-                    // pass on shader
-                    std::shared_ptr<NodePort> outputPort = getOutputPortByType(pass);
-                    if (outputPort) {
-                        outputPort->setData<ShaderData>(shader);
-                    }   
+
+                    setOutputData(pass, shader);
                 } 
-            } 
+            } else {
+                Log::console("Camera node requires a transform node as input.");
+            }
         } 
         
     }
