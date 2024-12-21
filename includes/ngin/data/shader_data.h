@@ -36,43 +36,47 @@ public:
         gShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
         try 
         {
-            vShaderFile.open(vertPath_);
-            fShaderFile.open(fragPath_);
-            std::stringstream vShaderStream, fShaderStream;
+            if (vertPath_) {
+                vShaderFile.open(vertPath_);
+                std::stringstream vShaderStream;
+                vShaderStream << vShaderFile.rdbuf();
+                vShaderFile.close();
+                vertexCode = vShaderStream.str();
+            }
 
-            vShaderStream << vShaderFile.rdbuf();
-            fShaderStream << fShaderFile.rdbuf();		
+            if (fragPath_) {
+                fShaderFile.open(fragPath_);
+                std::stringstream fShaderStream;
+                fShaderStream << fShaderFile.rdbuf();
+                fShaderFile.close();
+                fragmentCode = fShaderStream.str();
+            }
 
-            vShaderFile.close();
-            fShaderFile.close();
-
-            vertexCode = vShaderStream.str();
-            fragmentCode = fShaderStream.str();		
-
-            if (inclPath_ != nullptr)
-            {
+            if (inclPath_) {
                 iShaderFile.open(inclPath_);
                 std::stringstream iShaderStream;
                 iShaderStream << iShaderFile.rdbuf();
                 iShaderFile.close();
-                fragmentCode = iShaderStream.str() + + "\n" + fragmentCode;
+                fragmentCode = iShaderStream.str() + "\n" + fragmentCode;
             }
 
-            hShaderFile.open(headPath_);
-            std::stringstream hShaderStream;
-            hShaderStream << hShaderFile.rdbuf();
-            hShaderFile.close();
-            fragmentCode = hShaderStream.str() + + "\n" + fragmentCode;
-            vertexCode = hShaderStream.str() + + "\n" + vertexCode;
-
-            if (geomPath_ != nullptr)
-            {
+            if (geomPath_) {
                 gShaderFile.open(geomPath_);
                 std::stringstream gShaderStream;
                 gShaderStream << gShaderFile.rdbuf();
                 gShaderFile.close();
                 geometryCode = gShaderStream.str();
-                geometryCode = hShaderStream.str() + + "\n" + geometryCode;
+            }
+
+            if (headPath_) {
+                hShaderFile.open(headPath_);
+                std::stringstream hShaderStream;
+                hShaderStream << hShaderFile.rdbuf();
+                hShaderFile.close();
+                fragmentCode = hShaderStream.str() + "\n" + fragmentCode;
+                vertexCode = hShaderStream.str() + "\n" + vertexCode;
+                if (geomPath_)
+                    geometryCode = hShaderStream.str() + "\n" + geometryCode;
             }
         }
         catch (std::ifstream::failure& e)

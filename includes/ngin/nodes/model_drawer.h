@@ -5,7 +5,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <ngin/resources.h>
-#include <ngin/log.h>
 #include <ngin/nodes/i_drawer.h> // Include IDrawer
 #include <ngin/data/mesh_data.h> // Include MeshData
 #include <ngin/drawer.h> // Include IDrawer
@@ -24,42 +23,50 @@ public:
 
     ~ModelDrawer() override {
         for (const auto& pass : passes_) {
-            Log::console("Unregistering drawer: " + pass);
+            Log::console("unregistering drawer: " + pass);
             Drawer::unregisterDrawer(pass, this);
         }
     }
 
     void setup() override { 
         IDrawer::setup();
-
-        data_ = Resources::loadMeshData(model_);
-        data_->log();
     }
 
-    void launch() override { 
-        IDrawer::launch();
+    void start(std::string& pass) override { 
+        IDrawer::start(pass);
+
+        meshData_ = Resources::loadMeshData(model_);
 
         for (const auto& pass : passes_) {
-            Log::console("Registering drawer: " + pass);
+            Log::console("registering drawer: " + pass);
             Drawer::registerDrawer(pass, this);
         }
     }
 
     void update(std::string& pass) override {
         IDrawer::update(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
+        transforms_.clear();
+        // this will get called on a transform pass
+        std::vector<std::shared_ptr<NodePort>> ports = getInputPortsByType("transform");
+        for (const auto& port : ports) {
+            std::shared_ptr<TransformData> data = port->getData<TransformData>();
+            if (data) {
+                transforms_.push_back(data);
+            }
+        }
     }
 
     void render(std::shared_ptr<ShaderData> shader) override {
         if (!shader) {
-            Log::console("Shader is null in model drawer render");
+            Log::console("shader is null in model drawer render");
             return;
         }
-        Log::console("Rendering model: " + model_ + " with shader: " + shader->getName());
-        //return;
-        // Implement the render method
-        shader->setMat4("M_MODEL", getTransformation());
-        if (data_) {
-            data_->render();
+
+        for (const auto& transform : transforms_) {
+            shader->setMat4("model", transform->getWorldModelMatrix());
+            if (meshData_) {
+                meshData_->render();
+            }
         }
     }
 
@@ -67,11 +74,9 @@ protected:
     std::string model_;
     std::vector<std::string> passes_;
 
-    std::shared_ptr<MeshData> data_;
+    std::shared_ptr<MeshData> meshData_;
+    std::vector<std::shared_ptr<TransformData>> transforms_;
 
-    glm::mat4 getTransformation() {
-        return glm::mat4(1.0f);
-    }
 };
 
 #endif  // MODEL_DRAWER_H

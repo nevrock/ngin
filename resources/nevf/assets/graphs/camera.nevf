@@ -132,27 +132,9 @@ connections:
     camera-6---0-pass_render_gui: 
         type: render_gui
 gui: 
-    gui_depth_test: 
-        x: -450
-        y: 200
-    scene_depth_test: 
-        x: -150
-        y: -250
     camera: 
         x: 50.0
         y: 0.0
-    scene: 
-        x: 150
-        y: -100
-    gui: 
-        x: 150
-        y: 200
-    shader_gui: 
-        x: -250
-        y: 200
-    pass_logic: 
-        x: 550
-        y: -250
     pass_transform: 
         x: 550.0
         y: -200.0

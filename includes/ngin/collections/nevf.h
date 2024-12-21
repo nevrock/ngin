@@ -133,6 +133,37 @@ public:
         }
         return vec;
     }
+    glm::vec4 getVec4(const std::string& key, const glm::vec4& defaultValue) {
+        std::vector<float> l = getC<std::vector<float>>(key, std::vector<float>{0.0, 0.0, 0.0, 0.0});
+        if (l.size() != 4) {
+            std::cout << "dict failed to convert to vec - list length mismatch" << std::endl;
+            return defaultValue; // Return default if the length is not exactly 4
+        }
+        glm::vec4 vec(0.0f);
+        try {
+            for (int i = 0; i < 4; ++i) {
+                vec[i] = l[i];
+            }
+        } catch (const std::bad_any_cast& e) {
+            try {
+                std::vector<int> li = getC<std::vector<int>>(key, std::vector<int>{0, 0, 0, 0});
+                for (int i = 0; i < 4; ++i) {
+                    vec[i] = li[i];
+                }
+            } catch (const std::bad_any_cast& e2) {
+                std::cout << "dict failed to convert to vec - bad any cast" << std::endl;
+                return defaultValue; // Return default if the index is out of range
+            } catch (const std::out_of_range& e2) {
+                std::cout << "dict failed to convert to vec - out of range" << std::endl;
+                return defaultValue; // Return default if the index is out of range
+            }
+            return vec; // Return default if there's a type mismatch
+        } catch (const std::out_of_range& e) {
+            std::cout << "dict failed to convert to vec - out of range" << std::endl;
+            return defaultValue; // Return default if the index is out of range
+        }
+        return vec;
+    }
     std::string getString(int indent = 0) const {
         std::string result;
         for (const auto& pair : data_) {
@@ -190,6 +221,34 @@ public:
             return false;
         }
         return it->second.type() == type;
+    }
+    std::string getTypeForKey(const std::string& key) const {
+        auto it = data_.find(key);
+        if (it == data_.end()) {
+            return "none"; // Return "none" if the key is not found
+        }
+        const std::type_info& type = it->second.type();
+        if (type == typeid(int)) {
+            return "int";
+        } else if (type == typeid(float)) {
+            return "float";
+        } else if (type == typeid(bool)) {
+            return "bool";
+        } else if (type == typeid(std::string)) {
+            return "string";
+        } else if (type == typeid(std::vector<int>)) {
+            return "vector_int";
+        } else if (type == typeid(std::vector<float>)) {
+            return "vector_float";
+        } else if (type == typeid(std::vector<bool>)) {
+            return "vector_bool";
+        } else if (type == typeid(std::vector<std::string>)) {
+            return "vector_string";
+        } else if (type == typeid(Nevf)) {
+            return "nevf";
+        } else {
+            return "unknown"; // Return "unknown" for any other type
+        }
     }
     bool contains(const std::string& key) const {
         return data_.find(key) != data_.end();

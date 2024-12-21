@@ -14,6 +14,14 @@ public:
 
     ~Shader() override = default;
 
+    void start(std::string& pass) override {
+        Node::start(pass); // Correctly calls the base class setup(), which sets up the input ports
+    
+        shader_->use();
+
+        setOutputData(pass, shader_);
+    }
+
     void execute(std::string& pass) override {
         retrieveInputData(pass);
         update(pass);

@@ -43,6 +43,7 @@ public:
         //log();
 
         buildGraphStates();
+        launchGraphStates();
     }
     void execute() {
         //std::cout << "executing all graph states..." << std::endl;
@@ -342,6 +343,11 @@ private:
                 graphStates_[passNode->getPass()] = GraphState(passNode->getPass()); 
                 graphStates_[passNode->getPass()].cook(passNode); 
             }
+        }
+    }
+    void launchGraphStates() {
+        for (auto& [passType, graphState] : graphStates_) {
+            graphState.launch();
         }
     }
     void refreshGraphState(const std::string& passType) {

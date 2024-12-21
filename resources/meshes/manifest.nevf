@@ -1,3 +1,6 @@
 
 quad:
     location: prims/quad
+
+cube:
+    location: prims/cube

@@ -5,59 +5,15 @@ nodes:
         output_ports: 
         id: 1
         input_ports: 
-            logic: 
-                id: 0
-                type: logic
-                name: logic
         name: pass_logic
     pass_transform: 
         type: pass
         pass: transform
         id: 1
         input_ports: 
-            transform: 
-                id: 0
-                type: transform
-                name: transform
         output_ports: 
         name: pass_transform
-    model_test: 
-        type: model_drawer
-        file: /home/nev/github/ngin/resources/meshes/quad.mesh
-        input_ports: 
-            transform: 
-                id: 0
-                type: transform
-                name: transform
-        output_ports: 
-            logic: 
-                id: 0
-                type: logic
-                name: logic
-            transform: 
-                id: 1
-                type: transform
-                name: transform
-        name: model_test
-        model: quad
-        passes: ['render_gui']
-    test: 
-        type: transform
-        position: [0.0, 0.0, 0.0]
-        input_ports: 
-        output_ports: 
-            transform: 
-                id: 0
-                type: transform
-                name: transform
-        name: test
 connections: 
-    model_test-0---0-pass_logic: 
-        type: logic
-    model_test-1---0-pass_transform: 
-        type: transform
-    test-0---0-model_test: 
-        type: transform
 gui: 
     gui_depth_test: 
         x: -450

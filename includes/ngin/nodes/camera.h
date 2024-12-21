@@ -32,11 +32,14 @@ public:
         std::shared_ptr<NodePort> inputPortTransform = getInputPortByType("transform");
         std::shared_ptr<NodePort> inputPortRender = getInputPortByType(pass);
 
+        int screenWidth = Game::env<int>("screen.width");
+        int screenHeight = Game::env<int>("screen.height");
+
         if (inputPortTransform && inputPortRender) {
             std::shared_ptr<TransformData> parentData = inputPortTransform->getData<TransformData>();
             if (parentData) {
                 glm::vec3 worldPos = parentData->getWorldPosition();
-                glm::mat4 projection = getProjectionMatrix(Window::width, Window::height, zoom_);
+                glm::mat4 projection = getProjectionMatrix(screenWidth, screenHeight, zoom_);
                 glm::mat4 view = getViewMatrix(worldPos, parentData->getForward(), parentData->getUp());
                 glm::mat4 inverseViewMatrix = glm::inverse(view);
                 glm::mat4 inverseProjectionMatrix = glm::inverse(projection);
@@ -49,13 +52,13 @@ public:
 
                 std::shared_ptr<ShaderData> shader = inputPortRender->getData<ShaderData>();
                 if (shader) {
-                    shader->setMat4("M_CAMERA_VIEW", view);
-                    shader->setMat4("M_CAMERA_PROJECTION", projection);
-                    shader->setMat4("M_CAMERA_I_VIEW", inverseViewMatrix);
-                    shader->setMat4("M_CAMERA_I_PROJECTION", inverseProjectionMatrix);
-                    shader->setVec3("CAMERA_POS", worldPos);
-                    shader->setFloat("CAMERA_NEAR_PLANE", 0.1f);
-                    shader->setFloat("CAMERA_FAR_PLANE", 100.0f);
+                    shader->setMat4("view", view);
+                    shader->setMat4("projection", projection);
+                    //shader->setMat4("M_CAMERA_I_VIEW", inverseViewMatrix);
+                    //shader->setMat4("M_CAMERA_I_PROJECTION", inverseProjectionMatrix);
+                    //shader->setVec3("CAMERA_POS", worldPos);
+                    //shader->setFloat("CAMERA_NEAR_PLANE", 0.1f);
+                    //shader->setFloat("CAMERA_FAR_PLANE", 100.0f);
 
                     setOutputData(pass, shader);
                 } 

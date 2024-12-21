@@ -48,49 +48,51 @@ public:
     static std::shared_ptr<ShaderData> loadShaderData(const std::string& name)
     {
         Nevf shaderManifestData = shaderManifest_.getC<Nevf>(name, Nevf());
-        std::string location = shaderManifestData.getC<std::string>("location", "");
 
-        Log::console("loading shader! " + name + ", at location: " + location);
-        
-        std::string vShaderFilePath = FileUtils::getResourcePath("shaders/" + location + ".nvtx");
-        std::string fShaderFilePath = FileUtils::getResourcePath("shaders/" + location + ".nfrg");
-        std::string gShaderFilePath = FileUtils::getResourcePath("shaders/" + location + ".ngeo");
-        std::string iShaderFilePath = FileUtils::getResourcePath("shaders/" + location + ".ninc");
-        std::string hShaderFilePath = FileUtils::getResourcePath("shaders/" + std::string(ngin::SHADER_INCLUDE_MANDATORY) + ".ninc");
+        std::string vertexLocation = shaderManifestData.getC<std::string>("vertex", "");
+        std::string fragmentLocation = shaderManifestData.getC<std::string>("fragment", "");
+        std::string geometryLocation = shaderManifestData.getC<std::string>("geometry", "");
+        std::string includeLocation = shaderManifestData.getC<std::string>("include", "");
+        std::string headerLocation = shaderManifestData.getC<std::string>("header", ngin::SHADER_INCLUDE_MANDATORY);
 
-        if (FileUtils::doesPathExist(gShaderFilePath)) {
-            if (FileUtils::doesPathExist(iShaderFilePath)) {
-                return std::make_shared<ShaderData>(name, vShaderFilePath.c_str(), 
-                    fShaderFilePath.c_str(), hShaderFilePath.c_str(), gShaderFilePath.c_str(), iShaderFilePath.c_str());
-            } else {
-                return std::make_shared<ShaderData>(name, vShaderFilePath.c_str(), 
-                    fShaderFilePath.c_str(), hShaderFilePath.c_str(), gShaderFilePath.c_str(), nullptr);
-            }
-        } else {
-            if (FileUtils::doesPathExist(iShaderFilePath)) {
-                return std::make_shared<ShaderData>(name, vShaderFilePath.c_str(), 
-                    fShaderFilePath.c_str(), hShaderFilePath.c_str(), nullptr, iShaderFilePath.c_str());
-            } else {
-                return std::make_shared<ShaderData>(name, vShaderFilePath.c_str(), 
-                    fShaderFilePath.c_str(), hShaderFilePath.c_str(), nullptr, nullptr);
-            }
-        }    
-        return nullptr;
+        Log::console("loading shader! " + name);
+
+        std::string vShaderFilePath = FileUtils::getResourcePath("shaders/" + vertexLocation + ".nvtx");
+        std::string fShaderFilePath = FileUtils::getResourcePath("shaders/" + fragmentLocation + ".nfrg");
+        std::string gShaderFilePath = FileUtils::getResourcePath("shaders/" + geometryLocation + ".ngeo");
+        std::string iShaderFilePath = FileUtils::getResourcePath("shaders/" + includeLocation + ".ninc");
+        std::string hShaderFilePath = FileUtils::getResourcePath("shaders/" + headerLocation + ".ninc");
+
+        const char* vShaderPath = FileUtils::doesPathExist(vShaderFilePath) ? vShaderFilePath.c_str() : nullptr;
+        const char* fShaderPath = FileUtils::doesPathExist(fShaderFilePath) ? fShaderFilePath.c_str() : nullptr;
+        const char* gShaderPath = FileUtils::doesPathExist(gShaderFilePath) ? gShaderFilePath.c_str() : nullptr;
+        const char* iShaderPath = FileUtils::doesPathExist(iShaderFilePath) ? iShaderFilePath.c_str() : nullptr;
+        const char* hShaderPath = FileUtils::doesPathExist(hShaderFilePath) ? hShaderFilePath.c_str() : nullptr;
+
+        return std::make_shared<ShaderData>(name, vShaderPath, fShaderPath, hShaderPath, gShaderPath, iShaderPath);
     }
+    
     static std::shared_ptr<MeshData> loadMeshData(const std::string& name) {
         Nevf meshManifestData = meshManifest_.getC<Nevf>(name, Nevf());
-        meshManifest_.print();
-        meshManifestData.print();
+        //meshManifest_.print();
+        //meshManifestData.print();
         std::string location = meshManifestData.getC<std::string>("location", "");
 
         Log::console("loading mesh! " + name + ", at location: " + location);
 
         std::string meshFilePath = FileUtils::getResourcePath("meshes/" + location + ".nmsh");
 
+        Log::console("mesh filepath: " + meshFilePath);
+
         Nevf n;
         n.read(meshFilePath);
 
-        return std::make_shared<MeshData>(n);
+        n.print();
+
+        std::vector<float> verticesFlattened = n.getC<std::vector<float>>("vertices", std::vector<float>());
+        std::string meshName = n.getC<std::string>("name", "");
+
+        return std::make_shared<MeshData>(meshName, verticesFlattened);
     }
 
 private:

@@ -3,4 +3,5 @@ name: test_game
 start_scene: scenes/start
 
 env:
-    
+    screen.width: 800
+    screen.height: 600

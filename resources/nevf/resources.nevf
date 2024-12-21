@@ -1,0 +1,10 @@
+brdf:
+    vertex: brdf/brdf
+    fragment: brdf/brdf
+
+equirectangular:
+    vertex: cubemap/cubemap
+    fragment: equirectangular_to_cubemap/equirectangular_to_cubemap
+
+irradiance:
+    

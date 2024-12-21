@@ -124,6 +124,16 @@ public:
                                [type](const std::shared_ptr<NodePort>& port) { return port->getType() == type; });
         return (it != inputPorts_.end()) ? *it : nullptr;
     }
+
+    std::vector<std::shared_ptr<NodePort>> getInputPortsByType(const std::string& type) const {
+        std::vector<std::shared_ptr<NodePort>> result;
+        for (const auto& port : inputPorts_) {
+            if (port->getType() == type) {
+                result.push_back(port);
+            }
+        }
+        return result;
+    }
     
     std::vector<std::shared_ptr<NodePort>> getOutputPortsByType(const std::string& type) const {
         std::vector<std::shared_ptr<NodePort>> result;
@@ -277,19 +287,28 @@ public:
     }
 
     void execute(std::string& pass) override {
+        Log::console("execute node: " + name_, 2);
+
         retrieveInputData(pass);
         update(pass);
         setOutputData(pass);
     }
 
     void setup() override { 
+        Log::console("setup node: " + name_);
     }
 
     void launch() override { 
+        Log::console("launch node: " + name_, 1);
         setupPorts();
     }
 
+    void start(std::string& preupdate) override {
+        Log::console("start node: " + name_, 1);
+    }
+
     void update(std::string& pass) override {
+        Log::console("update node: " + name_, 2);
     }
 
 protected:

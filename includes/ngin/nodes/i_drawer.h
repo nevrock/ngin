@@ -4,7 +4,7 @@
 #include <ngin/node/node.h>
 #include <ngin/data/shader_data.h>
 
-class IDrawer : public Node, public std::enable_shared_from_this<IDrawer> {
+class IDrawer : public Node {
 public:
     using Node::Node; // Inherit constructors from Node
 
@@ -21,6 +21,9 @@ public:
     }
     void update(std::string& pass) override {
         Node::update(pass);
+    }
+    void start(std::string& pass) override {
+        Node::start(pass);
     }
 };
 

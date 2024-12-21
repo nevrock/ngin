@@ -7,17 +7,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <ngin/gl/window.h>
-#include <ngin/constants.h>
 #include <ngin/collections/nevf.h>
 #include <ngin/game.h>
 #include <ngin/resources.h>
-#include <ngin/physics.h>
-#include <ngin/preferences.h>
 #include <ngin/drawer.h>
-
-#include <ngin/node/node_graph.h>
-#include <ngin/nodes/pass.h>
-#include <ngin/node/graph_state.h>
 #include <ngin/scene.h>
 
 #include <ft2build.h>
@@ -28,196 +21,64 @@
 #include <atomic>
 #include <memory>
 
+
+// --- STATIC DECLARATIONS --- //
 Nevf Resources::shaderManifest_ = {}; 
 Nevf Resources::meshManifest_ = {}; 
 std::map<std::string, std::vector<IDrawer*>> Drawer::drawers_ = {}; 
 
+GLFWwindow* Window::window = nullptr; // Initialize static member
+Window* Window::mainWindow = nullptr; // Initialize static member
+
 static int gameInit = (Game::init(), 0); 
 static int resourcesInit = (Resources::init(), 0); 
-static int preferencesInit = (Preferences::init(), 0); 
-static int physicsInit = (Physics::init(), 0); 
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow *window);
 
-// settings
-const unsigned int SCR_WIDTH = ngin::SCREEN_WIDTH;
-const unsigned int SCR_HEIGHT = ngin::SCREEN_HEIGHT;
-
-// camera
-float lastX = (float)SCR_WIDTH / 2.0;
-float lastY = (float)SCR_HEIGHT / 2.0;
-bool firstMouse = true;
-
-// timing
+// --- GLOBAL VARIABLES --- //
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-float deltaTimePhysics = 0.0f;
-float lastFramePhysics = 0.0f;
 
-float fixedPhysicsStep = 0.015f;
-
-unsigned int screenWidth, screenHeight;
-
-GLFWwindow* Window::window = nullptr; // Initialize static member
-Window* Window::mainWindow = nullptr; // Initialize static member
-int Window::width = SCR_WIDTH;
-int Window::height = SCR_HEIGHT;
-std::atomic<bool> Physics::running = false;
-Scene* Physics::scene_ = nullptr; 
-
-
+// --- MAIN --- //
 int main()
 {
-    Window window(SCR_WIDTH, SCR_HEIGHT, "ngin");
-    GLFWwindow* win = Window::getGLFWwindow();
-
+    // --- game setup --- //
     Game::setState("loading");
-
     Nevf n = Resources::loadNevf("game");
-    Scene scene;
-    scene.load(n.getC<std::string>("start_scene", "scenes/start").c_str());
-
     Nevf env = n.getC<Nevf>("env", Nevf());
     Game::setEnv(std::make_shared<Nevf>(env));
 
+    // --- scene setup --- /
+    Scene scene;
+    scene.load(n.getC<std::string>("start_scene", "scenes/start").c_str());
+
+    // --- window setup --- //
+    Window window(Game::env<int>("screen.width"), Game::env<int>("screen.height"), "ngin");
+
+    // --- main loop --- //
     Game::setState("start");
 
-    glfwSetFramebufferSizeCallback(win, framebuffer_size_callback);
-    glfwSetCursorPosCallback(win, mouse_callback);
-    glfwSetScrollCallback(win, scroll_callback);
-    glfwSetScrollCallback(win, scroll_callback);
 
-    window.setupDepthMap();
-    window.setupCubeMap();
-
-    //std::atomic<bool> running(true);
-    Physics::connectScene(&scene);
-    Physics::run();
-
-    while (!glfwWindowShouldClose(win))
+    while (!window.shouldClose())
     {
-        float currentFrame = static_cast<float>(glfwGetTime());
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        float currentTime = static_cast<float>(glfwGetTime());
+        deltaTime = currentTime - lastFrame;
+        lastFrame = currentTime;
 
-        std::string& state = Game::getState();
+        Game::envset<float>("time.current", currentTime);
+        Game::envset<float>("time.delta", deltaTime);
 
-        // input
-        // -----
-        processInput(win);
+        window.processInput();
 
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         window.clear();
 
-        if (state != "loading") {
+        scene.executePasses();
 
-            scene.executePasses();
-
-            /*
-
-            scene.executePass("logic");
-            scene.executePass("transform");
-            
-            // 1. render depth of scene to texture (from light's perspective)
-            // --------------------------------------------------------------
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_LESS);
-
-            scene.executePass("pre_render_directional_depth");
-            window.updateDepthMap();
-            scene.executePass("render_directional_depth");
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-            // render scene from light's point of view
-            scene.executePass("pre_render_points_depth");
-            window.updateCubeMap();
-            scene.executePass("render_points_depth");
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            
-            // reset viewport
-            glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            // 2. render scene as normal using the generated depth/shadow map  
-            // --------------------------------------------------------------
-            scene.executePass("pre_render");
-            window.bindDepthMap();
-            window.bindCubeMap();
-            scene.executePass("render");
-            
-
-            // 3. render ui
-            // --------------------------------------------------------------
-            glDisable(GL_DEPTH_TEST);
-
-            scene.executePass("pre_render_gui");
-            scene.executePass("render_gui");
-            
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));  // Simulate the passage of time between frames
-        
-            */
-        }
-        
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
-        glfwSwapBuffers(win);
-        glfwPollEvents();
+        window.displayAndPoll();
     }
 
-    Physics::running = false;
 
-    glfwTerminate();
-
+    window.terminate();
     return 0;
-}
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-}
-
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    // make sure the viewport matches the new window dimensions; note that width and 
-    // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
-    screenWidth = width;
-    screenHeight = height;
-}
-
-// glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
-{
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-    lastX = xpos;
-    lastY = ypos;
-}
-
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-
 }

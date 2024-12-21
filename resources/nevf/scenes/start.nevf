@@ -1,199 +1,232 @@
 nodes: 
-    gui_depth_test: 
-        type: gl_depth_test
-        is_enable: false
+    pass_transform: 
+        type: pass
+        pass: transform
+        id: 0
         input_ports: 
-        output_ports: 
-            render_gui: 
-                id: 0
-                type: render_gui
-                name: render_gui
-        name: gui_depth_test
-    scene_depth_test: 
-        type: gl_depth_test
-        is_enable: true
-        input_ports: 
-        output_ports: 
-        name: scene_depth_test
-    camera_obj: 
-        type: object
-        graph: camera_obj
-        file: /home/nev/github/ngin/resources/nevf/assets/graphs/camera.nevf
-        input_ports: 
-            render_gui: 
-                id: 0
-                type: render_gui
-                name: render_gui
-        output_ports: 
-            render_gui: 
-                id: 0
-                type: render_gui
-                name: render_gui
             transform: 
                 id: 1
                 type: transform
                 name: transform
-        name: camera_obj
-    scene: 
-        type: object
-        position: [0.0, 0.0, 0.0]
-        input_ports: 
         output_ports: 
-        name: scene
-        file: /home/nev/github/ngin/resources/nevf/assets/graphs/scene.nevf
-        graph: test
-    gui: 
-        type: object
-        graph: gui/canvas
-        file: /home/nev/github/ngin/resources/nevf/assets/graphs/gui/canvas.nevf
-        input_ports: 
-        output_ports: 
-        name: gui
-    shader_gui: 
-        type: shader
-        shader: gui
-        input_ports: 
-            render_gui: 
-                id: 0
-                type: render_gui
-                name: render_gui
-        output_ports: 
-            render_gui: 
-                id: 0
-                type: render_gui
-                name: render_gui
-        name: shader_gui
-        passes: ['render_gui']
-    pass_logic: 
+        name: pass_transform
+    pass_colors: 
         type: pass
-        pass: logic
-        id: 0
-        input_ports: 
-        output_ports: 
-        name: pass_logic
-    pass_transform: 
-        type: pass
-        pass: transform
+        pass: render_colors
         id: 1
+        input_ports: 
+        output_ports: 
+        name: pass_colors
+    pass_lighting: 
+        type: pass
+        pass: render_lighting
+        id: 2
+        input_ports: 
+        output_ports: 
+        name: pass_lighting
+    model_cube_1: 
+        type: model_drawer
+        model: cube
+        passes: ['render_colors']
         input_ports: 
             transform: 
                 id: 0
                 type: transform
                 name: transform
         output_ports: 
-        name: pass_transform
-    pass_render_depthmap: 
-        type: pass
-        pass: render_depthmap
-        id: 2
-        input_ports: 
-        output_ports: 
-        name: pass_render_depthmap
-    pass_render_cubemap: 
-        type: pass
-        pass: render_cubemap
-        id: 3
-        input_ports: 
-        output_ports: 
-        name: pass_render_cubemap
-    pass_render_opaque: 
-        type: pass
-        pass: render_opaque
-        id: 4
-        input_ports: 
-        output_ports: 
-        name: pass_render_opaque
-    pass_render_transparent: 
-        type: pass
-        pass: render_transparent
-        id: 5
-        input_ports: 
-        output_ports: 
-        name: pass_render_transparent
-    pass_render_gui: 
-        type: pass
-        pass: render_gui
-        id: 6
-        input_ports: 
-            render_gui: 
+            transform: 
                 id: 0
-                type: render_gui
-                name: render_gui
-        output_ports: 
-        name: pass_render_gui
-    shader_drawer_gui: 
-        type: shader_drawer
+                type: transform
+                name: transform
+        name: model_cube_1
+    model_cube_2: 
+        type: model_drawer
+        model: cube
+        passes: ['render_lighting']
         input_ports: 
-            render_gui: 
+            transform: 
                 id: 0
-                type: render_gui
-                name: render_gui
+                type: transform
+                name: transform
         output_ports: 
-            render_gui: 
+            transform: 
                 id: 0
-                type: render_gui
-                name: render_gui
-        name: shader_drawer_gui
+                type: transform
+                name: transform
+        name: model_cube_2
+    transform_cube: 
+        type: transform
+        position: [1.2, 1.0, 2.0]
+        input_ports: 
+        output_ports: 
+            transform: 
+                id: 0
+                type: transform
+                name: transform
+        name: transform_cube
+    transform_light: 
+        type: transform
+        position: [1.2, 1.0, 2.0]
+        input_ports: 
+        output_ports: 
+            transform: 
+                id: 0
+                type: transform
+                name: transform
+        name: transform_light
+    shader_colors: 
+        type: shader
+        shader: colors
+        input_ports: 
+        output_ports: 
+            render_colors: 
+                id: 0
+                type: render_colors
+                name: render_colors
+        name: shader_colors
+    shader_lighting: 
+        type: shader
+        shader: lighting
+        input_ports: 
+        output_ports: 
+            render_lighting: 
+                id: 0
+                type: render_lighting
+                name: render_lighting
+        name: shader_lighting
+    camera: 
+        type: camera
+        input_ports: 
+            render_lighting: 
+                id: 0
+                type: render_lighting
+                name: render_lighting
+            render_colors: 
+                id: 1
+                type: render_colors
+                name: render_colors
+            transform: 
+                id: 2
+                type: transform
+                name: transform
+        output_ports: 
+            render_colors: 
+                id: 0
+                type: render_colors
+                name: render_colors
+            render_lighting: 
+                id: 1
+                type: render_lighting
+                name: render_lighting
+        name: camera
+    camera_transform: 
+        type: transform
+        position: [0.0, 0.0, 3.0]
+        input_ports: 
+        output_ports: 
+            transform: 
+                id: 0
+                type: transform
+                name: transform
+        name: camera_transform
+    lighting_attrs: 
+        type: shader_attributes
+        input_ports: 
+            render_lighting: 
+                id: 0
+                type: render_lighting
+                name: render_lighting
+        output_ports: 
+            render_lighting: 
+                id: 0
+                type: render_lighting
+                name: render_lighting
+        name: lighting_attrs
+        objectColor: [1.0, 0.5, 0.31]
+        lightColor: [1.0, 1.0, 1.0]
+    drawer_colors: 
+        type: model_drawer
+        model: quad
+        passes: [render_depthmap, render_cubemap, render_opaque]
+        input_ports: 
+            render_colors: 
+                id: 0
+                type: render_colors
+                name: render_colors
+        output_ports: 
+        name: drawer_colors
+    drawer_lighting: 
+        type: model_drawer
+        model: quad
+        passes: [render_depthmap, render_cubemap, render_opaque]
+        input_ports: 
+            render_lighting: 
+                id: 0
+                type: render_lighting
+                name: render_lighting
+        output_ports: 
+        name: drawer_lighting
 connections: 
-    gui_depth_test-0---0-shader_gui: 
-        type: render_gui
-    shader_gui-0---0-camera_obj: 
-        type: render_gui
-    camera_obj-0---0-shader_drawer_gui: 
-        type: render_gui
-    shader_drawer_gui-0---0-pass_render_gui: 
-        type: render_gui
-    camera_obj-1---0-pass_transform: 
+    transform_light-0---0-model_cube_2: 
+        type: transform
+    transform_cube-0---0-model_cube_1: 
+        type: transform
+    shader_lighting-0---0-lighting_attrs: 
+        type: render_lighting
+    lighting_attrs-0---0-camera: 
+        type: render_lighting
+    shader_colors-0---1-camera: 
+        type: render_colors
+    camera-0---0-drawer_colors: 
+        type: render_colors
+    camera-1---0-drawer_lighting: 
+        type: render_lighting
+    camera_transform-0---2-camera: 
+        type: transform
+    model_cube_1-0---0-pass_transform: 
+        type: transform
+    model_cube_2-0---1-pass_transform: 
         type: transform
 gui: 
-    gui_depth_test: 
-        x: -450.0
-        y: 100.0
-    scene_depth_test: 
-        x: -450.0
-        y: -100.0
-    camera_obj: 
-        x: 50.0
-        y: -100.0
-    scene: 
-        x: 50.0
-        y: -200.0
-    gui: 
-        x: 50.0
-        y: -150.0
-    shader_gui: 
-        x: -200.0
-        y: 100.0
-    pass_logic: 
-        x: 550.0
-        y: -200.0
     pass_transform: 
-        x: 550.0
+        x: 600.0
+        y: -200.0
+    pass_colors: 
+        x: 600.0
+        y: 150.0
+    pass_lighting: 
+        x: 600.0
+        y: 250.0
+    model_cube_1: 
+        x: 100.0
         y: -250.0
-    pass_render_depthmap: 
-        x: 550.0
-        y: -100.0
-    pass_render_cubemap: 
-        x: 550.0
+    model_cube_2: 
+        x: 100.0
+        y: -150.0
+    transform_cube: 
+        x: -150.0
+        y: -250.0
+    transform_light: 
+        x: -150.0
+        y: -150.0
+    shader_colors: 
+        x: -400.0
+        y: 150.0
+    shader_lighting: 
+        x: -400.0
+        y: 250.0
+    camera: 
+        x: 100.0
         y: -50.0
-    pass_render_opaque: 
-        x: 550.0
-        y: 0.0
-    pass_render_transparent: 
-        x: 550.0
-        y: 50.0
-    pass_render_gui: 
-        x: 550.0
-        y: 100.0
-    shader_dawer_gui: 
-        x: 50
-        y: 50
-    shader_drawer_gui: 
-        x: 300.0
-        y: 100.0
-    transform_test_1: 
-        x: 150
-        y: -400
-    transform_test_2: 
-        x: 350
-        y: -400
+    camera_transform: 
+        x: -150.0
+        y: -50.0
+    lighting_attrs: 
+        x: -150.0
+        y: 250.0
+    drawer_colors: 
+        x: 350.0
+        y: 150.0
+    drawer_lighting: 
+        x: 350.0
+        y: 250.0

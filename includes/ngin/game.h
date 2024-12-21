@@ -19,6 +19,16 @@ public:
     static std::shared_ptr<Nevf> getEnv() {
         return env_;
     }
+    template <typename T>
+    static T env(const std::string& key) { 
+        return env_->getC<T>(key, T());
+    }
+    template <typename T>
+    static void envset(const std::string& key, T value) {
+        env_->set(key, value);
+    }
+
+    
     static std::string& getState() {
         return state_;
     }

@@ -67,6 +67,19 @@ public:
         }
     }
 
+    void launch() {
+        // Iterate from totalDepth down to 0
+        for (int depth = totalDepth_; depth >= 0; --depth) {
+            // Get nodes at the current depth
+            std::vector<std::shared_ptr<INode>> nodesAtDepth = getNodesByDepth(depth); 
+
+            // Launch each node at the current depth
+            for (const auto& node : nodesAtDepth) {
+                node->start(type_); 
+            }
+        }
+    }
+
 
 private:
     void resetDepth(std::shared_ptr<INode> node) {
