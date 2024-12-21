@@ -16,6 +16,8 @@ public:
         int screenWidth = Game::env<int>("screen.width");
         int screenHeight = Game::env<int>("screen.height");
 
+        // glfw: initialize and configure
+        // ------------------------------
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -27,7 +29,7 @@ public:
 
         // glfw window creation
         // --------------------
-        GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "LearnOpenGL", NULL, NULL);
+        window = glfwCreateWindow(screenWidth, screenHeight, title.c_str(), NULL, NULL);
         if (window == NULL)
         {
             std::cout << "Failed to create GLFW window" << std::endl;
@@ -35,9 +37,7 @@ public:
             return;
         }
         glfwMakeContextCurrent(window);
-        glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-        glfwSetCursorPosCallback(window, mouse_callback);
-        glfwSetScrollCallback(window, scroll_callback);
+    
 
         // tell GLFW to capture our mouse
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -50,11 +50,16 @@ public:
             return;
         }
 
+        mainWindow = this;
+
         // configure global opengl state
         // -----------------------------
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
 
-        mainWindow = this;
+        glEnable(GL_BLEND);  
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
     }
 
 

@@ -26,6 +26,9 @@
 
 class Resources {
 public:
+    inline static std::map<std::string, std::unique_ptr<MeshData>> meshData_; // Changed to use std::unique_ptrc
+    inline static std::map<std::string, std::unique_ptr<ShaderData>> shaderData_;
+
     static void init() {
         Log::console("!!!   resources started   !!!");
         // need to load in resources

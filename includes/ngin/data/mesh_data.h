@@ -38,6 +38,8 @@ public:
     void setupMesh() {
         Log::console("setting up vao...");
         glGenVertexArrays(1, &vao_);
+        glBindVertexArray(vao_); // Ensure VAO is bound before setting up VBO
+
         Log::console("setting up vbo...");
         glGenBuffers(1, &vbo_);
         
@@ -48,8 +50,6 @@ public:
 
         Log::console("setting up mesh with vao_: " + std::to_string(vao_));
         
-        glBindVertexArray(vao_);
-
         // Vertex Positions
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
