@@ -1,19 +1,28 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#ifndef TEXTURE_DATA_H
+#define TEXTURE_DATA_H
 
 #include <glad/glad.h>
 
-// Texture is able to store and configure a texture in OpenGL.
+#include <ngin/data/i_data.h>
+
+// TextureData is able to store and configure a texture in OpenGL.
 // It also hosts utility functions for easy management.
-class Texture
+class TextureData : public IData 
 {
 public:
-    Texture() {
-        glGenTextures(1, &this->ID);
+
+    TextureData() {
+        glGenTextures(1, &this->id);
     }
 
-    // holds the ID of the texture object, used for all texture operations to reference to this particular texture
-    unsigned int ID;
+    void execute() override {
+        // cook this data so it is stable for remaining passes
+    }
+
+    std::string getName() override { return name_; } 
+
+    // holds the id of the texture object, used for all texture operations to reference to this particular texture
+    unsigned int id;
     // texture image dimensions
     unsigned int width, height; // width and height of loaded image in pixels
     // texture Format
@@ -30,7 +39,7 @@ public:
         this->width = width;
         this->height = height;
         // create Texture
-        glBindTexture(GL_TEXTURE_2D, this->ID);
+        glBindTexture(GL_TEXTURE_2D, this->id);
         glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, width, height, 0, this->imageFormat, GL_UNSIGNED_BYTE, data);
         
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -45,8 +54,11 @@ public:
     }
     // binds the texture as the current active GL_TEXTURE_2D texture object
     void bind() const {
-        glBindTexture(GL_TEXTURE_2D, this->ID);
+        glBindTexture(GL_TEXTURE_2D, this->id);
     }
+
+private:
+    std::string name_;
 };
 
 #endif

@@ -23,13 +23,12 @@
 
 
 // --- STATIC DECLARATIONS --- //
-Nevf Resources::shaderManifest_ = {}; 
-Nevf Resources::meshManifest_ = {}; 
-std::map<std::string, std::vector<IDrawer*>> Drawer::drawers_ = {}; 
 
-GLFWwindow* Window::window = nullptr; // Initialize static member
+GLFWwindow* Window::mainContext = nullptr; // Initialize static member
 Window* Window::mainWindow = nullptr; // Initialize static member
 
+
+// --- STATIC FUNCTIONS --- //
 static int gameInit = (Game::init(), 0); 
 static int resourcesInit = (Resources::init(), 0); 
 
@@ -48,12 +47,12 @@ int main()
     Nevf env = n.getC<Nevf>("env", Nevf());
     Game::setEnv(std::make_shared<Nevf>(env));
 
+    // --- window setup --- //
+    Window window("ngin");
+
     // --- scene setup --- /
     Scene scene;
     scene.load(n.getC<std::string>("start_scene", "scenes/start").c_str());
-
-    // --- window setup --- //
-    Window window(Game::env<int>("screen.width"), Game::env<int>("screen.height"), "ngin");
 
     // --- main loop --- //
     Game::setState("start");
@@ -70,15 +69,18 @@ int main()
 
         window.processInput();
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        window.clear();
+        window.clear(true);
 
         scene.executePasses();
+        scene.cleanPasses();
 
         window.displayAndPoll();
     }
 
-
     window.terminate();
+
+    Resources::terminate();
+    Game::terminate();
+
     return 0;
 }

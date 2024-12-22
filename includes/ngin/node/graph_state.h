@@ -66,6 +66,18 @@ public:
             }
         }
     }
+    void clean() {
+        // Iterate from 0 to totalDepth
+        for (int depth = 0; depth <= totalDepth_; ++depth) {
+            // Get nodes at the current depth
+            std::vector<std::shared_ptr<INode>> nodesAtDepth = getNodesByDepth(depth); 
+
+            // Clean each node at the current depth
+            for (const auto& node : nodesAtDepth) {
+                node->clean(type_); 
+            }
+        }
+    }
 
     void launch() {
         // Iterate from totalDepth down to 0

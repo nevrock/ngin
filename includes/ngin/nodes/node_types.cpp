@@ -8,12 +8,15 @@
 #include <ngin/nodes/shader_drawer.h>
 #include <ngin/nodes/model_drawer.h>
 #include <ngin/nodes/shader_attributes.h>
+#include <ngin/nodes/light_directional.h>
 
 #include <ngin/nodes/gl/gl_depth_test.h>
 #include <ngin/nodes/gl/gl_g_buffer.h>
 #include <ngin/nodes/gl/gl_bind_buffer.h>
 #include <ngin/nodes/gl/gl_window.h>
 #include <ngin/nodes/gl/gl_copy_buffer.h>
+#include <ngin/nodes/gl/gl_framebuffer.h>
+#include <ngin/nodes/gl/gl_cubemap.h>
 
 bool pass_registered = []() {
     NodeGraph::registerNodeType("pass", [](const std::string& name, Nevf& dictionary) {
@@ -72,6 +75,12 @@ bool shader_attributes_registered = []() {
     return true;
 }();
 
+bool light_directional_registered = []() {
+    NodeGraph::registerNodeType("light_directional", [](const std::string& name, Nevf& dictionary) {
+        return std::make_shared<LightDirectional>(name, dictionary);
+    });
+    return true;
+}();
 
 
 
@@ -107,6 +116,20 @@ bool gl_window_registered = []() {
 bool gl_copy_buffer_registered = []() {
     NodeGraph::registerNodeType("gl_copy_buffer", [](const std::string& name, Nevf& dictionary) {
         return std::make_shared<GlCopyBuffer>(name, dictionary);
+    });
+    return true;
+}();
+
+bool gl_framebuffer_registered = []() {
+    NodeGraph::registerNodeType("gl_framebuffer", [](const std::string& name, Nevf& dictionary) {
+        return std::make_shared<GlFramebuffer>(name, dictionary);
+    });
+    return true;
+}();
+
+bool gl_cubemap_registered = []() {
+    NodeGraph::registerNodeType("gl_cubemap", [](const std::string& name, Nevf& dictionary) {
+        return std::make_shared<GlCubemap>(name, dictionary);
     });
     return true;
 }();

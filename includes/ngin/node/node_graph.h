@@ -66,12 +66,39 @@ public:
         //std::cout << "executing complete." << std::endl;
     }
 
+    void clean() {
+        std::vector<std::pair<std::string, GraphState>> sortedGraphStates(graphStates_.begin(), graphStates_.end());
+
+        // Sort based on graphState.id
+        std::sort(sortedGraphStates.begin(), sortedGraphStates.end(),
+            [](auto& a, const auto& b) {
+                return a.second.id < b.second.id;
+            });
+
+        // Execute graph states in sorted order
+        for (auto& [passType, graphState] : sortedGraphStates) {
+            //std::cout << "executing graph state for pass type: " << passType << ", id: " << graphState.id << std::endl;
+            graphState.clean();
+        }
+    }
+
     void executePass(const std::string& passType) {
         auto it = graphStates_.find(passType);
         if (it != graphStates_.end()) {
             // Retrieve the existing GraphState
             GraphState& graphState = it->second;
             graphState.execute();
+        } else {
+            //std::cerr << "error: graph state for pass type \"" << passType << "\" not found." << std::endl;
+        }
+    }
+
+    void cleanPass(const std::string& passType) {
+        auto it = graphStates_.find(passType);
+        if (it != graphStates_.end()) {
+            // Retrieve the existing GraphState
+            GraphState& graphState = it->second;
+            graphState.clean();
         } else {
             //std::cerr << "error: graph state for pass type \"" << passType << "\" not found." << std::endl;
         }

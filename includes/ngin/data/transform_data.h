@@ -12,11 +12,13 @@ public:
 
   TransformData() : position_(0.0f), rotation_(1.0f, 0.0f, 0.0f, 0.0f), scale_(1.0f), parent_(1.0f) {} 
   TransformData(const Nevf& data) :  position_(0.0f), rotation_(1.0f, 0.0f, 0.0f, 0.0f), scale_(1.0f), parent_(1.0f) {
+    parent_ = glm::mat4(1.0f);
     if (data.contains("position")) {
       position_ = data.getVec("position", glm::vec3(0.0));
     }
     if (data.contains("rotation")) {
-      rotation_ = data.getVec("rotation", glm::vec3(0.0));
+      glm::vec4 rotationVec = data.getVec4("rotation", glm::vec4(0.0f));
+      rotation_ = glm::quat(rotationVec.w, rotationVec.x, rotationVec.y, rotationVec.z);
     }
     if (data.contains("scale")) {
       scale_ = data.getVec("scale", glm::vec3(1.0));

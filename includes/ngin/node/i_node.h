@@ -20,6 +20,7 @@ public:
 
     virtual void start(std::string& pass) = 0;
     virtual void update(std::string& pass) = 0;
+    virtual void clean(std::string& pass) = 0;
 };
 
 #endif // I_NODE_H

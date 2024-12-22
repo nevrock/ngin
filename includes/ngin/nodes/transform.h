@@ -6,6 +6,7 @@
 
 #include <ngin/node/node.h>
 #include <ngin/data/transform_data.h>
+#include <ngin/data/mover_data.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp> // Include this header for glm::to_string
@@ -23,7 +24,12 @@ public:
     void update(std::string& pass) override {
         Node::update(pass);
 
-        std::shared_ptr<NodePort> inputPort = getInputPortByType(pass);
+        if (pass == "logic") {
+            setOutputData(pass, transform_);
+            return;
+        }
+        
+        std::shared_ptr<NodePort> inputPort = getInputPortByTypeAndData<TransformData>(pass);
         if (inputPort) {
             std::shared_ptr<TransformData> parentData = inputPort->getData<TransformData>();
             if (parentData) {
@@ -34,9 +40,24 @@ public:
         } else {
             transform_->setParentModel(glm::mat4(1.0f));
         }
-        transform_->execute();
 
+        // Retrieve MoverData if it exists
+        std::shared_ptr<NodePort> moverPort = getInputPortByTypeAndData<MoverData>(pass);
+        if (moverPort) {
+            std::shared_ptr<MoverData> moverData = moverPort->getData<MoverData>();
+            if (moverData) {
+                transform_->setPosition(transform_->getPosition() + moverData->getPositionDelta());
+                transform_->setRotation(transform_->getRotation() * moverData->getRotationDelta());
+                transform_->setScale(transform_->getScale() + moverData->getScaleDelta());
+            }
+        }
+
+        transform_->execute();
         setOutputData(pass, transform_);
+    }
+    void clean(std::string& pass) override {
+        Node::clean(pass);
+        //transform_->setParentModel(glm::mat4(1.0f));
     }
 
     void setup() override {

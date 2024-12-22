@@ -8,7 +8,7 @@ class IDrawer : public Node {
 public:
     using Node::Node; // Inherit constructors from Node
 
-    virtual void render(std::shared_ptr<ShaderData> shader) = 0; // Pure virtual method for rendering
+    virtual void render(ShaderData& shader) = 0; // Pure virtual method for rendering
 
     void setup() override {
         Node::setup();

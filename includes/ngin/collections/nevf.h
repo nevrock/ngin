@@ -133,7 +133,7 @@ public:
         }
         return vec;
     }
-    glm::vec4 getVec4(const std::string& key, const glm::vec4& defaultValue) {
+    glm::vec4 getVec4(const std::string& key, const glm::vec4& defaultValue) const {
         std::vector<float> l = getC<std::vector<float>>(key, std::vector<float>{0.0, 0.0, 0.0, 0.0});
         if (l.size() != 4) {
             std::cout << "dict failed to convert to vec - list length mismatch" << std::endl;
@@ -338,6 +338,9 @@ public:
         file.close();
     }
 
+    size_t length() const {
+        return data_.size();
+    }
 
     auto begin() {
         return data_.begin();

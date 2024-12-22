@@ -18,6 +18,7 @@
 // data
 #include <ngin/data/shader_data.h>
 #include <ngin/data/mesh_data.h>
+#include <ngin/data/texture_data.h>
 
 #if defined(_MSC_VER)
     #include <io.h>
@@ -26,8 +27,13 @@
 
 class Resources {
 public:
-    inline static std::map<std::string, std::unique_ptr<MeshData>> meshData_; // Changed to use std::unique_ptrc
-    inline static std::map<std::string, std::unique_ptr<ShaderData>> shaderData_;
+    inline static std::map<std::string, std::unique_ptr<MeshData>> meshes_; // Changed to use std::unique_ptrc
+    inline static std::map<std::string, std::unique_ptr<ShaderData>> shaders_;
+    inline static std::map<std::string, std::unique_ptr<TextureData>> textures_;
+
+    inline static Nevf shaderManifest_;
+    inline static Nevf meshManifest_;
+    inline static Nevf textureManifest_;
 
     static void init() {
         Log::console("!!!   resources started   !!!");
@@ -35,10 +41,21 @@ public:
 
         shaderManifest_ = loadNevf("manifest.nevf", "shaders/");
         meshManifest_ = loadNevf("manifest.nevf", "meshes/");
+        textureManifest_ = loadNevf("manifest.nevf", "textures_/");
     }
-
-    static Nevf shaderManifest_;
-    static Nevf meshManifest_;
+    static void terminate() {
+        Log::console("!!!   resources terminated   !!!");
+        // need to unload resources
+        for (auto& [name, mesh] : meshes_) {
+            mesh.reset();
+        }
+        for (auto& [name, shader] : shaders_) {
+            shader.reset();
+        }
+        for (auto& [name, texture] : textures_) {
+            texture.reset();
+        }
+    }
 
     // resources, data you can load from files
     static Nevf loadNevf(const std::string& name, const std::string& prefix = "nevf/") {
@@ -48,7 +65,20 @@ public:
         //n.print();
         return n;
     }
-    static std::shared_ptr<ShaderData> loadShaderData(const std::string& name)
+    static ShaderData& getShaderData(const std::string& name) {
+        auto it = shaders_.find(name);
+        if (it == shaders_.end()) {
+            std::cerr << "shader not found: " << name << ", requires loading" << std::endl;
+            loadShaderData(name);  // Potentially risky if name still doesn't correspond to a valid shader file
+            it = shaders_.find(name);
+            if (it == shaders_.end()) {
+                throw std::runtime_error("failed to load shader: " + name);
+            }
+            return *(it->second);
+        }
+        return *(it->second);
+    }
+    static void loadShaderData(const std::string& name)
     {
         Nevf shaderManifestData = shaderManifest_.getC<Nevf>(name, Nevf());
 
@@ -72,31 +102,109 @@ public:
         const char* iShaderPath = FileUtils::doesPathExist(iShaderFilePath) ? iShaderFilePath.c_str() : nullptr;
         const char* hShaderPath = FileUtils::doesPathExist(hShaderFilePath) ? hShaderFilePath.c_str() : nullptr;
 
-        return std::make_shared<ShaderData>(name, vShaderPath, fShaderPath, hShaderPath, gShaderPath, iShaderPath);
+        shaders_[name] = std::make_unique<ShaderData>(name, vShaderPath, fShaderPath, hShaderPath, gShaderPath, iShaderPath);
+    }
+    static void unloadShaderData(const std::string& name) {
+        auto it = shaders_.find(name);
+        if (it != shaders_.end()) {
+            shaders_.erase(it);
+        }
     }
     
-    static std::shared_ptr<MeshData> loadMeshData(const std::string& name) {
+    static MeshData& getMeshData(const std::string& name) {
+        auto it = meshes_.find(name);
+        if (it == meshes_.end()) {
+            std::cerr << "mesh not found: " << name << ". Loading default mesh." << std::endl;
+            loadMeshData(name);  // Potentially risky if name still doesn't correspond to a valid mesh file
+            it = meshes_.find(name);
+            if (it == meshes_.end()) {
+                throw std::runtime_error("Failed to load mesh: " + name);
+            }
+            return *(it->second);
+        }
+        return *(it->second);
+    }
+    static void loadMeshData(const std::string& name) {
+
         Nevf meshManifestData = meshManifest_.getC<Nevf>(name, Nevf());
-        //meshManifest_.print();
-        //meshManifestData.print();
         std::string location = meshManifestData.getC<std::string>("location", "");
-
         Log::console("loading mesh! " + name + ", at location: " + location);
-
         std::string meshFilePath = FileUtils::getResourcePath("meshes/" + location + ".nmsh");
-
         Log::console("mesh filepath: " + meshFilePath);
 
         Nevf n;
         n.read(meshFilePath);
-
         n.print();
 
-        std::vector<float> verticesFlattened = n.getC<std::vector<float>>("vertices", std::vector<float>());
         std::string meshName = n.getC<std::string>("name", "");
 
-        return std::make_shared<MeshData>(meshName, verticesFlattened);
+        meshes_[name] = std::make_unique<MeshData>(meshName, n);
     }
+    static void unloadMeshData(const std::string& name) {
+        auto it = meshes_.find(name);
+        if (it != meshes_.end()) {
+            meshes_.erase(it);
+        }
+    }
+
+    static TextureData& getTextureData(const std::string& name) {
+        auto it = textures_.find(name);
+        if (it == textures_.end()) {
+            std::cerr << "Texture not found: " << name << ". Loading texture." << std::endl;
+            return loadTextureData(name);
+        }
+        return *(it->second);
+    }
+    static TextureData& loadTextureData(const std::string& name) {
+        Log::console("load texture! " + name);
+        Nevf textureManifestData = textureManifest_.getC<Nevf>(name, Nevf());
+        std::string path = textureManifestData.getC<std::string>("location", "");
+
+        auto& texture = textures_[name]; // Create a new unique_ptr entry if it does not exist
+        if (!texture) {
+            texture = std::make_unique<TextureData>(); // Create a new TextureData if not already loaded
+        }
+        if (loadTextureFromFile(path.c_str(), *texture)) {
+            return *texture;
+        } else {
+            throw std::runtime_error("Failed to load texture: " + name);
+        }
+    }
+    static void unloadTextureData(const std::string& name) {
+        auto it = textures_.find(name);
+        if (it != textures_.end()) {
+            textures_.erase(it);
+        }
+    }
+    static bool loadTextureFromFile(const char* path, TextureData& texture) {
+        int width, height, nrComponents;
+        unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+        if (!data) {
+            std::cerr << "Texture failed to load at path: " << path << std::endl;
+            stbi_image_free(data);
+            return false;
+        }
+
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        texture.internalFormat = format;
+        texture.imageFormat = format;
+        texture.wrapS = (format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        texture.wrapT = (format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        texture.filterMin = GL_LINEAR_MIPMAP_LINEAR;
+        texture.filterMax = GL_LINEAR;
+        texture.generate(width, height, data);
+        
+        stbi_image_free(data);
+        return true;
+    }
+
 
 private:
     // static std::vector<std::shared_ptr<Shader>> shaders_;

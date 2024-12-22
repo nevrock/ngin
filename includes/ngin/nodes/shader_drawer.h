@@ -19,9 +19,9 @@ public:
             Log::console("No input port found for pass: " + pass);
             return;
         }
-        std::shared_ptr<ShaderData> shaderData = inputPortRenderGui->getData<ShaderData>();
-        if (shaderData) {
-            Drawer::render(pass, shaderData);
+        std::shared_ptr<RenderData> renderData = inputPortRenderGui->getData<RenderData>();
+        if (renderData) {
+            Drawer::render(pass, renderData->getShader());
         } else {
             Log::console("No shader data found for pass: " + pass);
         }

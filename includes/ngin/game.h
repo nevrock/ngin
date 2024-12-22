@@ -13,6 +13,9 @@ public:
     static void init() {
         Log::console("!!!   game started   !!!");
     }
+    static void terminate() {
+        Log::console("!!!   game terminated   !!!");
+    }
     static void setEnv(std::shared_ptr<Nevf> nevf) {
         env_ = nevf;
     }
@@ -27,8 +30,6 @@ public:
     static void envset(const std::string& key, T value) {
         env_->set(key, value);
     }
-
-    
     static std::string& getState() {
         return state_;
     }

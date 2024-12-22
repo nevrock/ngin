@@ -1,19 +1,7 @@
-deferred_shading:
-    vertex: deferred_shading/deferred_shading
-    fragment: deferred_shading/deferred_shading
+skybox:
+    fragment: skybox/skybox
+    vertex: cubemap/cubemap
 
-forward:
-    vertex: forward/forward
-    fragment: forward/forward
-
-g_buffer:
-    vertex: g_buffer/g_buffer
-    fragment: g_buffer/g_buffer
-
-colors:
-    vertex: colors/colors
-    fragment: colors/colors
-
-light_cube:
-    vertex: light_cube/light_cube
-    fragment: light_cube/light_cube
+background:
+    fragment: background/background
+    vertex: background/background

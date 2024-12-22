@@ -5,7 +5,8 @@
 #include <ngin/gl/window.h>
 #include <ngin/game.h>
 
-#include <ngin/data/shader_data.h>
+#include <ngin/data/render_data.h>
+#include <ngin/data/transform_data.h>
 
 class Camera : public Node {
 public:
@@ -25,7 +26,11 @@ public:
         Node::update(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
     
         if (pass.find("render") == std::string::npos) {
+            
+            
+
             // Only execute on render passes
+            setOutputData(pass);
             return;
         }
 
@@ -50,15 +55,16 @@ public:
                 env->set("camera_inverse_view_matrix", inverseViewMatrix);
                 env->set("camera_inverse_projection_matrix", inverseProjectionMatrix);
 
-                std::shared_ptr<ShaderData> shader = inputPortRender->getData<ShaderData>();
+                std::shared_ptr<RenderData> shader = inputPortRender->getData<RenderData>();
                 if (shader) {
-                    shader->setMat4("view", view);
-                    shader->setMat4("projection", projection);
-                    //shader->setMat4("M_CAMERA_I_VIEW", inverseViewMatrix);
-                    //shader->setMat4("M_CAMERA_I_PROJECTION", inverseProjectionMatrix);
-                    //shader->setVec3("CAMERA_POS", worldPos);
-                    //shader->setFloat("CAMERA_NEAR_PLANE", 0.1f);
-                    //shader->setFloat("CAMERA_FAR_PLANE", 100.0f);
+                    ShaderData& shaderData = shader->getShader();
+                    shaderData.setMat4("M_CAMERA_VIEW", view);
+                    shaderData.setMat4("M_CAMERA_PROJECTION", projection);
+                    shaderData.setMat4("M_CAMERA_I_VIEW", inverseViewMatrix);
+                    shaderData.setMat4("M_CAMERA_I_PROJECTION", inverseProjectionMatrix);
+                    shaderData.setVec3("CAMERA_POS", worldPos);
+                    shaderData.setFloat("CAMERA_NEAR_PLANE", 0.1f);
+                    shaderData.setFloat("CAMERA_FAR_PLANE", 100.0f);
 
                     setOutputData(pass, shader);
                 } 

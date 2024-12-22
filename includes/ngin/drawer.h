@@ -12,7 +12,7 @@
 class Drawer {
 public:
 
-    static std::map<std::string, std::vector<IDrawer*>> drawers_; 
+    inline static std::map<std::string, std::vector<IDrawer*>> drawers_; 
 
     std::vector<IDrawer*> getDrawers(const std::string& key) const {
         auto it = drawers_.find(key);
@@ -24,7 +24,7 @@ public:
     }
 
     static void registerDrawer(const std::string& key, IDrawer* drawer) {
-        Log::console("Registering drawer: " + drawer->getName() + " for key: " + key);  
+        Log::console("registering drawer: " + drawer->getName() + " for key: " + key);  
         drawers_[key].push_back(drawer); 
     }
 
@@ -36,12 +36,7 @@ public:
         }
     }
 
-    static void render(const std::string& key, std::shared_ptr<ShaderData> shader) {
-        if (!shader) {
-            Log::console("Shader is null in drawer render");
-            return;
-        }
-        
+    static void render(const std::string& key, ShaderData& shader) {
         auto it = drawers_.find(key);
         if (it != drawers_.end()) {
             for (const auto& drawer : it->second) {

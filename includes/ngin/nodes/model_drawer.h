@@ -15,10 +15,9 @@
 class ModelDrawer : public IDrawer { // Inherit from IDrawer and enable_shared_from_this
 public:
     explicit ModelDrawer(const std::string& name, Nevf& dictionary)
-        : IDrawer(name, dictionary) // Initialize IDrawer
-    {
-        model_ = dictionary.getC<std::string>("model", "");
-        passes_ = dictionary.getC<std::vector<std::string>>("passes", {});    
+        : IDrawer(name, dictionary), model_(dictionary.getC<std::string>("model", "")),
+        meshData_(Resources::getMeshData(model_)), passes_(dictionary.getC<std::vector<std::string>>("passes", {})) {
+
     }
 
     ~ModelDrawer() override {
@@ -34,8 +33,6 @@ public:
 
     void start(std::string& pass) override { 
         IDrawer::start(pass);
-
-        meshData_ = Resources::loadMeshData(model_);
 
         for (const auto& pass : passes_) {
             Log::console("registering drawer: " + pass);
@@ -56,17 +53,10 @@ public:
         }
     }
 
-    void render(std::shared_ptr<ShaderData> shader) override {
-        if (!shader) {
-            Log::console("shader is null in model drawer render");
-            return;
-        }
-
+    void render(ShaderData& shader) override {
         for (const auto& transform : transforms_) {
-            shader->setMat4("model", transform->getWorldModelMatrix());
-            if (meshData_) {
-                meshData_->render();
-            }
+            shader.setMat4("model", transform->getWorldModelMatrix());
+            meshData_.render();
         }
     }
 
@@ -74,7 +64,7 @@ protected:
     std::string model_;
     std::vector<std::string> passes_;
 
-    std::shared_ptr<MeshData> meshData_;
+    MeshData& meshData_;
     std::vector<std::shared_ptr<TransformData>> transforms_;
 
 };

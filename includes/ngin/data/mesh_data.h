@@ -4,64 +4,160 @@
 #include <glad/glad.h> // holds all OpenGL type declarations
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #include <iostream>
 #include <vector> // Ensure you include the vector header
 
-#include <ngin/data/i_data.h>
-#include <ngin/log.h>
+#include <ngin/data/i_data.h>   
 #include <ngin/collections/nevf.h>
+#include <ngin/log.h>
 
+#define MAX_BONE_INFLUENCE 4
+#define MAX_TEXTURES 4
+
+struct Vertex {
+    // position
+    glm::vec3 position;
+    // color
+    glm::vec3 normal;
+    // texCoords
+    glm::vec2 uv;
+    // color
+    glm::vec3 color;
+    //bone indexes which will influence this vertex
+	int m_BoneIDs[MAX_BONE_INFLUENCE];
+	//weights from each bone
+	float m_Weights[MAX_BONE_INFLUENCE];
+};
+
+struct Texture {
+    unsigned int id;
+    std::string type;
+    std::string name;
+};
 
 class MeshData : public IData {
 public:
+    std::vector<Vertex> vertices;
+    std::vector<int> indices;
+    std::vector<Texture> textures;
+    unsigned int VAO;
+    unsigned int VBO, EBO;
 
-    void execute() override {}
+    glm::mat4 localTransform;
+
+    glm::mat4 getMeshMatrix() {
+        return localTransform;
+    }
+
+    void execute() override {
+        // cook this data so it is stable for remaining passes
+    }
 
     std::string getName() override { return name_; } 
 
     MeshData() {}
-    MeshData(std::string name, std::vector<float> vertices) 
-        : name_(name), vertices_(vertices) {
-        Log::console("constructing mesh with " + std::to_string(this->vertices_.size()) + " vertices");
+
+    MeshData(std::string name, Nevf data) : name_(name) {
+
+        Log::console("creating MeshData: " + name);
+        Nevf verticeDict = data.getC<Nevf>("vertices", Nevf());
+        Log::console("vertices: " + std::to_string(verticeDict.length()));
+
+        std::vector<int> triangles = data.getC<std::vector<int>>("triangles", std::vector<int>());
+        Log::console("triangles: " + std::to_string(triangles.size()));
+
+        vertices.reserve(verticeDict.length());
+        for (const auto& kvp : verticeDict) {
+            Nevf vertexData = std::any_cast<Nevf>(kvp.second);
+            Vertex vertex;
+            vertex.position = vertexData.getVec("position", glm::vec3(0.0f));
+            vertex.normal = vertexData.getVec("normal", glm::vec3(0.0f));
+            vertex.uv = vertexData.getVec2("uv", glm::vec2(0.0f));
+            vertex.color = vertexData.getVec("color", glm::vec3(1.0f));
+            auto boneIDs = vertexData.getC<std::vector<int>>("bone_ids", std::vector<int>(MAX_BONE_INFLUENCE, 0));
+            auto weights = vertexData.getC<std::vector<float>>("weights", std::vector<float>(MAX_BONE_INFLUENCE, 0.0f));
+            std::copy(boneIDs.begin(), boneIDs.end(), vertex.m_BoneIDs);
+            std::copy(weights.begin(), weights.end(), vertex.m_Weights);
+            vertices.push_back(vertex);
+        }
+
+        Log::console("vertices initialized: " + std::to_string(vertices.size()));
+
+        indices.reserve(triangles.size());
+        for (int i = 0; i < triangles.size(); i++) {
+            indices.push_back(triangles[i]);
+        }
+
+        Log::console("indices initialized: " + std::to_string(indices.size())); 
+
         setupMesh();
     }
+
     ~MeshData() {
-        Log::console("destroying mesh with vao_: " + std::to_string(vao_));
+        std::cout << "destroying Mesh with VAO: " << VAO << std::endl;
         // Proper cleanup
-        glDeleteVertexArrays(1, &vao_);
-        glDeleteBuffers(1, &vbo_);
+        //if (glIsVertexArray(VAO)) {
+        //    glDeleteVertexArrays(1, &VAO);
+        //}
+        //if (glIsBuffer(VBO)) {
+        //    glDeleteBuffers(1, &VBO);
+        //}
+        //if (glIsBuffer(EBO)) {
+        //    glDeleteBuffers(1, &EBO);
+        //}
     }
+
     void render() {
-        glBindVertexArray(vao_);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        // std::cout << "Rendering Mesh with VAO: " << VAO << std::endl;
+        // draw mesh
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
     }
+
+    // initializes all the buffer objects/arrays
     void setupMesh() {
-        Log::console("setting up vao...");
-        glGenVertexArrays(1, &vao_);
-        glBindVertexArray(vao_); // Ensure VAO is bound before setting up VBO
+        Log::console("setting up Mesh... ");
 
-        Log::console("setting up vbo...");
-        glGenBuffers(1, &vbo_);
-        
-        Log::console("gen mesh with vao_: " + std::to_string(vao_));
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glGenBuffers(1, &EBO);
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-        glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(float), vertices_.data(), GL_STATIC_DRAW);
+        std::cout << "setting up Mesh with VAO: " << VAO << std::endl;
+        glBindVertexArray(VAO);
 
-        Log::console("setting up mesh with vao_: " + std::to_string(vao_));
-        
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);
+
         // Vertex Positions
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        // Vertex Normals
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+        // Vertex Texture Coords
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+        // Vertex Colors
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+        // ids
+		glEnableVertexAttribArray(4);
+		glVertexAttribIPointer(4, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, m_BoneIDs));
+		// weights
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Weights));
 
-        glBindVertexArray(0); // Unbind vao_
+        glBindVertexArray(0); // Unbind VAO
     }
 
 private:
     std::string name_;
-    std::vector<float> vertices_;
-    unsigned int vao_;
-    unsigned int vbo_;
-};
+}; // Added missing semicolon here at the end of the class definition
 
-#endif
+#endif // MESH_H

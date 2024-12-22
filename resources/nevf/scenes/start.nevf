@@ -2,71 +2,73 @@ nodes:
     pass_transform: 
         type: pass
         pass: transform
-        id: 0
+        id: 1
         input_ports: 
             transform: 
-                id: 1
+                id: 0
                 type: transform
                 name: transform
         output_ports: 
         name: pass_transform
-    pass_colors: 
+    pass_logic: 
         type: pass
-        pass: render_colors
-        id: 1
+        pass: logic
+        id: 0
+        input_ports: 
+            logic: 
+                id: 1
+                type: logic
+                name: logic
+        output_ports: 
+        name: pass_logic
+    model_quad: 
+        type: model_drawer
+        model: quad
+        passes: ['render_geom']
         input_ports: 
         output_ports: 
-        name: pass_colors
-    pass_lighting: 
+            logic: 
+                id: 0
+                type: logic
+                name: logic
+        name: model_quad
+    pass_shadows: 
         type: pass
-        pass: render_lighting
+        pass: render_shadows
         id: 2
         input_ports: 
+            render_shadows: 
+                id: 0
+                type: render_shadows
+                name: render_shadows
         output_ports: 
-        name: pass_lighting
-    model_cube_1: 
-        type: model_drawer
-        model: cube
-        passes: ['render_colors']
-        input_ports: 
-            transform: 
-                id: 0
-                type: transform
-                name: transform
-        output_ports: 
-            transform: 
-                id: 0
-                type: transform
-                name: transform
-        name: model_cube_1
-    model_cube_2: 
-        type: model_drawer
-        model: cube
-        passes: ['render_lighting']
-        input_ports: 
-            transform: 
-                id: 0
-                type: transform
-                name: transform
-        output_ports: 
-            transform: 
-                id: 0
-                type: transform
-                name: transform
-        name: model_cube_2
-    transform_cube: 
+        name: pass_shadows
+    transform_camera: 
         type: transform
-        position: [1.2, 1.0, 2.0]
+        position: [0.0, 0.0, 0.0]
         input_ports: 
         output_ports: 
             transform: 
                 id: 0
                 type: transform
                 name: transform
-        name: transform_cube
+        name: transform_camera
+    camera_main: 
+        type: camera
+        input_ports: 
+            transform: 
+                id: 0
+                type: transform
+                name: transform
+        output_ports: 
+            transform: 
+                id: 0
+                type: transform
+                name: transform
+        name: camera_main
     transform_light: 
         type: transform
-        position: [1.2, 1.0, 2.0]
+        position: [0.0, 0.0, 0.0]
         input_ports: 
         output_ports: 
             transform: 
@@ -74,159 +76,58 @@ nodes:
                 type: transform
                 name: transform
         name: transform_light
-    shader_colors: 
-        type: shader
-        shader: colors
+    light_main: 
+        type: light_directional
         input_ports: 
-        output_ports: 
-            render_colors: 
-                id: 0
-                type: render_colors
-                name: render_colors
-        name: shader_colors
-    shader_lighting: 
-        type: shader
-        shader: lighting
-        input_ports: 
-        output_ports: 
-            render_lighting: 
-                id: 0
-                type: render_lighting
-                name: render_lighting
-        name: shader_lighting
-    camera: 
-        type: camera
-        input_ports: 
-            render_lighting: 
-                id: 0
-                type: render_lighting
-                name: render_lighting
-            render_colors: 
-                id: 1
-                type: render_colors
-                name: render_colors
             transform: 
-                id: 2
+                id: 0
                 type: transform
                 name: transform
-        output_ports: 
-            render_colors: 
-                id: 0
-                type: render_colors
-                name: render_colors
-            render_lighting: 
-                id: 1
-                type: render_lighting
-                name: render_lighting
-        name: camera
-    camera_transform: 
-        type: transform
-        position: [0.0, 0.0, 3.0]
-        input_ports: 
         output_ports: 
             transform: 
                 id: 0
                 type: transform
                 name: transform
-        name: camera_transform
-    lighting_attrs: 
-        type: shader_attributes
-        input_ports: 
-            render_lighting: 
-                id: 0
-                type: render_lighting
-                name: render_lighting
-        output_ports: 
-            render_lighting: 
-                id: 0
-                type: render_lighting
-                name: render_lighting
-        name: lighting_attrs
-        objectColor: [1.0, 0.5, 0.31]
-        lightColor: [1.0, 1.0, 1.0]
-    drawer_colors: 
-        type: model_drawer
-        model: quad
-        passes: [render_depthmap, render_cubemap, render_opaque]
-        input_ports: 
-            render_colors: 
-                id: 0
-                type: render_colors
-                name: render_colors
-        output_ports: 
-        name: drawer_colors
-    drawer_lighting: 
-        type: model_drawer
-        model: quad
-        passes: [render_depthmap, render_cubemap, render_opaque]
-        input_ports: 
-            render_lighting: 
-                id: 0
-                type: render_lighting
-                name: render_lighting
-        output_ports: 
-        name: drawer_lighting
+            render_shadows: 
+                id: 1
+                type: render_shadows
+                name: render_shadows
+        name: light_main
 connections: 
-    transform_light-0---0-model_cube_2: 
+    model_quad-0---1-pass_logic: 
+        type: logic
+    transform_camera-0---0-camera_main: 
         type: transform
-    transform_cube-0---0-model_cube_1: 
+    transform_light-0---0-light_main: 
         type: transform
-    shader_lighting-0---0-lighting_attrs: 
-        type: render_lighting
-    lighting_attrs-0---0-camera: 
-        type: render_lighting
-    shader_colors-0---1-camera: 
-        type: render_colors
-    camera-0---0-drawer_colors: 
-        type: render_colors
-    camera-1---0-drawer_lighting: 
-        type: render_lighting
-    camera_transform-0---2-camera: 
+    camera_main-0---0-pass_transform: 
         type: transform
-    model_cube_1-0---0-pass_transform: 
+    light_main-0---1-pass_transform: 
         type: transform
-    model_cube_2-0---1-pass_transform: 
-        type: transform
+    light_main-1---0-pass_shadows: 
+        type: render_shadows
 gui: 
     pass_transform: 
-        x: 600.0
-        y: -200.0
-    pass_colors: 
-        x: 600.0
+        x: 400.0
         y: 150.0
-    pass_lighting: 
-        x: 600.0
-        y: 250.0
-    model_cube_1: 
-        x: 100.0
-        y: -250.0
-    model_cube_2: 
-        x: 100.0
-        y: -150.0
-    transform_cube: 
+    pass_logic: 
+        x: 400.0
+        y: 50.0
+    model_quad: 
+        x: 150.0
+        y: 50.0
+    pass_shadows: 
+        x: 400.0
+        y: 400.0
+    transform_camera: 
         x: -150.0
-        y: -250.0
+        y: 250.0
+    camera_main: 
+        x: 100.0
+        y: 250.0
     transform_light: 
         x: -150.0
-        y: -150.0
-    shader_colors: 
-        x: -400.0
-        y: 150.0
-    shader_lighting: 
-        x: -400.0
-        y: 250.0
-    camera: 
+        y: 350.0
+    light_main: 
         x: 100.0
-        y: -50.0
-    camera_transform: 
-        x: -150.0
-        y: -50.0
-    lighting_attrs: 
-        x: -150.0
-        y: 250.0
-    drawer_colors: 
-        x: 350.0
-        y: 150.0
-    drawer_lighting: 
-        x: 350.0
-        y: 250.0
+        y: 350.0

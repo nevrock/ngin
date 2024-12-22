@@ -2,14 +2,14 @@
 #define SUB_GRAPH_H
 
 #include <ngin/data/shader_data.h>
+#include <ngin/data/render_data.h>
 #include <ngin/resources.h>
 
 class Shader : public Node {
 public:
     explicit Shader(const std::string& name, Nevf& dictionary)
-        : Node(name, dictionary)
-    {
-        shader_ = Resources::loadShaderData(dictionary.getC<std::string>("shader", ""));
+        : Node(name, dictionary), shader_(Resources::getShaderData(dictionary.getC<std::string>("shader", ""))) {
+
     }
 
     ~Shader() override = default;
@@ -17,9 +17,9 @@ public:
     void start(std::string& pass) override {
         Node::start(pass); // Correctly calls the base class setup(), which sets up the input ports
     
-        shader_->use();
+        shader_.use();
 
-        setOutputData(pass, shader_);
+        setOutputData(pass, std::make_shared<RenderData>(pass, shader_));
     }
 
     void execute(std::string& pass) override {
@@ -29,22 +29,18 @@ public:
     void update(std::string& pass) override {
         Node::update(pass); // Correctly calls the base class execute(), which retrieves data so we are ready to extract
         
-        shader_->use();
+        shader_.use();
 
-        setOutputData(pass, shader_);
+        setOutputData(pass, std::make_shared<RenderData>(pass, shader_));
     }
 
     void setup() override {
         Node::setup();
     }
 
-    std::shared_ptr<ShaderData> getData() {
-        return shader_;
-    }
-
 private:
 
-    std::shared_ptr<ShaderData> shader_;
+    ShaderData& shader_;
 
 };
 

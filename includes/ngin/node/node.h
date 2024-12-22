@@ -145,6 +145,20 @@ public:
         return result;
     }
     
+    template <typename T>
+    std::shared_ptr<NodePort> getInputPortByTypeAndData(std::string type) {
+        for (const auto& port : inputPorts_) {
+            if (port->getType() != type) {
+                continue;
+            }
+            auto data = port->getData<T>();
+            if (data) {
+                return port;
+            }
+        }
+        return nullptr;
+    }
+
     std::shared_ptr<NodePort> getOutputPortByType(std::string type) {
         auto it = std::find_if(outputPorts_.begin(), outputPorts_.end(),
                                [type](const std::shared_ptr<NodePort>& port) { return port->getType() == type; });
@@ -159,15 +173,6 @@ public:
             }
         }
         return nullptr; // Return nullptr if no match is found
-    }
-    
-    std::shared_ptr<IData> getInputDataByType(const std::string& type) {
-        auto port = getInputPortByConnection(type);
-        if (port) {
-            std::shared_ptr<IData> data = port->getRawData(); // Retrieve the data from the port
-            return data;
-        }
-        throw std::runtime_error("No connected input port with the specified type: " + type);
     }
 
     std::shared_ptr<NodePort> getOutputPortByConnection(const std::string& type) {
@@ -287,7 +292,7 @@ public:
     }
 
     void execute(std::string& pass) override {
-        Log::console("execute node: " + name_, 2);
+        //Log::console("execute node: " + name_, 2);
 
         retrieveInputData(pass);
         update(pass);
@@ -308,7 +313,11 @@ public:
     }
 
     void update(std::string& pass) override {
-        Log::console("update node: " + name_, 2);
+        //Log::console("update node: " + name_, 2);
+    }
+
+    void clean(std::string& pass) override {
+        //Log::console("clean node: " + name_, 1);
     }
 
 protected:

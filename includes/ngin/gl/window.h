@@ -11,10 +11,16 @@
 
 class Window {
 public:
-    Window(int windowWidth, int windowHeight, const std::string& title) {
+    static GLFWwindow* mainContext; // Now a static member
+    static Window* mainWindow;    
+
+    Window(const std::string& title) {
 
         int screenWidth = Game::env<int>("screen.width");
         int screenHeight = Game::env<int>("screen.height");
+
+        lastX_ = (float)screenWidth / 2.0;
+        lastY_ = (float)screenHeight / 2.0;
 
         // glfw: initialize and configure
         // ------------------------------
@@ -29,18 +35,18 @@ public:
 
         // glfw window creation
         // --------------------
-        window = glfwCreateWindow(screenWidth, screenHeight, title.c_str(), NULL, NULL);
-        if (window == NULL)
+        mainContext = glfwCreateWindow(screenWidth, screenHeight, title.c_str(), NULL, NULL);
+        if (mainContext == NULL)
         {
-            std::cout << "Failed to create GLFW window" << std::endl;
+            std::cout << "failed to create GLFW window" << std::endl;
             glfwTerminate();
             return;
         }
-        glfwMakeContextCurrent(window);
+        glfwMakeContextCurrent(mainContext);
     
 
         // tell GLFW to capture our mouse
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(mainContext, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         // glad: load all OpenGL function pointers
         // ---------------------------------------
@@ -51,6 +57,10 @@ public:
         }
 
         mainWindow = this;
+
+        glfwSetFramebufferSizeCallback(mainContext, framebuffer_size_callback);
+        glfwSetCursorPosCallback(mainContext, mouse_callback);
+        glfwSetScrollCallback(mainContext, scroll_callback);
 
         // configure global opengl state
         // -----------------------------
@@ -64,60 +74,86 @@ public:
 
 
     bool shouldClose() const {
-        return glfwWindowShouldClose(window);
+        return glfwWindowShouldClose(mainContext);
     }
     void displayAndPoll() const {
         display();
         pollEvents();
     }
     void display() const {
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(mainContext);
     }
     void pollEvents() const {
         glfwPollEvents();
     }
 
-    void clear() {
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    void clear(bool isClearColor=false) {
+        if (isClearColor)
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
     void terminate() {
         glfwTerminate();
     }
     ~Window() {
-        glfwDestroyWindow(window);
+        glfwDestroyWindow(mainContext);
         glfwTerminate();
-        window = nullptr; // Reset static member
+        mainContext = nullptr; // Reset static member
     }
 
     static GLFWwindow* getGLFWwindow() { // Implement this method
-        return window;
+        return mainContext;
     }
     static Window* getMainWindow() {
         return mainWindow;
     }
 
     void processInput() {
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-            glfwSetWindowShouldClose(window, true);
+        if (glfwGetKey(mainContext, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            glfwSetWindowShouldClose(mainContext, true);
     }
     
 
 private:
-    static GLFWwindow* window; // Now a static member
-    static Window* mainWindow;    
-    
+    static inline float lastX_ = 0.0f;
+    static inline float lastY_ = 0.0f;
+    static inline bool firstMouse_ = true;
 
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
+
+        Game::envset("screen.width", width);
+        Game::envset("screen.height", height);
     }
 
-    static void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    static void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
         // Implement mouse position handling logic here
+        float xpos = static_cast<float>(xposIn);
+        float ypos = static_cast<float>(yposIn);
+        if (firstMouse_)
+        {
+            lastX_ = xpos;
+            lastY_ = ypos;
+            firstMouse_ = false;
+        }
+
+        float xoffset = xpos - lastX_;
+        float yoffset = lastY_ - ypos; // reversed since y-coordinates go from bottom to top
+
+        lastX_ = xpos;
+        lastY_ = ypos;
+
+        Game::envset("mouse_x", xoffset);
+        Game::envset("mouse_y", yoffset);
+
+        //Log::console("mouse_x: " + std::to_string(xoffset) + ", mouse_y: " + std::to_string(yoffset));
     }
 
     static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
         // Implement scroll handling logic here
+
+        Game::envset("scroll_y", static_cast<float>(yoffset));
     }
 };
 
