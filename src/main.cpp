@@ -27,15 +27,17 @@
 GLFWwindow* Window::mainContext = nullptr; // Initialize static member
 Window* Window::mainWindow = nullptr; // Initialize static member
 
+// Initialize static events
+Event Window::onKeyPressW;
+Event Window::onKeyPressS;
+Event Window::onKeyPressA;
+Event Window::onKeyPressD;
+
 
 // --- STATIC FUNCTIONS --- //
 static int gameInit = (Game::init(), 0); 
 static int resourcesInit = (Resources::init(), 0); 
 
-
-// --- GLOBAL VARIABLES --- //
-float deltaTime = 0.0f;
-float lastFrame = 0.0f;
 
 
 // --- MAIN --- //
@@ -60,15 +62,9 @@ int main()
 
     while (!window.shouldClose())
     {
-        float currentTime = static_cast<float>(glfwGetTime());
-        deltaTime = currentTime - lastFrame;
-        lastFrame = currentTime;
-
-        Game::envset<float>("time.current", currentTime);
-        Game::envset<float>("time.delta", deltaTime);
+        window.updateTime();
 
         window.processInput();
-
         window.clear(true);
 
         scene.executePasses();

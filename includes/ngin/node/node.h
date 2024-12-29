@@ -184,7 +184,7 @@ public:
         }
         return nullptr; // Return nullptr if no match is found
     }
-
+    
     template <typename T>
     std::shared_ptr<NodePort> getInputPort() const {
         for (const auto& port : inputPorts_) {

@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <ngin/log.h>
+#include <ngin/event.h>
 
 #include <ngin/game.h>
 
@@ -13,6 +14,14 @@ class Window {
 public:
     static GLFWwindow* mainContext; // Now a static member
     static Window* mainWindow;    
+
+    static Event onKeyPressW;
+    static Event onKeyPressS;
+    static Event onKeyPressA;
+    static Event onKeyPressD;
+
+    static inline float deltaTime = 0.0f;
+    static inline float lastFrame = 0.0f;
 
     Window(const std::string& title) {
 
@@ -86,7 +95,14 @@ public:
     void pollEvents() const {
         glfwPollEvents();
     }
+    void updateTime() const {
+        float currentTime = static_cast<float>(glfwGetTime());
+        deltaTime = currentTime - lastFrame;
+        lastFrame = currentTime;
 
+        Game::envset<float>("time.current", currentTime);
+        Game::envset<float>("time.delta", deltaTime);
+    }
     void clear(bool isClearColor=false) {
         if (isClearColor)
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -112,6 +128,15 @@ public:
     void processInput() {
         if (glfwGetKey(mainContext, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(mainContext, true);
+
+        if (glfwGetKey(mainContext, GLFW_KEY_W) == GLFW_PRESS)
+            onKeyPressW.trigger();
+        if (glfwGetKey(mainContext, GLFW_KEY_S) == GLFW_PRESS)
+            onKeyPressS.trigger();
+        if (glfwGetKey(mainContext, GLFW_KEY_A) == GLFW_PRESS)
+            onKeyPressA.trigger();
+        if (glfwGetKey(mainContext, GLFW_KEY_D) == GLFW_PRESS)
+            onKeyPressD.trigger();
     }
     
 

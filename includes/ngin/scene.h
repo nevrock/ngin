@@ -42,7 +42,7 @@ public:
         graph_->clean();
     }
     // Add a listener for graph events
-    void addGraphListener(std::function<void()> listener) {
+    void addGraphListener(std::function<void(const Nevf&)> listener) {
         eventState_.addListener(listener);
     }
 

@@ -4,6 +4,7 @@
 #include <ngin/nodes/transform.h>
 #include <ngin/nodes/pass.h>
 #include <ngin/nodes/camera.h>
+#include <ngin/nodes/camera_mover.h>
 #include <ngin/nodes/shader.h>
 #include <ngin/nodes/shader_drawer.h>
 #include <ngin/nodes/model_drawer.h>
@@ -42,6 +43,13 @@ bool object_registered = []() {
 bool camera_registered = []() {
     NodeGraph::registerNodeType("camera", [](const std::string& name, Nevf& dictionary) {
         return std::make_shared<Camera>(name, dictionary);
+    });
+    return true;
+}();
+
+bool camera_mover_registered = []() {
+    NodeGraph::registerNodeType("camera_mover", [](const std::string& name, Nevf& dictionary) {
+        return std::make_shared<CameraMover>(name, dictionary);
     });
     return true;
 }();

@@ -12,6 +12,9 @@ class MoverData : public IData {
 public:
 
   MoverData() : positionDelta_(glm::vec3(0.0)), rotationDelta_(glm::quat()), scaleDelta_(glm::vec3(0.0)) {} 
+  MoverData(glm::vec3 pos, glm::quat rot, glm::vec3 scale) : positionDelta_(pos), rotationDelta_(rot), scaleDelta_(scale) {
+
+  }
   MoverData(const Nevf& data) {
     if (data.contains("position")) {
       positionDelta_ = data.getVec("position", glm::vec3(0.0));
@@ -26,8 +29,17 @@ public:
   }
 
   glm::vec3 getPositionDelta() const { return positionDelta_; }
+  void setPositionDelta(glm::vec3 pos) {
+    positionDelta_ = pos;
+  }
   glm::quat getRotationDelta() const { return rotationDelta_; }
+  void setRotationDelta(glm::quat rot) {
+    rotationDelta_ = rot;
+  }
   glm::vec3 getScaleDelta() const { return scaleDelta_; }
+  void setScaleDelta(glm::vec3 scale) {
+    scaleDelta_ = scale;
+  }
 
   void execute() override {
     // cook this data so it is stable for remaining passes

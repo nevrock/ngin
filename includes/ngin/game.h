@@ -37,7 +37,7 @@ public:
         state_ = std::string(s);
         eventState_.trigger();
     }
-    static void addStateListener(std::function<void()> listener) {
+    static void addStateListener(std::function<void(const Nevf&)> listener) {
         eventState_.addListener(listener);
     }
 

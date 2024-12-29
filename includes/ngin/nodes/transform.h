@@ -54,6 +54,10 @@ public:
 
         transform_->execute();
         setOutputData(pass, transform_);
+
+        if (isLog_) {
+            transform_->log();
+        }
     }
     void clean(std::string& pass) override {
         Node::clean(pass);

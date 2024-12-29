@@ -5,7 +5,7 @@ nodes:
         id: 1
         input_ports: 
             transform: 
-                id: 0
+                id: 1
                 type: transform
                 name: transform
         output_ports: 
@@ -45,13 +45,22 @@ nodes:
         name: pass_shadows
     transform_camera: 
         type: transform
+        is_log: true
         position: [0.0, 0.0, 0.0]
         input_ports: 
+            transform: 
+                id: 0
+                type: transform
+                name: transform
         output_ports: 
             transform: 
                 id: 0
                 type: transform
                 name: transform
+            logic: 
+                id: 1
+                type: logic
+                name: logic
         name: transform_camera
     camera_main: 
         type: camera
@@ -93,9 +102,24 @@ nodes:
                 type: render_shadows
                 name: render_shadows
         name: light_main
+    camera_mover: 
+        type: camera_mover
+        input_ports: 
+            logic: 
+                id: 0
+                type: logic
+                name: logic
+        output_ports: 
+            transform: 
+                id: 0
+                type: transform
+                name: transform
+            logic: 
+                id: 1
+                type: logic
+                name: logic
+        name: camera_mover
 connections: 
-    model_quad-0---1-pass_logic: 
-        type: logic
     transform_camera-0---0-camera_main: 
         type: transform
     transform_light-0---0-light_main: 
@@ -106,6 +130,14 @@ connections:
         type: transform
     light_main-1---0-pass_shadows: 
         type: render_shadows
+    camera_mover-0---0-transform_camera: 
+        type: transform
+    transform_camera-1---0-camera_mover: 
+        type: logic
+    camera_mover-1---0-pass_logic: 
+        type: logic
+    model_quad-0---1-pass_logic: 
+        type: logic
 gui: 
     pass_transform: 
         x: 400.0
@@ -114,11 +146,11 @@ gui:
         x: 400.0
         y: 50.0
     model_quad: 
-        x: 150.0
+        x: 100.0
         y: 50.0
     pass_shadows: 
         x: 400.0
-        y: 400.0
+        y: 250.0
     transform_camera: 
         x: -150.0
         y: 250.0
@@ -131,3 +163,6 @@ gui:
     light_main: 
         x: 100.0
         y: 350.0
+    camera_mover: 
+        x: -400.0
+        y: 250.0

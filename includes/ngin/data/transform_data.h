@@ -4,6 +4,7 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <iostream>
 
 #include <ngin/data/i_data.h>
 
@@ -54,6 +55,32 @@ public:
   glm::quat getRotation() const { return rotation_; }
   void setRotation(const glm::quat& rotation) { rotation_ = rotation; }
 
+  void setRotationFromYawPitch(float yaw, float pitch) {
+    glm::quat qPitch = glm::angleAxis(glm::radians(pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::quat qYaw = glm::angleAxis(glm::radians(yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+    rotation_ = qYaw * qPitch;
+  }
+
+  void setYaw(float yaw) {
+    glm::quat qPitch = glm::angleAxis(glm::pitch(rotation_), glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::quat qYaw = glm::angleAxis(glm::radians(yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+    rotation_ = qYaw * qPitch;
+  }
+
+  void setPitch(float pitch) {
+    glm::quat qYaw = glm::angleAxis(glm::yaw(rotation_), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::quat qPitch = glm::angleAxis(glm::radians(pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+    rotation_ = qYaw * qPitch;
+  }
+
+  float getYaw() const {
+    return glm::degrees(glm::yaw(rotation_));
+  }
+
+  float getPitch() const {
+    return glm::degrees(glm::pitch(rotation_));
+  }
+
   // Scale
   glm::vec3 getScale() const { return scale_; }
   void setScale(const glm::vec3& scale) { scale_ = scale; }
@@ -83,6 +110,13 @@ public:
       front.z = cos(glm::radians(rotation_.x)) * cos(glm::radians(rotation_.y));
       return glm::normalize(front);
   }
+  glm::vec3 getRightDirection() const {
+      glm::vec3 right;
+      right.x = sin(glm::radians(rotation_.y - 90.0f));
+      right.y = 0.0f;
+      right.z = cos(glm::radians(rotation_.y - 90.0f));
+      return glm::normalize(right);
+  }
   glm::vec3 getUpDirection() const {
       glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); // Assuming 'up' is always Y-axis aligned
       glm::mat4 rot = glm::rotate(glm::mat4(1.0f), glm::radians(rotation_.x), glm::vec3(1, 0, 0));
@@ -91,6 +125,12 @@ public:
       return glm::mat3(rot) * up;
   }
 
+  void log() const {
+    std::cout << "transform_data:" << std::endl;
+    std::cout << "position: (" << position_.x << ", " << position_.y << ", " << position_.z << ")" << std::endl;
+    std::cout << "rotation: (" << rotation_.x << ", " << rotation_.y << ", " << rotation_.z << ", " << rotation_.w << ")" << std::endl;
+    std::cout << "scale: (" << scale_.x << ", " << scale_.y << ", " << scale_.z << ")" << std::endl;
+  }
 
 private:
   std::string name_;
