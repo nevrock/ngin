@@ -55,7 +55,7 @@ public:
 
     void render(ShaderData& shader) override {
         for (const auto& transform : transforms_) {
-            shader.setMat4("model", transform->getWorldModelMatrix());
+            shader.setMat4("M_MODEL", transform->getWorldModelMatrix());
             meshData_.render();
         }
     }

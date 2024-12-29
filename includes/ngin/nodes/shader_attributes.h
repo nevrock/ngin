@@ -23,8 +23,8 @@ public:
             std::shared_ptr<RenderData> renderData = inputPort->getData<RenderData>();
             if (renderData) {
                 ShaderData& shader = renderData->getShader();
-                for (const auto& key : attributesUpdate_->keys()) {
-                    const auto& value = (*attributesUpdate_)[key];
+                for (const auto& key : attributesStart_->keys()) {
+                    const auto& value = (*attributesStart_)[key];
                     setShaderAttribute(key, value, shader);
                 }
             }

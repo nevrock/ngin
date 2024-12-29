@@ -5,7 +5,7 @@ nodes:
         id: 1
         input_ports: 
             transform: 
-                id: 1
+                id: 2
                 type: transform
                 name: transform
         output_ports: 
@@ -16,7 +16,7 @@ nodes:
         id: 0
         input_ports: 
             logic: 
-                id: 1
+                id: 0
                 type: logic
                 name: logic
         output_ports: 
@@ -24,28 +24,25 @@ nodes:
     model_quad: 
         type: model_drawer
         model: quad
-        passes: ['render_geom']
+        passes: ['render_shadows_directional', 'render_shadows_point', render_bsdf]
         input_ports: 
+            transform: 
+                id: 0
+                type: transform
+                name: transform
         output_ports: 
             logic: 
                 id: 0
                 type: logic
                 name: logic
+            transform: 
+                id: 1
+                type: transform
+                name: transform
         name: model_quad
-    pass_shadows: 
-        type: pass
-        pass: render_shadows
-        id: 2
-        input_ports: 
-            render_shadows: 
-                id: 0
-                type: render_shadows
-                name: render_shadows
-        output_ports: 
-        name: pass_shadows
     transform_camera: 
         type: transform
-        is_log: true
+        is_log: false
         position: [0.0, 0.0, 0.0]
         input_ports: 
             transform: 
@@ -92,15 +89,19 @@ nodes:
                 id: 0
                 type: transform
                 name: transform
+            render_shadows_directional: 
+                id: 2
+                type: render_shadows_directional
+                name: render_shadows_directional
         output_ports: 
             transform: 
                 id: 0
                 type: transform
                 name: transform
-            render_shadows: 
+            render_shadows_directional: 
                 id: 1
-                type: render_shadows
-                name: render_shadows
+                type: render_shadows_directional
+                name: render_shadows_directional
         name: light_main
     camera_mover: 
         type: camera_mover
@@ -119,6 +120,96 @@ nodes:
                 type: logic
                 name: logic
         name: camera_mover
+    shadows_directional: 
+        type: gl_shadows_directional
+        input_ports: 
+            render_shadows_directional: 
+                id: 0
+                type: render_shadows_directional
+                name: render_shadows_directional
+        output_ports: 
+            render_shadows_directional: 
+                id: 0
+                type: render_shadows_directional
+                name: render_shadows_directional
+        name: shadows_directional
+    shadows_point: 
+        type: gl_shadows_point
+        input_ports: 
+        output_ports: 
+        name: shadows_point
+    shader_depthmap: 
+        type: shader
+        shader: depthmap
+        input_ports: 
+        output_ports: 
+            render_shadows_directional: 
+                id: 1
+                type: render_shadows_directional
+                name: render_shadows_directional
+        name: shader_depthmap
+    pass_shadows_directional: 
+        type: pass
+        pass: render_shadows_directional
+        id: 2
+        input_ports: 
+            render_shadows_directional: 
+                id: 0
+                type: render_shadows_directional
+                name: render_shadows_directional
+        output_ports: 
+        name: pass_shadows_directional
+    pass_shadows_point: 
+        type: pass
+        pass: render_shadows_point
+        id: 3
+        input_ports: 
+        output_ports: 
+        name: pass_shadows_point
+    pass_bsdf: 
+        type: pass
+        pass: render_bsdf
+        id: 4
+        input_ports: 
+        output_ports: 
+        name: pass_bsdf
+    shader_bsdf: 
+        type: shader
+        shader: bsdf
+        input_ports: 
+        output_ports: 
+        name: shader_bsdf
+    model_transform: 
+        type: transform
+        position: [0.0, 0.0, 0.0]
+        input_ports: 
+        output_ports: 
+            transform: 
+                id: 0
+                type: transform
+                name: transform
+        name: model_transform
+    bsdf: 
+        type: gl_bsdf
+        input_ports: 
+        output_ports: 
+        name: bsdf
+    bsdf_drawer: 
+        type: shader_drawer
+        input_ports: 
+        output_ports: 
+        name: bsdf_drawer
+    shader_cubemap: 
+        type: shader
+        shader: cubemap
+        input_ports: 
+        output_ports: 
+        name: shader_cubemap
+    attributes_shadows: 
+        type: shader_attributes
+        input_ports: 
+        output_ports: 
+        name: attributes_shadows
 connections: 
     transform_camera-0---0-camera_main: 
         type: transform
@@ -126,10 +217,6 @@ connections:
         type: transform
     camera_main-0---0-pass_transform: 
         type: transform
-    light_main-0---1-pass_transform: 
-        type: transform
-    light_main-1---0-pass_shadows: 
-        type: render_shadows
     camera_mover-0---0-transform_camera: 
         type: transform
     transform_camera-1---0-camera_mover: 
@@ -138,31 +225,76 @@ connections:
         type: logic
     model_quad-0---1-pass_logic: 
         type: logic
+    light_main-0---1-pass_transform: 
+        type: transform
+    model_transform-0---0-model_quad: 
+        type: transform
+    model_quad-1---2-pass_transform: 
+        type: transform
+    shadows_directional-0---0-pass_shadows_directional: 
+        type: render_shadows_directional
+    light_main-1---0-shadows_directional: 
+        type: render_shadows_directional
+    shader_depthmap-1---2-light_main: 
+        type: render_shadows_directional
 gui: 
     pass_transform: 
-        x: 400.0
+        x: 550.0
         y: 150.0
     pass_logic: 
-        x: 400.0
+        x: 550.0
         y: 50.0
     model_quad: 
         x: 100.0
         y: 50.0
-    pass_shadows: 
-        x: 400.0
-        y: 250.0
     transform_camera: 
-        x: -150.0
+        x: -650.0
         y: 250.0
     camera_main: 
-        x: 100.0
+        x: -150.0
         y: 250.0
     transform_light: 
-        x: -150.0
+        x: -650.0
         y: 350.0
     light_main: 
-        x: 100.0
+        x: -400.0
         y: 350.0
     camera_mover: 
-        x: -400.0
+        x: -900.0
         y: 250.0
+    shadows_directional: 
+        x: -150.0
+        y: 350.0
+    shadows_point: 
+        x: -150.0
+        y: 600.0
+    shader_depthmap: 
+        x: -1150.0
+        y: 450.0
+    pass_shadows_directional: 
+        x: 550.0
+        y: 350.0
+    pass_shadows_point: 
+        x: 550.0
+        y: 600.0
+    pass_bsdf: 
+        x: 550.0
+        y: 850.0
+    shader_bsdf: 
+        x: -1150.0
+        y: 850.0
+    model_transform: 
+        x: -650.0
+        y: 50.0
+    bsdf: 
+        x: -1400.0
+        y: 850.0
+    bsdf_drawer: 
+        x: 100.0
+        y: 850.0
+    shader_cubemap: 
+        x: -1150.0
+        y: 600.0
+    attributes_shadows: 
+        x: -900.0
+        y: 450.0

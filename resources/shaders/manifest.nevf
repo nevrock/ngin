@@ -1,7 +1,16 @@
-skybox:
-    fragment: skybox/skybox
-    vertex: cubemap/cubemap
+bsdf:
+    fragment: bsdf/bsdf
+    vertex: bsdf/bsdf
+    header: header
 
-background:
-    fragment: background/background
-    vertex: background/background
+depthmap:
+    fragment: depthmap/depthmap
+    vertex: depthmap/depthmap
+    include: depthmap/depthmap
+    header: header
+
+cubemap:
+    fragment: cubemap/cubemap
+    vertex: cubemap/cubemap
+    geometry: cubemap/cubemap
+    header: header

@@ -31,6 +31,8 @@ public:
         
         shader_.use();
 
+        Log::console("shader::update " + getName());
+
         setOutputData(pass, std::make_shared<RenderData>(pass, shader_));
     }
 

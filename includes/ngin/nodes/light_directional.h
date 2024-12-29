@@ -62,7 +62,6 @@ public:
                     setOutputData(pass, shader);
                 } 
             } else {
-                Log::console("Camera node requires a transform node as input.");
             }
         } 
         

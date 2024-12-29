@@ -11,13 +11,9 @@
 #include <ngin/nodes/shader_attributes.h>
 #include <ngin/nodes/light_directional.h>
 
-#include <ngin/nodes/gl/gl_depth_test.h>
-#include <ngin/nodes/gl/gl_g_buffer.h>
-#include <ngin/nodes/gl/gl_bind_buffer.h>
-#include <ngin/nodes/gl/gl_window.h>
-#include <ngin/nodes/gl/gl_copy_buffer.h>
-#include <ngin/nodes/gl/gl_framebuffer.h>
-#include <ngin/nodes/gl/gl_cubemap.h>
+#include <ngin/nodes/gl/gl_shadows_directional.h>
+#include <ngin/nodes/gl/gl_shadows_point.h>
+#include <ngin/nodes/gl/gl_bsdf.h>
 
 bool pass_registered = []() {
     NodeGraph::registerNodeType("pass", [](const std::string& name, Nevf& dictionary) {
@@ -93,51 +89,23 @@ bool light_directional_registered = []() {
 
 
 
-bool gl_depth_test_registered = []() {
-    NodeGraph::registerNodeType("gl_depth_test", [](const std::string& name, Nevf& dictionary) {
-        return std::make_shared<GlDepthTest>(name, dictionary);
+bool gl_shadows_directional = []() {
+    NodeGraph::registerNodeType("gl_shadows_directional", [](const std::string& name, Nevf& dictionary) {
+        return std::make_shared<GlShadowsDirectional>(name, dictionary);
     });
     return true;
 }();
 
-bool gl_g_buffer_registered = []() {
-    NodeGraph::registerNodeType("gl_g_buffer", [](const std::string& name, Nevf& dictionary) {
-        return std::make_shared<GlGBuffer>(name, dictionary);
+bool gl_shadows_point = []() {
+    NodeGraph::registerNodeType("gl_shadows_point", [](const std::string& name, Nevf& dictionary) {
+        return std::make_shared<GlShadowsPoint>(name, dictionary);
     });
     return true;
 }();
 
-bool gl_bind_buffer_registered = []() {
-    NodeGraph::registerNodeType("gl_bind_buffer", [](const std::string& name, Nevf& dictionary) {
-        return std::make_shared<GlBindBuffer>(name, dictionary);
-    });
-    return true;
-}();
-
-bool gl_window_registered = []() {
-    NodeGraph::registerNodeType("gl_window", [](const std::string& name, Nevf& dictionary) {
-        return std::make_shared<GlWindow>(name, dictionary);
-    });
-    return true;
-}();
-
-bool gl_copy_buffer_registered = []() {
-    NodeGraph::registerNodeType("gl_copy_buffer", [](const std::string& name, Nevf& dictionary) {
-        return std::make_shared<GlCopyBuffer>(name, dictionary);
-    });
-    return true;
-}();
-
-bool gl_framebuffer_registered = []() {
-    NodeGraph::registerNodeType("gl_framebuffer", [](const std::string& name, Nevf& dictionary) {
-        return std::make_shared<GlFramebuffer>(name, dictionary);
-    });
-    return true;
-}();
-
-bool gl_cubemap_registered = []() {
-    NodeGraph::registerNodeType("gl_cubemap", [](const std::string& name, Nevf& dictionary) {
-        return std::make_shared<GlCubemap>(name, dictionary);
+bool gl_bsdf = []() {
+    NodeGraph::registerNodeType("gl_bsdf", [](const std::string& name, Nevf& dictionary) {
+        return std::make_shared<GlBsdf>(name, dictionary);
     });
     return true;
 }();
