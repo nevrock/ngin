@@ -1,121 +1,47 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include <iostream> 
-#include <vector>
-#include <ngin/collections/nevf.h>
-#include <ngin/resources.h>
+#include <memory>
 #include <ngin/scene/object.h>
-#include <ngin/gl/model_drawer.h>
-#include <memory> // Include for smart pointers
-#include <unordered_map>
+#include <ngin/resources.h>
+#include <ngin/log.h>
 
 class Scene {
 public:
-    std::unique_ptr<Object> origin;  // Use smart pointer for origin
-    std::unordered_map<int, std::string> shaderNames;  // Store shader IDs and names
-
-    Scene(const std::string& title) : originName(title) {
-    }   
-
-    void initScene() {
-
-        Nevf d;
-        d.read(FileUtils::getResourcePath("nevf/resources.nevf").c_str());
-        d.print();
-
-        if (d.contains("shaders")) {
-            for (const auto& pair : d.get<Nevf>("shaders", nullptr)->data()) {
-                int shaderId = std::any_cast<int>(pair.second);
-                shaderNames[shaderId] = pair.first;
-                Resources::loadShader(pair.first);
-            }
-        }
-        if (d.contains("textures")) {
-            for (const auto& pair : d.get<Nevf>("textures", nullptr)->data()) {
-                Resources::loadTexture(pair.first);
-            }
-        }
-        if (d.contains("models_primitive")) {
-            for (const auto& pair : d.get<Nevf>("models_primitive", nullptr)->data()) {
-                Resources::loadModelPrimitive(pair.first);
-            }
-        }
-        if (d.contains("fonts")) {
-            for (const auto& pair : d.get<Nevf>("fonts", nullptr)->data()) {
-                Resources::loadFont(pair.first);
-            }
-        }
-
-        ModelDrawer::init();
+    Scene(const std::string& pathToSceneFile) : path_(pathToSceneFile) {
     }
+    ~Scene() = default;
+
     void build() {
-        Nevf d;
-        d.read(FileUtils::getResourcePath("nevf/" + originName + ".nevf").c_str());
-        d.print();
-        origin = std::make_unique<Object>(d, 0, nullptr, false);
-    }
+        // load
+        //auto lex = Resources::loadLexicon(path_);
+        auto lex = Resources::loadObject(path_);
+        //lex.print();
+        std::string name = lex.getC<std::string>("name", "default");
+        origin_ = std::make_unique<Object>(name, lex);
+        origin_->build();
 
-    ~Scene() {}
-    
-    static bool isApplicationShuttingDown;
+        log();
+    }
 
     void launch() {
-        origin->launch();
+        origin_->launch();
     }
-    void updateAnimation(float dt) {
-        origin->updateAnimation(dt);
+    void updateLogic() {
+        origin_->updateLogic();
     }
-    void update() {
-        origin->update();
-    }
-    void updatePhysics(float dt) {
-        origin->updatePhysics(dt);
-    }
-    void updatePreRender(const unsigned int index, Shader& shader) {
-        origin->updatePreRender(index, shader);
-    }
-    void updateRender(const unsigned int index, Shader& shader) {
-        //origin->updateRender(index, shader);
-        ModelDrawer::render(index, shader);
-        ModelDrawer::renderInstances(index, shader);
-    }   
-
-    void initDepth() {
-        for (const auto& [shaderId, shaderName] : shaderNames) {
-            Shader shader = Resources::getShader(shaderName);
-            shader.use();
-            shader.setInt("DIRECTIONAL_SHADOW_MAP", 0);
-            shader.setInt("POINT_SHADOW_CUBE_MAP", 1);
-        }
+    void updateTransform() {
+        origin_->updateTransform();
     }
 
-    void render(const unsigned int index) {
-        if (!shaderNames.empty() && shaderNames.count(index)) {
-            Shader shader = Resources::getShader(shaderNames[index]);
-            updateRender(index, shader);
-        }
-    }
-    void preRender(const unsigned int index) {
-        if (!shaderNames.empty() && shaderNames.count(index)) {
-            Shader shader = Resources::getShader(shaderNames[index]);
-            shader.use();
-            updatePreRender(index, shader);
-        }
+    void log(int indent = 0) const {
+        origin_->log(indent);
     }
 
-    int getShaderCount() const {
-        return shaderNames.size();
-    }
-
-    void clear() {
-        Resources::clear();
-    }
-        
 private:
-    std::string originName;
+    std::string path_;
+    std::unique_ptr<Object> origin_;
 };
 
-bool Scene::isApplicationShuttingDown = false;  // Define and initialize the static bool
 
 #endif // SCENE_H

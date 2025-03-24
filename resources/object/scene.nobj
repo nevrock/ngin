@@ -1,0 +1,75 @@
+name: start
+children: 
+    cube: 
+        name: cube_test
+        transform: 
+            position: [0.0, 0.0, 0.0]
+            rotation: [0.0, 0.0, 0.0]
+            scale: [1.0, 1.0, 1.0]
+        components: 
+            mesh: 
+                type: mesh
+                mesh: cube
+                shaders: [shadowmap, ssao_g_buffer]
+        children: 
+    camera: 
+        transform: 
+            position: [-5.0, -7.0, 5.0]
+            rotation: [-63.199986276938105, -6.998917952086515e-06, -34.40000869814827]
+            scale: [1.0, 1.0, 1.0]
+        components: 
+            camera: 
+                type: camera
+                orthographic: false
+                focal_length: 50.0
+                near: 0.10000000149011612
+                far: 1000.0
+                shaders: [skybox, ssao_g_buffer, ssao_deferred, ssao, translucent]
+        children: 
+    sun: 
+        transform: 
+            position: [0.0, 0.0, 0.0]
+            rotation: [-39.99999883637168, -30.000000834826057, 0.0]
+            scale: [1.0, 1.0, 1.0]
+        components: 
+            light: 
+                type: light
+                shaders: [shadowmap, pbr, ssao_g_buffer, ssao_deferred, translucent]
+        children: 
+    plane: 
+        transform: 
+            position: [0.0, 0.0, 0.0]
+            rotation: [0.0, 0.0, 0.0]
+            scale: [1.0, 1.0, 1.0]
+        components: 
+            mesh: 
+                type: mesh
+                mesh: plane
+                shaders: [shadowmap, ssao_g_buffer]
+        children: 
+    point_light:
+        name: point_light_0 
+        transform: 
+            position: [-1.0, 0.0, 2.0]
+            rotation: [0.0, 0.0, 0.0]
+            scale: [1.0, 1.0, 1.0]
+        components: 
+            light: 
+                type: light_point
+                color: [4.0, 4.0, 4.0]
+        children: 
+    skybox:
+        name: skybox
+        components:
+            skybox:
+                type: skybox
+                shaders: [skybox]
+
+        transform:
+            position: [0.0, 0.0, 0.0]
+    quad:
+        name: screen_quad
+        components:
+            quad:
+                type: quad
+                shaders: [ssao_deferred, ssao, ssao_blur]

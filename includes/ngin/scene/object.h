@@ -1,224 +1,111 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include <ngin/scene/i_object.h>
-#include <ngin/scene/component.h>
-#include <ngin/scene/point_ui.h>
+#include <ngin/scene/i_component.h>
 #include <ngin/log.h>
-#include <ngin/utils/fileutils.h>
-#include <ngin/collections/nevf.h> 
-
-#include <vector>
-#include <memory>
+#include <memory> // Include memory header for std::enable_shared_from_this
+#include <functional>
 #include <unordered_map>
 #include <string>
-#include <functional>
-#include <queue>
 
 class Object : public IObject {
 public:
-    // Constructors
-    Object() : isParent(false), point(std::make_unique<Point>()) {}
 
-    Object(const Nevf& dict, unsigned int hIndex, 
-        IObject* parentObj = nullptr, bool isParentObj = false) : isParent(isParentObj), 
-        point(std::make_unique<Point>()), parent(parentObj), hierarchyIndex(hIndex) {
-        loadFromNevf(dict);
+    Object(std::string name, Lex lex) 
+        : IObject(name, lex), parent_(nullptr) {
     }
-
-    ~Object() {
-        // Log the destruction of the object if necessary
-        Log::console("Destroying Object: " + name);
+    Object(std::string name, Lex lex, Object* parent)
+        : IObject(name, lex), parent_(parent) {
     }
 
-    // Getters
-    Point& getPoint() override {
-        return *point;
+    void init() override {
+        componentInit();
     }
-    const Point& getPoint() const override {
-        return *point;
-    }
-    PointUi& getPointUi() override {
-        PointUi* uiPoint = dynamic_cast<PointUi*>(point.get());
-        if (!uiPoint) {
-            throw std::runtime_error("Current Point instance is not of type PointUi");
+    void launch() override {
+        componentLaunch();
+        for (auto& [name, child] : children_) {
+            child->launch();
         }
-        return *uiPoint;
     }
-    const PointUi& getPointUi() const override {
-        const PointUi* uiPoint = dynamic_cast<const PointUi*>(point.get());
-        if (!uiPoint) {
-            throw std::runtime_error("Current Point instance is not of type PointUi");
+    void updateLogic() override {
+        componentUpdateLogic();
+        for (auto& [name, child] : children_) {
+            child->updateLogic();
         }
-        return *uiPoint;
-    }    
-    std::string getName() const override {
-        return name;
     }
-    IObject* getParent() const override {
-        return parent;
-    }
-
-    // Setters
-    void setPoint(const Point& newPoint) {
-        *point = newPoint;
-    }
-
-    // Load from JSON
-    void loadFromNevf(const Nevf& dConst) {
-        Nevf d = dConst;  // Create a modifiable copy of dConst
-        isUiPoint = false;
-        if (d.contains("inherit")) {
-            std::string inheritFromObj  = d.getC<std::string>("inherit", "");
-            Nevf dOther;
-            dOther.read(FileUtils::getResourcePath("nevf/objects/" + inheritFromObj + ".nevf"));
-            d.sync(&dOther);
-            Log::console("object inherit from: " + inheritFromObj);
-            d.print();
-        }
-        if (d.contains("name")) {
-            name = d.getC<std::string>("name", "object"); 
-        }
-        if (parent != nullptr) {
-            Log::console(":::OBJECT::: " + getName() + ", " + std::to_string(hierarchyIndex) + 
-                ", with parent - " + parent->getName());
-        }
-        if (d.contains("point")) {
-            Nevf pD;
-            loadPoint(d.getC<Nevf>("point", pD));
+    void updateTransform() override {
+        // cook transform position 
+        if (parent_) {
+            transform_->setParentModel(parent_->getTransform()->getWorldModelMatrix());
         } else {
-            point->setScale(glm::vec3(1.0,1.0,1.0));
+            transform_->setParentModel(glm::mat4(1.0f));
         }
-        if (d.contains("components")) {
-            Nevf cD;
-            loadComponents(d.getC<Nevf>("components", cD));
+
+        transform_->execute();
+
+        for (auto& [name, child] : children_) {
+            child->updateTransform();
         }
-        if (d.contains("children")) {
-            Nevf chD;
-            loadChildren(d.getC<Nevf>("children", chD));
+
+        //Log::console("object: " + name_ + ", update transformm, with position: " + std::to_string(transform_->getWorldPosition().x) + ", " + std::to_string(transform_->getWorldPosition().y) + ", " + std::to_string(transform_->getWorldPosition().z));  
+    }
+
+    void build() {
+        createChildren();
+
+        buildTransform();
+        buildComponents();
+
+        init();
+
+        buildChildren();
+    }
+
+    void componentInit() {
+        for (auto& component : components_) {
+            component->init();
         }
     }
-    void loadChildren(const Nevf& d) {
-        for (auto& childNevf : d.data()) {
-            std::string name = std::any_cast<std::string>(childNevf.first);
-            Nevf childData;
-            childData = d.getC<Nevf>(name, childData);
-            
-            std::shared_ptr<Object> child = std::make_shared<Object>(childData, hierarchyIndex+1, this, true);
-            children[name] = child;
+    void componentLaunch() {
+        for (auto& component : components_) {
+            component->launch();
         }
     }
-    void addChild(const std::string& key, const Nevf& args) {
-        if (args.contains(key)) {
-            Nevf childNevf;
-            childNevf = args.getC<Nevf>(key, childNevf);
-            if (childNevf.contains("name")) {
-                std::string childName = childNevf.getC<std::string>("name", "");
-                if (childName == "") {
-                    return;
-                }
-                std::shared_ptr<Object> child = std::make_shared<Object>(childNevf, hierarchyIndex+1, this, true);
-                children[childName] = child;
-                Log::console("Added child with key '" + key + "': " + childName);
-            } else {
-                Log::console("Nevf under key '" + key + "' does not contain a 'name' key, child not added.");
-            }
-        } else {
-            Log::console("Nevf does not contain key: " + key);
+    void componentUpdateLogic() {
+        for (auto& component : components_) {
+            component->update();
         }
     }
-    void removeChild(const std::string& name) {
-        auto it = children.find(name);
-        if (it != children.end()) {
-            children.erase(it);
-            Log::console("Removed child: " + name);
-        } else {
-            Log::console("Child not found: " + name);
+    void componentUpdateLate() {
+        for (auto& component : components_) {
+            component->updateLate();
         }
     }
 
-
-    // Update (now a normal member function)
-    void launch() {
-        // Log::console("object update, with name: " + name);  
-        for (auto& component : components) {
-            component->launch();  // Call the update method on each component
-        }
-        for (auto& [childName, child] : children) {
-            child->launch();  // Recursively update child objects
-        }
-    }
-    void updateAnimation(float dt) {
-        // Log::console("object update, with name: " + name);  
-        for (auto& component : components) {
-            component->updateAnimation(dt);  // Call the update method on each component
-        }
-        for (auto& [childName, child] : children) {
-            child->updateAnimation(dt);  // Recursively update child objects
-        }
-    }
-    void update() {
-        // Log::console("object update, with name: " + name);  
-        for (auto& component : components) {
-            component->update();  // Call the update method on each component
-        }
-        for (auto& [childName, child] : children) {
-            child->update();  // Recursively update child objects
-        }
-    }
-    void updatePhysics(float dt) {
-        for (auto& component : components) {
-            component->updatePhysics(dt);  // Call the update method on each component
-        }
-        for (auto& [childName, child] : children) {
-            child->updatePhysics(dt);  // Recursively update child objects
-        }
-    }
-    void updatePreRender(const unsigned int index, Shader& shader) {
-        for (auto& component : components) {
-            component->updatePreRender(index, shader);  // Call the update method on each component
-        }
-        for (auto& [childName, child] : children) {
-            child->updatePreRender(index, shader);  // Recursively update child objects
-        }
-    }
-
-    void updateRender(const unsigned int index, Shader& shader) {
-        for (auto& component : components) {
-            component->updateRender(index, shader);  // Call the update method on each component
-        }
-        for (auto& [childName, child] : children) {
-            child->updateRender(index, shader);  // Recursively update child objects
-        }
-    }
-
-    // point extensions:
-    glm::mat4 getWorldMatrix(bool includeSelf = true) const override {
-        //Log::console("object get world matrix! " + name);
-        glm::mat4 model = point->getModelMatrix();
-        if (!includeSelf) {
-            model = glm::mat4(1.0);
-        }
-        if (hasParent()) {
-            if ((isUiPoint && parent->isUi()) || !isUiPoint)
-                model *= parent->getWorldMatrix();
-        }
-        return model;
-    }
-    glm::vec3 getWorldPosition() const override {
-        glm::vec3 p = getPoint().getPosition();
-        if (hasParent()) {
-            if ((isUiPoint && parent->isUi()) || !isUiPoint)
-                p += parent->getWorldPosition();
-        }
-        return p;
-    }
-
-    // Component management
     template<typename T>
-    std::shared_ptr<T> getComponent() const {
-        for (const auto& component : components) {
-            std::shared_ptr<T> casted = std::dynamic_pointer_cast<T>(component);
+    std::vector<T*> getComponents() {
+        std::vector<T*> components;
+        for (auto& component : components_) {
+            auto casted = dynamic_cast<T*>(component.get());
+            if (casted) {
+                components.push_back(casted);
+            }
+        }
+        return components;
+    }
+    template<typename T>
+    T* getComponent(const std::string& name) {
+        for (auto& component : components_) {
+            if (component->getName() == name) {
+                return dynamic_cast<T*>(component.get());
+            }
+        }
+        return nullptr;
+    }
+    template<typename T>
+    T* getComponent() {
+        for (auto& component : components_) {
+            auto casted = dynamic_cast<T*>(component.get());
             if (casted) {
                 return casted;
             }
@@ -226,63 +113,32 @@ public:
         return nullptr;
     }
 
-    template<typename T>
-    std::vector<std::shared_ptr<T>> getComponents() const {
-        std::vector<std::shared_ptr<T>> matchingComponents;
-        for (const auto& component : components) {
-            std::shared_ptr<T> casted = std::dynamic_pointer_cast<T>(component);
-            if (casted) {
-                matchingComponents.push_back(casted);
-            }
-        }
-        return matchingComponents;
-    }
-
-    template<typename T>
-    std::vector<std::shared_ptr<T>> getComponentsInChildren() const {
-        std::vector<std::shared_ptr<T>> result;
-        std::queue<std::shared_ptr<Object>> queue;
-
-        // Enqueue all direct children of this object
-        for (const auto& [childName, child] : children) {
-            queue.push(child);
-        }
-
-        while (!queue.empty()) {
-            std::shared_ptr<Object> current = queue.front();
-            queue.pop();
-
-            // Collect components of the current object
-            std::vector<std::shared_ptr<T>> currentComponents = current->getComponents<T>();
-            result.insert(result.end(), currentComponents.begin(), currentComponents.end());
-
-            // Enqueue all children of the current object
-            for (const auto& [childName, child] : current->children) {
-                queue.push(child);
-            }
-        }
-
-        return result;
-    }
-
-    template<typename T>
-    void getAllComponents(std::vector<std::shared_ptr<T>>*& outComponentsPtr = nullptr) {
-        if (!outComponentsPtr) {
-            outComponentsPtr = new std::vector<std::shared_ptr<T>>();
-        }
-
-        // Get components of the current object
-        std::vector<std::shared_ptr<T>> myComponents = getComponents<T>();
-        outComponentsPtr->insert(outComponentsPtr->end(), myComponents.begin(), myComponents.end());
-
-        // Recursively get components from all children
-        for (const auto& [childName, child] : children) {
-            child->getAllComponents(outComponentsPtr);
+    void newComponent(const std::string type, const std::string name, const Lex& lex) {
+        auto it = getComponentFactories().find(type);
+        if (it != getComponentFactories().end()) {
+            std::unique_ptr<IComponent> component = it->second(name, lex, this);
+            components_.push_back(std::move(component));
+        } else {
+            std::cerr << "unknown component type: " << type << std::endl;
         }
     }
+    template<typename T>
+    void addComponent(std::unique_ptr<T> component) {
+        static_assert(std::is_base_of<IComponent, T>::value, "type T must be derived from IComponent");
+        components_.push_back(std::move(component));
+    }
 
-    using ComponentFactory = std::function<std::shared_ptr<Component>(Object*)>;
+    Object* getParent() { return parent_; }  
+    std::unique_ptr<IObject> getChild(const std::string& name) {
+        auto it = children_.find(name);
+        if (it != children_.end()) {
+            return std::move(it->second);
+        }
+        return nullptr;
+    }   
 
+    // component
+    using ComponentFactory = std::function<std::unique_ptr<IComponent>(const std::string name, const Lex& lex, IObject* parent)>;
     static std::unordered_map<std::string, ComponentFactory>& getComponentFactories() {
         static std::unordered_map<std::string, Object::ComponentFactory> componentFactories;
         return componentFactories;
@@ -291,77 +147,46 @@ public:
         getComponentFactories()[name] = factory;
     }
 
-    bool hasParent() const override {
-        return isParent;
+    void log(int indent = 0) const {
+        std::string indentation(indent, ' ');
+        Log::console(indentation + "Object: " + getName(), 1); 
+        for (auto& [name, child] : children_) {
+            child->log(indent + 4);
+        }
     }
-    bool isUi() override {
-        return isUiPoint;
+
+    void registerComponent(const std::string& name, std::function<void()> factory);
+
+protected:
+    std::vector<std::unique_ptr<IComponent>> components_;
+
+    std::map<std::string, std::unique_ptr<Object>> children_;
+    Object* parent_;
+
+    void createChildren() {
+        auto children = lex_.getC<Lex>("children", Lex());
+        for (const auto& [name, child] : children.data()) {
+            children_[name] = std::make_unique<Object>(name, std::any_cast<Lex>(child), this);
+        }
     }
-    unsigned int getHierarchyIndex() const override {
-        return hierarchyIndex;
+    virtual void buildComponents() {
+        auto components = lex_.getC<Lex>("components", Lex());
+        for (const auto& [name, component] : components.data()) {
+            Lex childLex = std::any_cast<Lex>(component);
+            std::string type = childLex.getC<std::string>("type", "");
+            newComponent(type, name, std::any_cast<Lex>(component));
+        }
+
+    }
+    void buildChildren() {
+        for (auto& [name, child] : children_) {
+            child->build();
+        }
     }
 
 private:
-    IObject* parent;
-    std::unique_ptr<Point> point;
-    std::vector<std::shared_ptr<Component>> components;
-    std::unordered_map<std::string, std::shared_ptr<Object>> children;
-    const bool isParent;
-    bool isUiPoint;
-    std::string name;
+    std::unordered_map<std::string, std::function<void()>> componentFactories;
 
-    void resetPoint(bool isUiPoint) {
-        point.reset();  // Destroy the current Point object
-        if (isUiPoint) {
-            point = std::make_unique<PointUi>();  // Create a new Point object
-            Log::console("object reset point, set to ui!");
-        } else {
-            point = std::make_unique<Point>();  // Create a new Point object
-        }
-    }
-
-    void loadPoint(const Nevf& d) {
-        Log::console("object load point!");
-        if (d.contains("is_ui") && d.getC<bool>("is_ui", true)) {
-            resetPoint(true);
-            isUiPoint = true;
-        }
-        if (d.contains("position") && d.isType("position", typeid(std::vector<float>))) {
-            point->setPosition(d.getVec("position", glm::vec3(0.0)));
-        }
-        if (d.contains("rotation") && d.isType("rotation", typeid(std::vector<float>))) {
-            point->setRotation(d.getVec("rotation", glm::vec3(0.0)));
-        }
-        if (d.contains("scale") && d.isType("scale", typeid(std::vector<float>))) {
-            point->setScale(d.getVec("scale", glm::vec3(0.0)));
-        }
-        if (d.contains("size") && d.isType("size", typeid(std::vector<float>))) {
-            getPointUi().setSize(d.getVec2("size", glm::vec2(0.0)));
-        }
-    }
-
-
-protected:
-    unsigned int hierarchyIndex;
-    void loadComponents(const Nevf& dict, bool isLaunch = false) {
-        for (auto& element : dict.data()) {
-            std::string type = element.first;
-            Nevf componentData;
-            componentData = dict.getC<Nevf>(type, componentData);
-            
-            auto it = getComponentFactories().find(type);
-            if (it != getComponentFactories().end()) {
-                std::shared_ptr<Component> component = it->second(this);
-                component->loadFromNevf(componentData);
-                components.push_back(component);
-
-                if (isLaunch)
-                    component->launch();
-            } else {
-                std::cerr << "Unknown component type: " << type << std::endl;
-            }
-        }
-    }
 };
 
 #endif // OBJECT_H

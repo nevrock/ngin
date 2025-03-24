@@ -1,0 +1,7 @@
+name: blendgin_v1
+
+env:
+    screen.width: 1280
+    screen.height: 720
+    shadow.width: 2048
+    shadow.height: 2048

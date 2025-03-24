@@ -10,14 +10,16 @@
 #include <vector>
 #include <stb_image.h>
 
-#include <ngin/gl/shader.h>
-#include <ngin/gl/texture_2d.h>
 #include <ngin/utils/fileutils.h>
-#include <ngin/log.h>
-#include <ngin/gl/mesh.h>
-#include <ngin/gui/font.h>
+#include <ngin/lex.h>
 #include <ngin/constants.h>
-#include <ngin/scene/model_loader.h>
+#include <ngin/log.h>
+
+// data
+#include <ngin/data/shader_data.h>
+#include <ngin/data/mesh_data.h>
+#include <ngin/data/texture_data.h>
+#include <ngin/data/compute_data.h>
 
 #if defined(_MSC_VER)
     #include <io.h>
@@ -26,101 +28,186 @@
 
 class Resources {
 public:
+    inline static std::map<std::string, std::unique_ptr<MeshData>> meshes_; // Changed to use std::unique_ptrc
+    inline static std::map<std::string, std::unique_ptr<ShaderData>> shaders_;
+    inline static std::map<std::string, std::unique_ptr<TextureData>> textures_;
+    inline static std::map<std::string, std::unique_ptr<ComputeData>> computeShaders_;
 
-    inline static std::map<std::string, Shader>    shaders;
-    inline static std::map<std::string, std::unique_ptr<Texture2D>> textures; // Changed to use std::unique_ptrc
-    inline static std::map<std::string, std::unique_ptr<ModelData>> models; // Changed to use std::unique_ptrc
-    inline static std::map<std::string, std::unique_ptr<Font>> fonts; // Changed to use std::unique_ptrc
+    inline static Lex shaderManifest_;
+    inline static Lex meshManifest_;
+    inline static Lex textureManifest_;
 
-    static void clear()
-    {
-        // (properly) delete all shaders	
-        for (const auto& iter : shaders) {  // Using 'const auto&' to avoid copying
-            glDeleteProgram(iter.second.ID);
+    static void init() {
+        // need to load in resources
+
+        shaderManifest_ = loadLexicon("manifest.lexf", "shader/");
+        //shaderManifest_.print();
+
+        // we load mesh and texture selectively
+        meshManifest_ = loadLexicon("manifest.lexf", "mesh/");
+        textureManifest_ = loadLexicon("manifest.lexf", "texture/");
+    }
+
+    static void terminate() {
+        // need to unload resources
+        for (auto& [name, mesh] : meshes_) {
+            mesh.reset();
         }
-
-        // Properly delete all textures
-        for (const auto& iter : textures) {  // Using 'const auto&' to avoid copying
-            if (iter.second) {  // Check if the unique_ptr actually points to an object
-                glDeleteTextures(1, &iter.second->id);
-            }
+        for (auto& [name, shader] : shaders_) {
+            shader.reset();
         }
-
-        textures.clear();
-        shaders.clear();
-        models.clear();
-        fonts.clear();
-    }
-    
-    static std::string getResourcePath(const std::string& path) 
-    {
-        return FileUtils::getResourcePath(path);
-    }
-    
-    static Shader getShader(const std::string& name) {
-        auto it = shaders.find(name);
-        if (it == shaders.end()) {
-            std::cerr << "Shader not found: " << name << ". Loading default shader." << std::endl;
-            // Optionally, load a default shader here or throw an exception
-            loadShader(name);  // Potentially risky if name still doesn't correspond to a valid shader file
-            it = shaders.find(name);
-            if (it == shaders.end()) {
-                throw std::runtime_error("Failed to load shader: " + name);
-            }
+        for (auto& [name, texture] : textures_) {
+            texture.reset();
         }
-        return it->second;
-    }
-    static Shader loadShader(const std::string& name)
-    {
-        Log::console("load shader! " + name);
-        std::string vShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".vs");
-        std::string fShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".fs");
-        std::string gShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".gs");
-        std::string iShaderFilePath = FileUtils::getResourcePath("shaders/" + name + ".include");
-        std::string hShaderFilePath = FileUtils::getResourcePath("shaders/" + std::string(ngin::SHADER_INCLUDE_MANDATORY) + ".include");
-
-        if (FileUtils::doesPathExist(gShaderFilePath)) {
-            if (FileUtils::doesPathExist(iShaderFilePath)) {
-                shaders[name] = Shader(vShaderFilePath.c_str(), 
-                    fShaderFilePath.c_str(), hShaderFilePath.c_str(), gShaderFilePath.c_str(), iShaderFilePath.c_str());
-            } else {
-                shaders[name] = Shader(vShaderFilePath.c_str(), 
-                    fShaderFilePath.c_str(), hShaderFilePath.c_str(), gShaderFilePath.c_str(), nullptr);
-            }
-        } else {
-            if (FileUtils::doesPathExist(iShaderFilePath)) {
-                shaders[name] = Shader(vShaderFilePath.c_str(), 
-                    fShaderFilePath.c_str(), hShaderFilePath.c_str(), nullptr, iShaderFilePath.c_str());
-            } else {
-                shaders[name] = Shader(vShaderFilePath.c_str(), 
-                    fShaderFilePath.c_str(), hShaderFilePath.c_str(), nullptr, nullptr);
-            }
-        }    
-        return shaders[name];
+        for (auto& [name, computeShader] : computeShaders_) {
+            computeShader.reset();
+        }
     }
 
-    static Texture2D& getTexture(const std::string& name) {
-        auto it = textures.find(name);
-        if (it == textures.end()) {
-            std::cerr << "Texture not found: " << name << ". Loading texture." << std::endl;
-            return loadTexture(name);
+    // resources, data you can load from files
+    static Lex loadLexicon(const std::string& name, const std::string& prefix = "data/") {
+        Lex n;
+        std::string filePath = fixFilePath(prefix, name);
+        n.read(FileUtils::getResourcePath(filePath));
+        //n.print();
+        return n;
+    }
+    static Lex loadObject(const std::string& name) {
+        return loadLexicon(name + ".nobj", "object/");
+    }
+    static ShaderData& getShaderData(const std::string& name) {
+        auto it = shaders_.find(name);
+        if (it == shaders_.end()) {
+            Log::console("Shader not found: " + name + ", requires loading", 1);
+            loadShaderData(name);  // Potentially risky if name still doesn't correspond to a valid shader file
+            it = shaders_.find(name);
+            if (it == shaders_.end()) {
+                throw std::runtime_error("failed to load shader: " + name);
+            }
+            return *(it->second);
         }
         return *(it->second);
     }
-    static Texture2D& loadTexture(const std::string& name) {
-        Log::console("load texture! " + name);
-        std::string path = FileUtils::getResourcePath("textures/" + name + ".png");
-        auto& texture = textures[name]; // Create a new unique_ptr entry if it does not exist
-        if (!texture) {
-            texture = std::make_unique<Texture2D>(); // Create a new Texture2D if not already loaded
+    static void loadShaderData(const std::string& name) {
+        Lex shaderManifestData = shaderManifest_.getC<Lex>(name, Lex());
+
+        std::string vertexLocation = shaderManifestData.getC<std::string>("vertex", "");
+        std::string fragmentLocation = shaderManifestData.getC<std::string>("fragment", "");
+        std::string geometryLocation = shaderManifestData.getC<std::string>("geometry", "");
+        std::string includeLocation = shaderManifestData.getC<std::string>("include", "");
+        std::string headerLocation = shaderManifestData.getC<std::string>("header", ngin::SHADER_INCLUDE_MANDATORY);
+
+        Log::console("Loading shader! " + name, 1);
+
+        std::string vShaderFilePath = FileUtils::getResourcePath("shader/" + vertexLocation + ".nvtx");
+        std::string fShaderFilePath = FileUtils::getResourcePath("shader/" + fragmentLocation + ".nfrg");
+        std::string gShaderFilePath = FileUtils::getResourcePath("shader/" + geometryLocation + ".ngeo");
+        std::string iShaderFilePath = FileUtils::getResourcePath("shader/" + includeLocation + ".ninc");
+        std::string hShaderFilePath = FileUtils::getResourcePath("shader/" + headerLocation + ".ninc");
+
+        Log::console("Vertex shader file located at: " + vShaderFilePath, 1);
+        Log::console("Fragment shader file located at: " + fShaderFilePath, 1);
+
+        const char* vShaderPath = FileUtils::doesPathExist(vShaderFilePath) ? vShaderFilePath.c_str() : nullptr;
+        const char* fShaderPath = FileUtils::doesPathExist(fShaderFilePath) ? fShaderFilePath.c_str() : nullptr;
+        const char* gShaderPath = FileUtils::doesPathExist(gShaderFilePath) ? gShaderFilePath.c_str() : nullptr;
+        const char* iShaderPath = FileUtils::doesPathExist(iShaderFilePath) ? iShaderFilePath.c_str() : nullptr;
+        const char* hShaderPath = FileUtils::doesPathExist(hShaderFilePath) ? hShaderFilePath.c_str() : nullptr;
+        
+        shaders_[name] = std::make_unique<ShaderData>(name, vShaderPath, fShaderPath, hShaderPath, gShaderPath, iShaderPath);
+
+        shaders_[name]->use();
+
+        // Set default attributes
+        Lex defaults = shaderManifestData.getC<Lex>("defaults", Lex());
+        for (const auto& [key, value] : defaults.data()) {
+            if (value.type() == typeid(int)) {
+                shaders_[name]->setInt(key, std::any_cast<int>(value));
+                Log::console("Setting default attribute: " + key + " to int value " + std::to_string(std::any_cast<int>(value)), 1);
+            } else if (value.type() == typeid(float)) {
+                shaders_[name]->setFloat(key, std::any_cast<float>(value));
+                Log::console("Setting default attribute: " + key + " to float value " + std::to_string(std::any_cast<float>(value)), 1);
+            } else if (defaults.isType(key, typeid(std::vector<float>))) {
+                shaders_[name]->setVec3(key, defaults.getVec(key, glm::vec3(0.0f)));
+                Log::console("Setting default attribute: " + key, 1);            
+            }
         }
-        if (loadTextureFromFile(path.c_str(), *texture)) {
+    }
+    static void unloadShaderData(const std::string& name) {
+        auto it = shaders_.find(name);
+        if (it != shaders_.end()) {
+            shaders_.erase(it);
+        }
+    }
+    
+    static MeshData& getMeshData(const std::string& name) {
+        auto it = meshes_.find(name);
+        if (it == meshes_.end()) {
+            Log::console("Mesh not found: " + name + ". Loading default mesh.", 1);
+            loadMeshData(name);  // Potentially risky if name still doesn't correspond to a valid mesh file
+            it = meshes_.find(name);
+            if (it == meshes_.end()) {
+                throw std::runtime_error("Failed to load mesh: " + name);
+            }
+            return *(it->second);
+        }
+        return *(it->second);
+    }
+    static void loadMeshData(const std::string& name) {
+
+        Lex meshManifestData = meshManifest_.getC<Lex>(name, Lex());
+        std::string location = meshManifestData.getC<std::string>("location", "");
+        Log::console("Loading mesh! " + name + ", at location: " + location, 1);
+        std::string meshFilePath = FileUtils::getResourcePath("mesh/" + location + ".nmsh");
+        Log::console("Mesh filepath: " + meshFilePath, 1);
+
+        Lex n;
+        n.read(meshFilePath);
+        //n.print();
+
+        std::string meshName = n.getC<std::string>("name", "");
+
+        meshes_[name] = std::make_unique<MeshData>(meshName, n);
+    }
+    static void unloadMeshData(const std::string& name) {
+        auto it = meshes_.find(name);
+        if (it != meshes_.end()) {
+            meshes_.erase(it);
+        }
+    }
+
+    static unsigned int getTextureId(const std::string& name) {
+        return getTextureData(name).id;
+    }
+    static TextureData& getTextureData(const std::string& name) {
+        auto it = textures_.find(name);
+        if (it == textures_.end()) {
+            std::cerr << "Texture not found: " << name << ". Loading texture." << std::endl;
+            return loadTextureData(name);
+        }
+        return *(it->second);
+    }
+    static TextureData& loadTextureData(const std::string& name) {
+        Log::console("load texture! " + name);
+        Lex textureManifestData = textureManifest_.getC<Lex>(name, Lex());
+        std::string path = textureManifestData.getC<std::string>("location", "");
+        auto& texture = textures_[name]; // Create a new unique_ptr entry if it does not exist
+        if (!texture) {
+            texture = std::make_unique<TextureData>(); // Create a new TextureData if not already loaded
+        }
+        if (loadTextureFromFile(FileUtils::getResourcePath("texture/" + path + ".png").c_str(), *texture)) {
             return *texture;
         } else {
             throw std::runtime_error("Failed to load texture: " + name);
         }
     }
-    static bool loadTextureFromFile(const char* path, Texture2D& texture) {
+    static void unloadTextureData(const std::string& name) {
+        auto it = textures_.find(name);
+        if (it != textures_.end()) {
+            textures_.erase(it);
+        }
+    }
+    static bool loadTextureFromFile(const char* path, TextureData& texture) {
         int width, height, nrComponents;
         unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
         if (!data) {
@@ -149,189 +236,63 @@ public:
         return true;
     }
 
-    static Font& getFont(const std::string& name) {
-        auto it = fonts.find(name);
-        if (it == fonts.end()) {
-            std::cerr << "Font not found: " << name << ". Loading font." << std::endl;
-            return loadFont(name);
+    static ComputeData& getComputeData(const std::string& name) {
+        auto it = computeShaders_.find(name);
+        if (it == computeShaders_.end()) {
+            Log::error("Compute shader not found: " + name + ". Loading compute shader.", 1);
+            loadComputeData(name);  // Potentially risky if name still doesn't correspond to a valid compute shader file
+            it = computeShaders_.find(name);
+            if (it == computeShaders_.end()) {
+                throw std::runtime_error("failed to load compute shader: " + name);
+            }
+            return *(it->second);
         }
         return *(it->second);
     }
-    static Font& loadFont(const std::string& name) {
-        Log::console("load font! " + name);
-        std::string path = FileUtils::getResourcePath("fonts/" + name + ".ttf");
-        auto& font = fonts[name]; // Create a new unique_ptr entry if it does not exist
-        if (!font) {
-            font = std::make_unique<Font>(); // Create a new Texture2D if not already loaded
+
+    static void loadComputeData(const std::string& name) {
+        Lex shaderManifestData = shaderManifest_.getC<Lex>(name, Lex());
+
+        std::string computeLocation = shaderManifestData.getC<std::string>("compute", "");
+
+        Log::console("loading compute shader! " + name);
+
+        std::string cShaderFilePath = FileUtils::getResourcePath("shader/" + computeLocation + ".ncmp");
+
+        Log::console("cShaderFilePath: " + cShaderFilePath);
+
+        const char* cShaderPath = FileUtils::doesPathExist(cShaderFilePath) ? cShaderFilePath.c_str() : nullptr;
+
+        computeShaders_[name] = std::make_unique<ComputeData>(name, cShaderPath);
+
+        computeShaders_[name]->use();
+    }
+
+    static void unloadComputeData(const std::string& name) {
+        auto it = computeShaders_.find(name);
+        if (it != computeShaders_.end()) {
+            computeShaders_.erase(it);
         }
-        if (loadFontFromFile(path.c_str(), *font)) {
-            return *font;
+    }
+
+private:
+    // static std::vector<std::shared_ptr<Shader>> shaders_;
+
+    static std::string fixFilePath(const std::string& prefix, const std::string& name) {
+        std::string filePath = name;
+        if (filePath.find(prefix) == std::string::npos) {
+            filePath = prefix + filePath;
         } else {
-            throw std::runtime_error("Failed to load font: " + name);
+            filePath = filePath.substr(filePath.find(prefix));
         }
-    }
-    static bool loadFontFromFile(const char* path, Font& font) {
-        font.generate(std::string(path), 24);
-        return true;
-    }
-
-    static ModelData* getModel(const std::string& name) {
-        // Log::console("get model! " + name);
-        auto it = models.find(name);
-        if (it == models.end()) {
-            std::cerr << "model not found: " << name << "." << std::endl;
-            return nullptr;
+        if (filePath.find(".lexf") == std::string::npos) {
+            size_t pos = filePath.find_last_of('.');
+            if (pos != std::string::npos && filePath.substr(pos + 1).find('n') == 0) {
+                return filePath;
+            }
+            filePath += ".lexf";
         }
-        return it->second.get();
-    }
-    static ModelData& loadModelPrimitive(const std::string name) {
-
-        auto& model = models[name]; // Create a new unique_ptr entry if it does not exist
-        if (!model) {
-            model = std::make_unique<ModelData>(); // Create a new Animation if not already loaded
-            
-            std::vector<Texture> textures;
-
-            Nevf d;
-            d.read(FileUtils::getResourcePath("nevf/models/" + name + ".nevf"));
-            int texIndex = 2;
-            if (d.contains("textures")) {
-                for (const auto& textureName : d.getC<std::vector<std::string>>("textures", std::vector<std::string>{""})) {
-                    Log::console("resources loading texture for mesh prim! " + std::string(textureName));
-                    Texture texture;
-                    texture.id = texIndex,
-                    texture.name = textureName;
-                    textures.push_back(texture);
-
-                    texIndex += 1;
-                }
-            }
-
-
-            std::vector<Vertex> vertices;
-            std::vector<unsigned int> indices;
-            if (name == "plane") {
-                vertices.reserve(6);
-                indices.reserve(6);
-                float planeVertices[] = {
-                    // positions            // normals         // texcoords
-                    -25.0f, 0.0f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
-                    -25.0f, 0.0f,  25.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
-                    25.0f, 0.0f,  25.0f,  0.0f, 1.0f, 0.0f,  1.0f,  0.0f,
-
-                    -25.0f, 0.0f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
-                    25.0f, 0.0f,  25.0f,  0.0f, 1.0f, 0.0f,  1.0f,  0.0f,
-                    25.0f, 0.0f, -25.0f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f
-                };
-                for (uint32_t i = 0; i < 6; ++i) {
-                    Vertex vertex{
-                        glm::vec3(planeVertices[i*8], planeVertices[i*8 + 1], planeVertices[i*8 + 2]),
-                        glm::vec3(planeVertices[i*8 + 3], planeVertices[i*8 + 4], planeVertices[i*8 + 5]),
-                        glm::vec2(planeVertices[i*8 + 6], planeVertices[i*8 + 7]),
-                        glm::vec3(1.0f, 1.0f, 1.0f)
-                    };
-                    vertices.push_back(vertex);
-                }
-                for (uint32_t i = 0; i < 6; ++i) {
-                    indices.push_back(i);
-                }
-            } else if (name == "cube") {
-                vertices.reserve(36);
-                indices.reserve(36);
-                float cubeVertices[] = {
-                    // back face
-                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-                    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
-                    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-                    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-                    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
-                    // front face
-                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-                    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
-                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-                    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-                    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
-                    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-                    // left face
-                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-                    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
-                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-                    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-                    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-                    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-                    // right face
-                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-                    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
-                    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-                    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-                    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
-                    // bottom face
-                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-                    0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
-                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-                    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-                    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-                    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-                    // top face
-                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-                    0.5f,  0.5f , 0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-                    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
-                    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-                    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-                    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
-                };
-
-                for (uint32_t i = 0; i < 36; ++i) {
-                    Vertex vertex{
-                        glm::vec3(cubeVertices[i*8], cubeVertices[i*8 + 1], cubeVertices[i*8 + 2]),
-                        glm::vec3(cubeVertices[i*8 + 3], cubeVertices[i*8 + 4], cubeVertices[i*8 + 5]),
-                        glm::vec2(cubeVertices[i*8 + 6], cubeVertices[i*8 + 7]),
-                        glm::vec3(1.0f, 1.0f, 1.0f)
-                    };
-                    vertices.push_back(vertex);
-                }
-                for (uint32_t i = 0; i < 36; ++i) {
-                    indices.push_back(i);
-                }
-
-            } else if (name == "quad") {
-                vertices.reserve(4);
-                indices.reserve(6);
-                float cubeVertices[] = {
-                    // back face
-                    -0.5f, -0.5f, 0.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, 
-                    -0.5f, 0.5f, 0.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
-                    0.5f,  0.5f, 0.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, 
-                    0.5f,  -0.5f, 0.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f
-                };
-
-                for (uint32_t i = 0; i < 4; ++i) {
-                    Vertex vertex{
-                        glm::vec3(cubeVertices[i*8], cubeVertices[i*8 + 1], cubeVertices[i*8 + 2]),
-                        glm::vec3(cubeVertices[i*8 + 3], cubeVertices[i*8 + 4], cubeVertices[i*8 + 5]),
-                        glm::vec2(cubeVertices[i*8 + 6], cubeVertices[i*8 + 7]),
-                        glm::vec3(1.0f, 1.0f, 1.0f)
-                    };
-                    vertices.push_back(vertex);
-                }
-                indices.push_back(2);
-                indices.push_back(1);
-                indices.push_back(0);
-                indices.push_back(3);
-                indices.push_back(2);
-                indices.push_back(0);
-            }
-            auto newMesh = std::make_unique<Mesh>();
-            newMesh->vertices = std::move(vertices);
-            newMesh->indices = std::move(indices);
-            newMesh->textures = std::move(textures);
-            newMesh->setupMesh();  
-            model.get()->meshes.push_back(std::move(newMesh));
-        } 
-
-        return *model;
+        return filePath;
     }
 };
 

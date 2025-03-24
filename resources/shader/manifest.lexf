@@ -1,0 +1,88 @@
+shadowmap:
+    fragment: shadowmap
+    vertex: shadowmap
+    
+envmap:
+    fragment: envmap
+    vertex: cubemap
+
+skybox:
+    fragment: skybox
+    vertex: skybox
+
+    defaults:
+        environmentMap: 0
+
+ssao_g_buffer:
+    fragment: ssao_geometry
+    vertex: ssao_geometry
+
+    defaults:
+        shadowMap: 0
+
+ssao_deferred:
+    fragment: ssao_lighting
+    vertex: ssao
+
+    defaults:
+        shadowMap: 0
+        gPosition: 1
+        gNormal: 2
+        gAlbedo: 3
+        ssao: 4
+        gPositionWorld: 5
+        gNormalWorld: 6
+        gDepth: 7
+
+ssao:
+    fragment: ssao
+    vertex: ssao
+    compute: ssao
+
+    defaults:
+        gPosition: 0
+        gNormal: 1
+        texNoise: 2
+
+ssao_blur:
+    fragment: ssao_blur
+    vertex: ssao
+    compute: ssao_blur
+
+    defaults:
+        ssaoInput: 0
+
+
+gui:
+    fragment: gui
+    vertex: gui
+    
+
+translucent:
+    fragment: translucent
+    vertex: translucent
+
+    defaults:
+        shadowMap: 0
+        textureDiffuse: 1
+
+ssrs:
+    fragment: ssrs
+    vertex: ssrs
+
+    defaults:
+        gNormal: 0
+        colorBuffer: 1
+        depthMap: 2
+
+final:
+    fragment: final
+    vertex: ssrs
+
+    defaults:
+        colorTexture: 0
+        refTexture: 1
+        specularTexture: 2
+
+test:
+    compute: test

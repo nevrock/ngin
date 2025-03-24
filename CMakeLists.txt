@@ -21,10 +21,8 @@ endif()
 # Find required packages
 find_package(GLM REQUIRED)
 find_package(GLFW3 REQUIRED)
-find_package(IRRKLANG REQUIRED)
 message(STATUS "GLM: ${GLM_INCLUDE_DIR}")
 message(STATUS "GLFW3: ${GLFW3_INCLUDE_DIR}")
-message(STATUS "IRRKLANG: ${IRRKLANG_INCLUDE_DIR}")
 
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/includes/)
@@ -32,13 +30,13 @@ include_directories(${CMAKE_SOURCE_DIR}/includes/)
 # Set libraries and platform-specific settings
 if(WIN32)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-    set(LIBS glfw3 opengl32 freetype irrKlang)
+    set(LIBS glfw3 opengl32 freetype)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 elseif(UNIX AND NOT APPLE)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
     find_package(OpenGL REQUIRED)
     find_package(X11 REQUIRED)
-    set(LIBS ${GLFW3_LIBRARY} X11 Xrandr Xinerama Xi Xxf86vm Xcursor GL dl pthread freetype ${IRRKLANG_LIBRARY})
+    set(LIBS ${GLFW3_LIBRARY} X11 Xrandr Xinerama Xi Xxf86vm Xcursor GL dl pthread freetype)
     set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -ldl")
 elseif(APPLE)
     include_directories(/System/Library/Frameworks)
@@ -52,20 +50,14 @@ endif()
 
 # Add source files
 set(SOURCES
-    src/glad.c
-    src/stb_image.cpp
-    src/game.cpp
-    src/main.cpp
-    src/model/model_primitive.cpp
-    src/model/model_ui.cpp
-    src/model/model_drawer.cpp
-    src/model/model_text.cpp
-    src/physics/body.cpp
-    src/physics/body_box.cpp
-    src/physics/body_mesh.cpp
-    src/physics/physics_manager.cpp
-    src/light/light.cpp
-    src/camera/camera.cpp
+    includes/ngin/glad.c
+    includes/ngin/stb_image.cpp
+
+    includes/ngin/components/types.cpp
+    includes/ngin/node/nodes/types.cpp
+    includes/ngin/game.cpp
+    
+    src/ngin.cpp
 )
 
 # Configure and include root directory header

@@ -1,33 +1,41 @@
-#ifndef IOBJECT_H
-#define IOBJECT_H
+#ifndef I_OBJECT_H
+#define I_OBJECT_H
 
-//#include <ngin/point.h> // Include the Point class definition
+#include <map>
 #include <memory>
-#include <glm/glm.hpp>
-#include <string>
 
-class Point;
-class PointUi;
+#include <ngin/lex.h>
+#include <ngin/data/transform_data.h>
+#include <ngin/log.h>
 
 class IObject {
 public:
-    virtual ~IObject() {}
+    IObject() = default;
+    IObject(std::string name, Lex lex) : name_(name), lex_(lex) {
+    }
 
-    // These should be marked as const methods that return const references for immutable access
-    virtual Point& getPoint() = 0;  // Provides mutable access to Point
-    virtual PointUi& getPointUi() = 0;  // Provides mutable access to Point
-    virtual const Point& getPoint() const = 0;  // Provides immutable access to Point
-    virtual const PointUi& getPointUi() const = 0;  // Provides immutable access to Point
-    virtual IObject* getParent() const = 0;
+    virtual void init() {}
+    virtual void launch() {}
+    virtual void updateLogic() {}
+    virtual void updateTransform() {}
 
-    virtual glm::mat4 getWorldMatrix(bool includeSelf = true) const = 0; // Correct method declaration
-    virtual glm::vec3 getWorldPosition() const = 0; // Correct method declaration
+    const std::string& getName() const {
+        return name_;
+    }
 
-    virtual bool hasParent() const = 0;
-    virtual bool isUi() = 0;
-    virtual std::string getName() const = 0;
+    TransformData* getTransform() {
+        return transform_.get();
+    }
 
-    virtual unsigned int getHierarchyIndex() const = 0;
+protected:
+    std::unique_ptr<TransformData> transform_;
+
+    void buildTransform() {
+        transform_ = std::make_unique<TransformData>(lex_.getC<Lex>("transform", Lex()));
+    }
+
+    std::string name_;
+    Lex lex_;
 };
 
-#endif // IOBJECT_H
+#endif // I_OBJECT_H

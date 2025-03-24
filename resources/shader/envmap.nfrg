@@ -1,0 +1,14 @@
+#version 330 core
+out vec4 FragColor;
+in vec3 WorldPos;
+
+
+void main()
+{		    
+    vec3 color1 = vec3(0.1, 0.2, 0.5); // First random color
+    vec3 color2 = vec3(0.8, 0.3, 0.1); // Second random color
+    float t = WorldPos.z; // Interpolation factor based on the y-coordinate of the UV
+    vec3 color = mix(color1, color2, t);
+    
+    FragColor = vec4(color, 1.0);
+}

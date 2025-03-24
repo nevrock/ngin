@@ -16,6 +16,10 @@ public:
     {
         return (i1 < i2) ? i1 : i2; // Use the correct variable names
     }
+    static float lerp(float a, float b, float t)
+    {
+        return a + t * (b - a);
+    }
 
 private:
     // Typically, static utility classes do not need constructors or destructors
