@@ -10,7 +10,8 @@
 #include <ngin/log.h>
 #include <ngin/game.h>
 #include <ngin/lex.h>
-#include <ngin/gl.h>
+
+#include <ngin/render/context.h>
 
 #include <ngin/render/shadow_pass.h> 
 #include <ngin/render/geometry_pass.h> 
@@ -21,79 +22,58 @@
 class Renderer {
 
 public:
+
+    static inline float deltaTime = 0.0f;
+    static inline float lastFrame = 0.0f;
+
     Renderer() {
-        Gl::createWindow("ngin", 
-            Game::envget<int>("screen.width"), 
-            Game::envget<int>("screen.height"),
-            framebufferSizeCallback,
-            mouseCallback,
-            scrollCallback);
+        Log::console("Renderer constructor called", 0);
+
+        Context::create("ngin");
     }
     void setup() {
         shadowPass_ = new ShadowPass(1); // Provide the required argument to ShadowPass constructor
-        ssaoPass_ = new SsaoPass(3); // Provide the required argument to SsaoPass constructor
-        geomPass_ = new GeometryPass(2); // Provide the required argument to GeometryPass constructor
-        geomPass_->linkSsaoColorBufferBlur(ssaoPass_->getSsaoColorBufferBlur());
-        
         shadowPass_->setup();
-        ssaoPass_->setup();
+
+        geomPass_ = new GeometryPass(2);
         geomPass_->setup();
+
+        ssaoPass_ = new SsaoPass(3);
+        ssaoPass_->setup();
+
+        envPass_ = new EnvPass(5);
+        envPass_->setup();
+
+        postPass_ = new PostPass(7);
+        postPass_->setup();
+
+        geomPass_->linkSsaoColorBufferBlur(ssaoPass.getSsaoColorBufferBlur());
     }
     void render() {
-        if (shadowPass_) {
-            shadowPass_->render();
-        }
+        shadowPass_->render();
+
+        geomPass_->render();
+
+        ssaoPass_->render();
+
+        deferredPass_->render();  
+
+        envPass_->render();
+
+        translucentPass_->render();
+
+        postPass_->render();
+
+        guiPass_->render();
     }
+
 
 private:
     ShadowPass* shadowPass_; // Updated type to ShadowPass*
     GeometryPass* geomPass_;
     SsaoPass* ssaoPass_;
-
-    static inline float lastX_;
-    static inline float lastY_;
-    static inline bool firstMouse_;
-
-    static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-        glViewport(0, 0, width, height);
-
-        Game::envset("screen.width", width);
-        Game::envset("screen.height", height);
-    }
-
-    static void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
-        // Handle mouse movement
-        std::cout << "Mouse moved to: " << xpos << ", " << ypos << std::endl;
-
-        float xPosFloat = static_cast<float>(xpos);
-        float yPosFloat = static_cast<float>(ypos);
-
-        Game::envset("mouse.x", xPosFloat);
-        Game::envset("mouse.y", yPosFloat);
-
-        if (firstMouse_) {
-            lastX_ = xPosFloat;
-            lastY_ = yPosFloat;
-            firstMouse_ = false;
-        }
-
-        float xoffset = lastX_ - xPosFloat;
-        float yoffset = lastY_ - yPosFloat; // reversed since y-coordinates go from bottom to top
-
-        lastX_ = xPosFloat;
-        lastY_ = yPosFloat;
-
-        Game::envset("mouse.offsetX", xoffset);
-        Game::envset("mouse.offsetY", yoffset);
-    }
-
-    static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-        // Handle scroll input
-        std::cout << "Scrolled: " << xoffset << ", " << yoffset << std::endl;
-
-        Game::envset("scroll_y", static_cast<float>(yoffset));
-    }
-
+    EnvPass* envPass_;
+    PostPass* postPass_;
 };
 
 #endif // RENDERER_H

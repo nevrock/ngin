@@ -64,7 +64,7 @@ public:
         float currentTime = static_cast<float>(glfwGetTime());
         return currentTime;
     }
-    static bool getKey(std::string& key) {
+    static bool getKey(const std::string& key) {
         if (key == "a") {
             return glfwGetKey(context_, GLFW_KEY_A) == GLFW_PRESS;
         } else if (key == "d") {
@@ -75,9 +75,14 @@ public:
             return glfwGetKey(context_, GLFW_KEY_S) == GLFW_PRESS;
         } else if (key == "esc") {
             return glfwGetKey(context_, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+        } else {
+            return false;
         }
     }
     
+    static void closeContext() {
+        glfwSetWindowShouldClose(context_, true);
+    }
     static void setTexture(unsigned int setTexture, int unit) {
         glActiveTexture(GL_TEXTURE0 + unit);
         glBindTexture(GL_TEXTURE_2D, setTexture);
@@ -144,6 +149,7 @@ public:
         }
         glfwTerminate();
     }
+    
 
 private:
     static inline GLFWwindow* context_;

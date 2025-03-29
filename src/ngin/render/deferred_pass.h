@@ -1,110 +1,81 @@
 #ifndef DEFERRED_PASS_H
 #define DEFERRED_PASS_H
 
-#include <ngin/render/render_pass.h>
 #include <iostream>
+#include <functional> // For std::function
+
+#include <ngin/render/render_pass.h>
+#include <ngin/lighter.h>
 
 class DeferredPass : public RenderPass {
 public:
     DeferredPass(unsigned int id) : RenderPass(id) {}
 
     void setup() override {
-        std::cout << "Setting up shadows for pass ID: " << getId() << std::endl;
 
-        int screenWidth = Game::envget<int>("screen.width");
-        int screenHeight = Game::envget<int>("screen.height");
-        // configure g-buffer framebuffer
-        glGenFramebuffers(1, &forwardFBO_);
-        glBindFramebuffer(GL_FRAMEBUFFER, forwardFBO_);
-        // position color buffer
-        glGenTextures(1, &gPosition_);
-        glBindTexture(GL_TEXTURE_2D, gPosition_);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition_, 0);
-        // normal color buffer
-        glGenTextures(1, &gNormal_);
-        glBindTexture(GL_TEXTURE_2D, gNormal_);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal_, 0);
-        // color + specular color buffer
-        glGenTextures(1, &gAlbedoSpec_);
-        glBindTexture(GL_TEXTURE_2D, gAlbedoSpec_);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenWidth, screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec_, 0);
-        // world position color buffer
-        glGenTextures(1, &gPositionWorld_);
-        glBindTexture(GL_TEXTURE_2D, gPositionWorld_);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gPositionWorld_, 0);
-        // world normal color buffer
-        glGenTextures(1, &gNormalWorld_);
-        glBindTexture(GL_TEXTURE_2D, gNormalWorld_);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, gNormalWorld_, 0);
-        // depth texture
-        glGenTextures(1, &gDepth_);
-        glBindTexture(GL_TEXTURE_2D, gDepth_);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_2D, gDepth_, 0);
-
-        unsigned int attachments[6] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5 };
-        glDrawBuffers(6, attachments);
-        
-        // create and attach depth buffer (renderbuffer)
-        glGenRenderbuffers(1, &forwardRBO_);
-        glBindRenderbuffer(GL_RENDERBUFFER, forwardRBO_);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screenWidth, screenHeight);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, forwardRBO_);
-        
-        // finally check if framebuffer is complete
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            Log::console("Framebuffer not complete!", 1);
-            
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
     void render() override {
-        std::cout << "Rendering shadows for pass ID: " << getId() << std::endl;
+        // PASS :: ssao deferred
+        // Set framebuffer for SSAO deferred rendering
+        Context::framebuffer(postFBO_);
+        Context::clear(false);
 
+        bind();
+
+        // Update deferred lighting and draw SSAO deferred
+        Lighter::updateDeferred("ssao_deferred");
+        Drawer::prep("ssao_deferred");
+
+        renderQuad();
     }
     void bind() override {
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, gPosition_);
+        if (geomBind_) geomBind_();
+        if (shadowBind_) shadowBind_();
+    }
 
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, gNormal_);
-
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, gAlbedoSpec_);
-
-        glActiveTexture(GL_TEXTURE4); // add extra SSAO texture to lighting pass
-        glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur_);
-
-        glActiveTexture(GL_TEXTURE5);
-        glBindTexture(GL_TEXTURE_2D, gPositionWorld_);
-
-        glActiveTexture(GL_TEXTURE6);
-        glBindTexture(GL_TEXTURE_2D, gNormalWorld_);
-
-        glActiveTexture(GL_TEXTURE7);
-        glBindTexture(GL_TEXTURE_2D, gDepth_);
-
+    void linkBinding(std::function<void()> geomBind, std::function<void()> shadowBind) {
+        geomBind_ = geomBind;
+        shadowBind_ = shadowBind;
+    }
+    void linkPostBuffer(unsigned int postFBO) {
+        postFBO_ = postFBO;
     }
 
 private:
-    unsigned int forwardFBO_, gDepth_, gPosition_, gPositionWorld_, gNormalWorld_, gNormal_, gAlbedoSpec_, forwardRBO_;
+    unsigned int quadVAO_ = 0;
+    unsigned int quadVBO_ = 0;
+    std::function<void()> geomBind_;   // Function to bind geometry
+    std::function<void()> shadowBind_; // Function to bind shadow
 
+    unsigned int postFBO_;
+    
+    
+    void renderQuad()
+    {
+        if (quadVAO_ == 0)
+        {
+            float quadVertices[] = {
+                // positions        // texture Coords
+                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+            };
+            // setup plane VAO
+            glGenVertexArrays(1, &quadVAO_);
+            glGenBuffers(1, &quadVBO_);
+            glBindVertexArray(quadVAO_);
+            glBindBuffer(GL_ARRAY_BUFFER, quadVBO_);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        }
+        glBindVertexArray(quadVAO_);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
+    }
 };
 
 #endif // DEFERRED_PASS_H

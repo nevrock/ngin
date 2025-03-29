@@ -1,8 +1,9 @@
 #ifndef SHADOW_PASS_H
 #define SHADOW_PASS_H
 
-#include <ngin/render/render_pass.h>
 #include <iostream>
+
+#include <ngin/render/render_pass.h>
 
 class ShadowPass : public RenderPass {
 public:
@@ -14,7 +15,7 @@ public:
         shadowWidth_ = Game::envget<int>("shadow.width");
         shadowHeight_ = Game::envget<int>("shadow.height");
 
-        glGenFramebuffers(1, &shadowMapFbo_);
+        glGenFramebuffers(1, &shadowMapFBO_);
         glGenTextures(1, &shadowMap_);
         glBindTexture(GL_TEXTURE_2D, shadowMap_);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowWidth_, shadowHeight_, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -26,23 +27,41 @@ public:
         float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFbo_);
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO_);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap_, 0);
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
-    void render() override {
-        std::cout << "Rendering shadows for pass ID: " << getId() << std::endl;
 
+    void render() override {
+
+        // Clear buffer and enable depth testing and face culling
+        Context::clear(true);
+        Context::depth(true);
+        Context::cull(true);   
+
+        // PASS :: shadows
+        // Set viewport and framebuffer for shadow rendering
+        Context::viewport(shadowWidth_, shadowHeight_);
+        Context::framebuffer(shadowMapFBO_);
+        Context::clear(true);
+
+        // Prepare and draw shadow map
+        Drawer::prep("shadowmap");
+        Drawer::draw("shadowmap");
+        
     }
     void bind() override {
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, shadowMap_);
+        Context::texture(shadowMap_, 0);
+    }
+
+    unsigned int getShadowBuffer() {
+        return shadowMapFBO_;
     }
 
 private:
-    unsigned int shadowMapFbo_, shadowMap_;
+    unsigned int shadowMapFBO_, shadowMap_;
     unsigned int shadowWidth_, shadowHeight_;
 
 };

@@ -8,6 +8,8 @@
 
 #include <ngin/drawer.h>    
 
+#include <ngin/utils/mathutils.h>   
+
 class Camera : public IDrawer {
 public:
     Camera(const std::string name, const Lex& lex, IObject* parent)
@@ -17,6 +19,8 @@ public:
         for (const auto& shader : shaders) {
             Drawer::registerDrawer(shader, *this);
         }
+
+        speed_ = lex.getC<float>("speed", 0.1f);
     }
     ~Camera() {
         std::vector<std::string> shaders = lex_.getC<std::vector<std::string>>("shaders", {});
@@ -58,15 +62,18 @@ public:
         glm::vec3 position = transform->getPosition();
 
 
-        yaw   += mouseX*0.1;
-        pitch += mouseY*0.1;
+        float yawN   = yaw + mouseX*0.1;
+        float pitchN = pitch + mouseY*0.1;
 
-        if (pitch > 89.0f)
-            pitch = 89.0f;
-        if (pitch < -89.0f)
-            pitch = -89.0f;
+        if (pitchN > 89.0f)
+            pitchN = 89.0f;
+        if (pitchN < -89.0f)
+            pitchN = -89.0f;
 
-        transform->setRotationFromYawPitch(yaw, pitch);
+        yawN = MathUtils::lerp(yaw, yawN, speed_);
+        pitchN = MathUtils::lerp(pitch, pitchN, speed_);
+
+        transform->setRotationFromYawPitch(yawN, pitchN);
 
         //transform->setRotationFromYawPitch(yaw, pitch);
 
@@ -133,6 +140,8 @@ public:
 private:
     //float zoom_, pitch_, movementSpeed_, mouseSensitivity_;
     float zoom_, movementSpeed_;
+
+    float speed_;
 };
 
 #endif // CAMERA_H

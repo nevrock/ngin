@@ -1,77 +1,28 @@
-#ifndef ENV_PASS_H
-#define ENV_PASS_H
+#ifndef SKYBOX_PASS_H
+#define SKYBOX_PASS_H
 
 #include <ngin/render/render_pass.h>
 #include <iostream>
 
-class EnvPass : public RenderPass {
+class SkyboxPass : public RenderPass {
 public:
-    EnvPass(unsigned int id) : RenderPass(id) {}
+    SkyboxPass(unsigned int id) : RenderPass(id) {}
 
     void setup() override {
-        std::cout << "Setting up env pass with ID: " << getId() << std::endl;
+        std::cout << "Setting up skybox pass with ID: " << getId() << std::endl;
 
-        // pbr: setup framebuffer
-        // ----------------------
-        glGenFramebuffers(1, &envFBO_);
-        glGenRenderbuffers(1, &envRBO_);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, envFBO_);
-        glBindRenderbuffer(GL_RENDERBUFFER, envRBO_);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, envRBO_);
-
-        glGenTextures(1, &envCubemap_);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap_);
-        for (unsigned int i = 0; i < 6; ++i)
-        {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, nullptr);
-        }
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // enable pre-filter mipmap sampling (combatting visible dots artifact)
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        Game::envset<int>("env_cubemap", envCubemap_);
-
-        // pbr: set up projection and view matrices for capturing data onto the 6 cubemap face directions
-        // ----------------------------------------------------------------------------------------------
-        captureProjection_ = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-        captureViews_[0] = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-        captureViews_[1] = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-        captureViews_[2] = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f));
-        captureViews_[3] = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f));
-        captureViews_[4] = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-        captureViews_[5] = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
     }
     void render() override {
-        envmap_.use();
-        envmap_.setMat4("projection", captureProjection_);
+        glDepthFunc(GL_LEQUAL);
+        glCullFace(GL_FRONT);
 
-        glViewport(0, 0, 512, 512); // don't forget to configure the viewport to the capture dimensions.
-        glBindFramebuffer(GL_FRAMEBUFFER, envFBO_);
-        for (unsigned int i = 0; i < 6; ++i)
-        {
-            envmap_.setMat4("view", captureViews_[i]);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, envCubemap_, 0);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // Prepare and draw skybox
+        Drawer::prep("skybox");
 
-            renderCube();
-        }
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, Game::envget<int>("env_cubemap"));
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-        // then let OpenGL generate mipmaps from first mip face (combatting visible dots artifact)
-        glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap_);
-        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        // then before rendering, configure the viewport to the original framebuffer's screen dimensions
-        int screenWidth = Game::envget<int>("screen.width");
-        int screenHeight = Game::envget<int>("screen.height");
-        glViewport(0, 0, screenWidth, screenHeight);
+        renderCube();
     }
     void bind() override {
         
@@ -79,11 +30,6 @@ public:
 
 private:
     unsigned int envFBO_, envRBO_, envCubemap_;
-
-    ShaderData& envmap_ = Resources::getShaderData("envmap");
-    glm::mat4 captureProjection_;
-    glm::mat4 captureViews_[6];
-
 
     unsigned int cubeVAO = 0;
     unsigned int cubeVBO = 0;
@@ -161,4 +107,4 @@ private:
 
 };
 
-#endif // ENV_PASS_H
+#endif // SKYBOX_PASS_H

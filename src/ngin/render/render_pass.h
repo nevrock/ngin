@@ -2,6 +2,10 @@
 #define RENDER_PASS_H
 
 #include <string>
+#include <initializer_list>
+
+#include <ngin/render/context.h>
+#include <ngin/drawer.h>
 
 class RenderPass {
 public:
@@ -13,7 +17,7 @@ public:
         return id_; 
     }
     
-    virtual void render() = 0;
+    virtual void render() = 0; // Accepts any number of unsigned int arguments
     virtual void setup() = 0;
     virtual void bind() = 0;
 

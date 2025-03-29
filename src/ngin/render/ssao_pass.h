@@ -79,21 +79,71 @@ public:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
     void render() override {
-        std::cout << "Rendering shadows for pass ID: " << getId() << std::endl;
+        // Reset framebuffer
+        Context::framebuffer(0);
+        Context::clear(false);
 
+        // PASS :: ssao
+        // Set framebuffer for SSAO rendering
+        Context::framebuffer(getSsaoBuffer());
+        Context::clear(false);
+
+        // Bind textures for SSAO
+        Context::texture(gPosition_, 0);
+        Context::texture(gNormal_, 1);
+        Context::texture(getNoiseTexture(), 2);
+
+        // Prepare and draw SSAO
+        Drawer::prep("ssao");
+        renderQuad();
+
+        // PASS :: ssao blur
+        // Set framebuffer for SSAO blur rendering
+        Context::framebuffer(getSsaoBlurBuffer());
+        Context::clear(false);
+        
+        // Use SSAO blur shader and bind SSAO texture
+        Drawer::prep("ssao_blur");  
+        Context::texture(getSsaoTexture(), 0);
+
+        // Prepare and draw SSAO blur
+        renderQuad();
     }
     void bind() override {
         
     }
 
+    void linkGBuffer(unsigned int gPosition, unsigned int gNormal) {
+        gPosition_ = gPosition;
+        gNormal_ = gNormal;
+    }
+
     unsigned int getSsaoColorBufferBlur() {
         return ssaoColorBufferBlur_;
+    }
+    unsigned int getSsaoBuffer() {
+        return ssaoFBO_;
+    }
+    unsigned int getSsaoTexture() {
+        return ssaoColorBuffer_;
+    }
+    unsigned int getSsaoBlurBuffer() {
+        return ssaoBlurFBO_;
+    }
+
+    std::vector<glm::vec3>& getSsaoKernel() {
+        return ssaoKernel_;
+    }
+    unsigned int getNoiseTexture() {
+        return noiseTexture_;
     }
 
 private:
     unsigned int ssaoFBO_, ssaoBlurFBO_;
     unsigned int noiseTexture_; 
     unsigned int ssaoColorBuffer_, ssaoColorBufferBlur_;
+
+    unsigned int gPosition_, gNormal_;
 
     std::vector<glm::vec3> ssaoKernel_;
 

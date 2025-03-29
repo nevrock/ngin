@@ -24,6 +24,7 @@ children:
                 focal_length: 50.0
                 near: 0.10000000149011612
                 far: 1000.0
+                speed: 0.5
                 shaders: [skybox, ssao_g_buffer, ssao_deferred, ssao, translucent]
         children: 
     sun: 
@@ -58,33 +59,9 @@ children:
                 type: light_point
                 color: [4.0, 4.0, 4.0]
         children: 
-    skybox:
-        name: skybox
-        components:
-            skybox:
-                type: skybox
-                shaders: [skybox]
-
-        transform:
-            position: [0.0, 0.0, 0.0]
-    quad:
-        name: screen_quad
-        components:
-            quad:
-                type: quad
-                shaders: [ssao_deferred, ssao, ssao_blur]
-
     quad_gui:
         name: screen_quad_gui
         components:
             quad:
                 type: gui_quad
                 shaders: [gui]
-
-
-    quad_screen:
-        name: screen_quad_full
-        components:
-            quad:
-                type: quad
-                shaders: [post]

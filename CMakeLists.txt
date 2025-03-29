@@ -57,7 +57,7 @@ set(SOURCES
     src/ngin/components/types.cpp
     src/ngin/game.cpp
     
-    src/ngin.cpp
+    src/ngin_render.cpp
 )
 
 # Configure and include root directory header
