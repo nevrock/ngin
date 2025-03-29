@@ -16,7 +16,7 @@ public:
     static void init() {
         std::cout << "" << std::endl;
         std::cout << "-------------------------------" << std::endl;
-        std::cout << "### PHASE - STATIC ###" << std::endl;
+        std::cout << "### PHASE - GAME INIT ###" << std::endl;
         std::cout << "-------------------------------" << std::endl;
 
         game_ = std::make_shared<Lex>(Resources::loadLexicon("game"));

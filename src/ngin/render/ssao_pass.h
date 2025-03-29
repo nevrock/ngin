@@ -1,40 +1,16 @@
 #ifndef SSAO_PASS_H
 #define SSAO_PASS_H
 
-#include <ngin/node/node.h>
-#include <ngin/resources.h>
-#include <ngin/log.h>
+#include <ngin/render/render_pass.h>
 #include <iostream>
 
-// Include glad header
-#include <glad/glad.h>
-
-class nSsao : public Node {
+class SsaoPass : public RenderPass {
 public:
-    nSsao(unsigned int id, const Lex& lex) {
-        setId(id);
-        loadFromLex(lex);
-    }
-    void loadFromLex(const Lex& lex) override {
-        Node::loadFromLex(lex);
-        shadowWidth_ = lex.getC<unsigned int>("width", 1024);
-        shadowHeight_ = lex.getC<unsigned int>("height", 1024);
+    SsaoPass(unsigned int id) : RenderPass(id) {}
 
-        setupShadowMap();
-    }
     void setup() override {
-        Log::console("Setting up nSsao with ID: " + std::to_string(getId()), 1);
+        std::cout << "Setting up ssao pass with ID: " << getId() << std::endl;
 
-    }
-    void execute() override {
-        Log::console("Executing nSsao with ID: " + std::to_string(getId()), 1);
-
-    }
-private:
-    unsigned int shadowMapFBO_, shadowMap_;
-    unsigned int shadowWidth_ = 1024, shadowHeight_ = 1024;
-
-    void setupSsao() {
         int screenWidth = Game::envget<int>("screen.width");
         int screenHeight = Game::envget<int>("screen.height");
         // also create framebuffer to hold SSAO processing stage 
@@ -75,7 +51,7 @@ private:
             float scale = float(i) / 64.0f;
 
             // scale samples s.t. they're more aligned to center of kernel
-            scale = ourLerp(0.1f, 1.0f, scale * scale);
+            scale = lerp(0.1f, 1.0f, scale * scale);
             sample *= scale;
             ssaoKernel_.push_back(sample);
         }
@@ -102,6 +78,59 @@ private:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
+    void render() override {
+        std::cout << "Rendering shadows for pass ID: " << getId() << std::endl;
+
+    }
+    void bind() override {
+        
+    }
+
+    unsigned int getSsaoColorBufferBlur() {
+        return ssaoColorBufferBlur_;
+    }
+
+private:
+    unsigned int ssaoFBO_, ssaoBlurFBO_;
+    unsigned int noiseTexture_; 
+    unsigned int ssaoColorBuffer_, ssaoColorBufferBlur_;
+
+    std::vector<glm::vec3> ssaoKernel_;
+
+    float lerp(float a, float b, float f)
+    {
+        return a + f * (b - a);
+    }
+
+    unsigned int quadVAO_ = 0;
+    unsigned int quadVBO_ = 0;
+    void renderQuad()
+    {
+        if (quadVAO_ == 0)
+        {
+            float quadVertices[] = {
+                // positions        // texture Coords
+                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+            };
+            // setup plane VAO
+            glGenVertexArrays(1, &quadVAO_);
+            glGenBuffers(1, &quadVBO_);
+            glBindVertexArray(quadVAO_);
+            glBindBuffer(GL_ARRAY_BUFFER, quadVBO_);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        }
+        glBindVertexArray(quadVAO_);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
+    }
+
 };
 
-#endif
+#endif // SSAO_PASS_H

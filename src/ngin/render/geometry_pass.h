@@ -1,37 +1,16 @@
-#ifndef G_BUFFER_PASS_H
-#define G_BUFFER_PASS_H
+#ifndef GEOMETRY_PASS_H
+#define GEOMETRY_PASS_H
 
-#include <ngin/node/node.h>
-#include <ngin/resources.h>
-#include <ngin/log.h>
+#include <ngin/render/render_pass.h>
 #include <iostream>
 
-// Include glad header
-#include <glad/glad.h>
-
-class nGBuffer : public Node {
+class GeometryPass : public RenderPass {
 public:
-    nGBuffer(unsigned int id, const Lex& lex) {
-        setId(id);
-        loadFromLex(lex);
-    }
-    void loadFromLex(const Lex& lex) override {
-        Node::loadFromLex(lex);
+    GeometryPass(unsigned int id) : RenderPass(id) {}
 
-        setupGBuffer();
-    }
     void setup() override {
-        Log::console("Setting up nGBuffer with ID: " + std::to_string(getId()), 1);
+        std::cout << "Setting up geom pass with ID: " << getId() << std::endl;
 
-    }
-    void execute() override {
-        Log::console("Executing nGBuffer with ID: " + std::to_string(getId()), 1);
-
-    }
-private:
-    unsigned int forwardFBO_, gDepth_, gPosition_, gPositionWorld_, gNormalWorld_, gNormal_, gAlbedoSpec_, forwardRBO_;
-
-    void setupGBuffer() {
         int screenWidth = Game::envget<int>("screen.width");
         int screenHeight = Game::envget<int>("screen.height");
         // configure g-buffer framebuffer
@@ -80,7 +59,6 @@ private:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_2D, gDepth_, 0);
 
-        // tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
         unsigned int attachments[6] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5 };
         glDrawBuffers(6, attachments);
         
@@ -96,6 +74,40 @@ private:
             
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
+    void render() override {
+        std::cout << "Rendering shadows for pass ID: " << getId() << std::endl;
+
+    }
+    void linkSsaoColorBufferBlur(unsigned int ssaoColorBufferBlur) {
+        ssaoColorBufferBlur_ = ssaoColorBufferBlur;
+    }
+    void bind() override {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, gPosition_);
+
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, gNormal_);
+
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, gAlbedoSpec_);
+
+        glActiveTexture(GL_TEXTURE4); // add extra SSAO texture to lighting pass
+        glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur_);
+
+        glActiveTexture(GL_TEXTURE5);
+        glBindTexture(GL_TEXTURE_2D, gPositionWorld_);
+
+        glActiveTexture(GL_TEXTURE6);
+        glBindTexture(GL_TEXTURE_2D, gNormalWorld_);
+
+        glActiveTexture(GL_TEXTURE7);
+        glBindTexture(GL_TEXTURE_2D, gDepth_);
+
+    }
+
+private:
+    unsigned int forwardFBO_, gDepth_, gPosition_, gPositionWorld_, gNormalWorld_, gNormal_, gAlbedoSpec_, forwardRBO_;
+    unsigned int ssaoColorBufferBlur_;
 };
 
-#endif
+#endif // GEOMETRY_PASS_H

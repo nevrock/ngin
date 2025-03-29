@@ -84,5 +84,12 @@ final:
         refTexture: 1
         specularTexture: 2
 
+post:
+    fragment: fxaa
+    vertex: ssrs
+
+    default:
+        screenTexture: 0
+
 test:
     compute: test

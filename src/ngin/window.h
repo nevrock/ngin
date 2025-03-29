@@ -71,9 +71,9 @@ public:
 
         mainWindow = this;
 
-        glfwSetFramebufferSizeCallback(mainContext, framebuffer_size_callback);
-        glfwSetCursorPosCallback(mainContext, mouse_callback);
-        glfwSetScrollCallback(mainContext, scroll_callback);
+        glfwSetFramebufferSizeCallback(mainContext, framebufferSizeCallback);
+        glfwSetCursorPosCallback(mainContext, mouseCallback);
+        glfwSetScrollCallback(mainContext, scrollCallback);
 
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         glfwSwapInterval(1);
@@ -87,6 +87,8 @@ public:
         setupSsaoCompute();
 
         setupEnvMap();
+
+        setupPostTexture();
     }
     void framebuffer(unsigned int fbo, bool isClear = false) {
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -502,17 +504,17 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, forwardFBO_);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
-    void copyDepthBuffer() {
+    void copyDepthBuffer(unsigned int drawBuffer = 0) {
         int screenWidth = Game::envget<int>("screen.width");
         int screenHeight = Game::envget<int>("screen.height");
 
         glBindFramebuffer(GL_READ_FRAMEBUFFER, forwardFBO_);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawBuffer); // write to default framebuffer
         // blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
         // the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the 		
         // depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
         glBlitFramebuffer(0, 0, screenWidth, screenHeight, 0, 0, screenWidth, screenHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, drawBuffer);
     }
     void bindGBuffer() {
         glActiveTexture(GL_TEXTURE0);
@@ -876,6 +878,45 @@ public:
         return ssaoKernel_;
     }
 
+    void setupPostTexture() {
+        int screenWidth = Game::envget<int>("screen.width");
+        int screenHeight = Game::envget<int>("screen.height");
+
+        // Generate framebuffer
+        glGenFramebuffers(1, &postFBO_);
+        glBindFramebuffer(GL_FRAMEBUFFER, postFBO_);
+
+        // Generate texture to render to
+        glGenTextures(1, &postTexture_);
+        glBindTexture(GL_TEXTURE_2D, postTexture_);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, postTexture_, 0);
+
+        // Create and attach depth buffer (renderbuffer)
+        unsigned int rbo;
+        glGenRenderbuffers(1, &rbo);
+        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screenWidth, screenHeight);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+        // Check if framebuffer is complete
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            Log::console("Post-processing framebuffer not complete!", 1);
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    unsigned int getPostBuffer() {
+        return postFBO_;
+    }
+
+    unsigned int getPostTexture() {
+        return postTexture_;
+    }
+
 private:
     static inline float lastX_ = 0.0f;
     static inline float lastY_ = 0.0f;
@@ -895,14 +936,16 @@ private:
 
     unsigned int ssaoComputeOutput_, ssaoComputeOutputBlur_;
 
-    static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    unsigned int postFBO_, postTexture_;
+
+    static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
 
         Game::envset("screen.width", width);
         Game::envset("screen.height", height);
     }
 
-    static void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
+    static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn) {
         // Implement mouse position handling logic here
         float xpos = static_cast<float>(xposIn);
         float ypos = static_cast<float>(yposIn);
@@ -929,7 +972,7 @@ private:
         //Log::console("mouse_x: " + std::to_string(xoffset) + ", mouse_y: " + std::to_string(yoffset));
     }
 
-    static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
         // Implement scroll handling logic here
 
         Game::envset("scroll_y", static_cast<float>(yoffset));

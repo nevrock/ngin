@@ -17,7 +17,7 @@
 #include <ngin/drawer.h>
 #include <ngin/lighter.h>
 
-#include <ngin/node/node_graph.h>
+#include <ngin/render/renderer.h>
 
 
 // --- STATIC FUNCTIONS --- //
@@ -32,44 +32,6 @@ bool firstMouse_;
 
 int main()
 {
-    std::cout << "" << std::endl;
-    std::cout << "-------------------------------" << std::endl;
-    std::cout << "### PHASE - GRAPH CONSTRUCT ###" << std::endl;
-    std::cout << "-------------------------------" << std::endl;
-
-    NodeGraph graph("graph");
-
-    std::cout << "" << std::endl;
-    std::cout << "-------------------------------" << std::endl;
-    std::cout << "### PHASE - GRAPH PROCESS ###" << std::endl;
-    std::cout << "-------------------------------" << std::endl;
-
-    graph.process();
-
-    std::cout << "" << std::endl;
-    std::cout << "-------------------------------" << std::endl;
-    std::cout << "### PHASE - GRAPH SETUP ###" << std::endl;
-    std::cout << "-------------------------------" << std::endl;
-
-    graph.setup();
-
-    std::cout << "" << std::endl;
-    std::cout << "-------------------------------" << std::endl;
-    std::cout << "### PHASE - GAME LOOP ###" << std::endl;
-    std::cout << "-------------------------------" << std::endl;
-
-    int i = 0;
-    while (Game::isRunning()) {
-
-        graph.execute();
-        
-        i += 1;
-        if (i > 2)
-            break;
-    }
-
-    return 0;
-
     // Create a window with the title "ngin"
     Window window("ngin");
 
@@ -88,6 +50,7 @@ int main()
     // Get the shaders we will need
     ShaderData& shaderSsao = Resources::getShaderData("ssao");
     ShaderData& shaderSsaoBlur = Resources::getShaderData("ssao_blur");
+    ShaderData& shaderPost = Resources::getShaderData("post");
 
     // Render loop
     // -----------
@@ -160,13 +123,10 @@ int main()
         // Prepare and draw SSAO blur
         Drawer::prep("ssao_blur");
         Drawer::draw("ssao_blur");
-
-        // Reset framebuffer
-        window.framebuffer(0);
         
         // PASS :: ssao deferred
         // Set framebuffer for SSAO deferred rendering
-        window.framebuffer(0);
+        window.framebuffer(window.getPostBuffer());
         window.clear(false);
 
         // Bind SSAO G-buffer and shadow map
@@ -180,7 +140,7 @@ int main()
         
         // PASS :: skybox
         // Copy depth buffer and set depth function and face culling for skybox
-        window.copyDepthBuffer();
+        window.copyDepthBuffer(window.getPostBuffer());
         glDepthFunc(GL_LEQUAL);
         glCullFace(GL_FRONT);
 
@@ -200,8 +160,22 @@ int main()
         window.bindShadowMap();
         Drawer::draw("translucent");
 
-        // Render GUI
+
+
+        // draw post
         glDisable(GL_DEPTH_TEST);
+        window.framebuffer(0);
+
+        // Render Post
+        window.texture(window.getPostTexture(), 0);
+        shaderPost.setVec2("screenSize", glm::vec2(screenWidth, screenHeight));
+
+        Drawer::prep("post");
+        Drawer::draw("post");
+
+
+        // Render GUI
+        //glDisable(GL_DEPTH_TEST);
         
         Drawer::prep("gui");
         Drawer::draw("gui");
@@ -217,7 +191,7 @@ int main()
         window.displayAndPoll();
 
         // Sleep for a short duration (commented out)
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     // Terminate the window and GLFW

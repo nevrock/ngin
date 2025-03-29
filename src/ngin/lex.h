@@ -532,6 +532,7 @@ private:
                 return value;
             }
         }
+        return {}; // Add a default return value to avoid warnings
     }
     void parseLexElement(Lex* dict, std::string& key, std::string& value) {
         //std::cout << "## setting element of dict " << std::endl;

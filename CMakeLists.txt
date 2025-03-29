@@ -26,6 +26,7 @@ message(STATUS "GLFW3: ${GLFW3_INCLUDE_DIR}")
 
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/includes/)
+include_directories(${CMAKE_SOURCE_DIR}/src/)
 
 # Set libraries and platform-specific settings
 if(WIN32)
@@ -50,12 +51,11 @@ endif()
 
 # Add source files
 set(SOURCES
-    includes/ngin/glad.c
-    includes/ngin/stb_image.cpp
+    src/ngin/glad.c
+    src/ngin/stb_image.cpp
 
-    includes/ngin/components/types.cpp
-    includes/ngin/node/nodes/types.cpp
-    includes/ngin/game.cpp
+    src/ngin/components/types.cpp
+    src/ngin/game.cpp
     
     src/ngin.cpp
 )

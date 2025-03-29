@@ -73,3 +73,18 @@ children:
             quad:
                 type: quad
                 shaders: [ssao_deferred, ssao, ssao_blur]
+
+    quad_gui:
+        name: screen_quad_gui
+        components:
+            quad:
+                type: gui_quad
+                shaders: [gui]
+
+
+    quad_screen:
+        name: screen_quad_full
+        components:
+            quad:
+                type: quad
+                shaders: [post]
