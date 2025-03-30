@@ -37,7 +37,7 @@ children:
             light: 
                 type: light
                 shaders: [shadowmap, gbuffer, deferred, translucent]
-                lightIntensity: 0.2
+                lightIntensity: 1.0
         children: 
     plane: 
         transform: 
