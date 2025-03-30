@@ -15,7 +15,7 @@ public:
     }
     void render() override {
         // Reset face culling and depth function
-        glCullFace(GL_BACK);   
+        Context::cull(true, false);
         glDepthFunc(GL_LESS);
 
         // Render translucent objects

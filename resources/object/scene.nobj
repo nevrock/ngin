@@ -10,7 +10,8 @@ children:
             mesh: 
                 type: mesh
                 mesh: cube
-                shaders: [shadowmap, ssao_g_buffer]
+                shaders: [shadowmap, gbuffer]
+                texture: face
         children: 
     camera: 
         transform: 
@@ -25,7 +26,7 @@ children:
                 near: 0.10000000149011612
                 far: 1000.0
                 speed: 0.5
-                shaders: [skybox, ssao_g_buffer, ssao_deferred, ssao, translucent]
+                shaders: [skybox, gbuffer, deferred, ssao, translucent]
         children: 
     sun: 
         transform: 
@@ -35,7 +36,8 @@ children:
         components: 
             light: 
                 type: light
-                shaders: [shadowmap, pbr, ssao_g_buffer, ssao_deferred, translucent]
+                shaders: [shadowmap, gbuffer, deferred, translucent]
+                lightIntensity: 0.2
         children: 
     plane: 
         transform: 
@@ -46,18 +48,21 @@ children:
             mesh: 
                 type: mesh
                 mesh: plane
-                shaders: [shadowmap, ssao_g_buffer]
+                shaders: [shadowmap, reflection, gbuffer]
+                texture: metal
         children: 
     point_light:
         name: point_light_0 
         transform: 
-            position: [-1.0, 0.0, 2.0]
+            position: [-1.0, -5.0, 1.0]
             rotation: [0.0, 0.0, 0.0]
             scale: [1.0, 1.0, 1.0]
         components: 
             light: 
                 type: light_point
-                color: [4.0, 4.0, 4.0]
+                color: [2.0, 2.0, 2.0]
+                intensity: 1.0
+                range: 15.0
         children: 
     quad_gui:
         name: screen_quad_gui

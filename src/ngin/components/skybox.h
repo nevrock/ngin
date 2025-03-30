@@ -117,7 +117,7 @@ public:
     }
     void draw(ShaderData& shader) override {
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, Game::envget<int>("env_cubemap"));
+        glBindTexture(GL_TEXTURE_CUBE_MAP, Game::envget<int>("envCubemap"));
         renderCube();
     }
 

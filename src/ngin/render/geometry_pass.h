@@ -87,8 +87,8 @@ public:
         Context::clear(false);
 
         // Prepare and draw SSAO G-buffer
-        Drawer::prep("ssao_g_buffer");
-        Drawer::draw("ssao_g_buffer");
+        Drawer::prep("gbuffer");
+        Drawer::draw("gbuffer");
     }
     void linkSsaoColorBufferBlur(unsigned int ssaoColorBufferBlur) {
         ssaoColorBufferBlur_ = ssaoColorBufferBlur;
@@ -127,6 +127,9 @@ public:
 
         glActiveTexture(GL_TEXTURE7);
         glBindTexture(GL_TEXTURE_2D, gDepth_);
+
+        glActiveTexture(GL_TEXTURE8);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, Game::envget<int>("envCubemap"));
     }
 
     unsigned int getForwardBuffer() {

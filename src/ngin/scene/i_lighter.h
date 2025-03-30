@@ -18,6 +18,8 @@ public:
         lightData_->setName(getName());
         lightData_->setPosition(getTransform()->getPosition());
         lightData_->setColor(lex_.getVec("color", glm::vec3(1.0)));
+        lightData_->setIntensity(lex_.getC<float>("intensity", 1.0f));
+        lightData_->setRange(lex_.getC<float>("range", 1.0f));
         return lightData_;
     }
 

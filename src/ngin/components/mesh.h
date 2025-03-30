@@ -35,6 +35,7 @@ public:
 
         if (lex_.contains("texture")) {
             texture_ = Resources::getTextureId(lex_.getC<std::string>("texture", ""));
+            std::cout << "Texture ID: " << texture_ << std::endl;
         }
     }
 

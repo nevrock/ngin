@@ -23,8 +23,10 @@ public:
         bind();
 
         // Update deferred lighting and draw SSAO deferred
-        Lighter::updateDeferred("ssao_deferred");
-        Drawer::prep("ssao_deferred");
+        Lighter::updateDeferred("deferred");
+        Drawer::prep("deferred");
+
+        deferred_.setVec3("probePosition", Game::envget<glm::vec3>("reflectionPosition"));
 
         renderQuad();
     }
@@ -46,6 +48,9 @@ private:
     unsigned int quadVBO_ = 0;
     std::function<void()> geomBind_;   // Function to bind geometry
     std::function<void()> shadowBind_; // Function to bind shadow
+
+    ShaderData& deferred_ = Resources::getShaderData("deferred");
+
 
     unsigned int postFBO_;
     

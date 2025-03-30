@@ -67,10 +67,11 @@ public:
         {
             std::shared_ptr<LightData> data = lights[i];
             shader.setVec3("lights[" + std::to_string(i) + "].Position", data->getPosition());
-            shader.setVec3("lights[" + std::to_string(i) + "].Color", data->getColor());
+            shader.setVec3("lights[" + std::to_string(i) + "].Color", data->getColor()*data->getIntensity());
+            
             // update attenuation parameters and calculate radius
-            const float linear = 0.7f;
-            const float quadratic = 1.8f;
+            const float linear = 1.8f;
+            const float quadratic = 0.7f;
             shader.setFloat("lights[" + std::to_string(i) + "].Linear", linear);
             shader.setFloat("lights[" + std::to_string(i) + "].Quadratic", quadratic);
         }

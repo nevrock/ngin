@@ -157,7 +157,7 @@ public:
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // enable pre-filter mipmap sampling (combatting visible dots artifact)
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        Game::envset<int>("env_cubemap", envCubemap_);
+        Game::envset<int>("envCubemap", envCubemap_);
 
         ShaderData& envmap = Resources::getShaderData("envmap");
         // pbr: set up projection and view matrices for capturing data onto the 6 cubemap face directions

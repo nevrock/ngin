@@ -33,7 +33,7 @@ public:
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // enable pre-filter mipmap sampling (combatting visible dots artifact)
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        Game::envset<int>("env_cubemap", envCubemap_);
+        Game::envset<int>("envCubemap", envCubemap_);
 
         // pbr: set up projection and view matrices for capturing data onto the 6 cubemap face directions
         // ----------------------------------------------------------------------------------------------
@@ -46,11 +46,16 @@ public:
         captureViews_[5] = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
     }
     void render() override {
+        Context::viewport(512, 512);
+        Context::framebuffer(envFBO_);
+
+        Context::clear(true);
+        Context::depth(true);
+        Context::cull(true, true);
+
         envmap_.use();
         envmap_.setMat4("projection", captureProjection_);
 
-        glViewport(0, 0, 512, 512); // don't forget to configure the viewport to the capture dimensions.
-        glBindFramebuffer(GL_FRAMEBUFFER, envFBO_);
         for (unsigned int i = 0; i < 6; ++i)
         {
             envmap_.setMat4("view", captureViews_[i]);
@@ -62,7 +67,6 @@ public:
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
         // then let OpenGL generate mipmaps from first mip face (combatting visible dots artifact)
         glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap_);
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
@@ -72,6 +76,8 @@ public:
         int screenWidth = Game::envget<int>("screen.width");
         int screenHeight = Game::envget<int>("screen.height");
         glViewport(0, 0, screenWidth, screenHeight);
+
+        Context::cull(true);
     }
     void bind() override {
         

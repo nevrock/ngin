@@ -58,6 +58,12 @@ public:
         lightView = glm::lookAt(arbitraryCenter - lightDir * 10.0f, arbitraryCenter, glm::vec3(0.0, 0.0, 1.0)); // Adjusted up vector
         lightSpaceMatrix = lightProjection * lightView;
 
+        glm::vec3 lightColor = lex_.getC<glm::vec3>("lightColor", glm::vec3(1.0f, 1.0f, 1.0f)); // Default to white light
+        shader.setVec3("lightColor", lightColor);
+
+        float lightIntensity = lex_.getC<float>("lightIntensity", 0.5f); // Default intensity is 1.0
+        shader.setFloat("lightIntensity", lightIntensity);
+
         //shader.setMat4("M_LIGHT_SPACE", lightSpaceMatrix);
         shader.setVec3("lightDir", lightDir);
         shader.setVec3("worldLightDir", lightDir);

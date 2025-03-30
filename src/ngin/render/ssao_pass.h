@@ -15,25 +15,26 @@ public:
         int screenHeight = Game::envget<int>("screen.height");
         // also create framebuffer to hold SSAO processing stage 
         // -----------------------------------------------------
-        glGenFramebuffers(1, &ssaoFBO_);  glGenFramebuffers(1, &ssaoBlurFBO_);
+        glGenFramebuffers(1, &ssaoFBO_);  
+        glGenFramebuffers(1, &ssaoBlurFBO_);
         glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO_);
         // SSAO color buffer
-        glGenTextures(1, &ssaoColorBuffer_);
-        glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer_);
+        glGenTextures(1, &ssaoColorTexture_);
+        glBindTexture(GL_TEXTURE_2D, ssaoColorTexture_);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, screenWidth, screenHeight, 0, GL_RED, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBuffer_, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorTexture_, 0);
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             Log::console("SSAO Framebuffer not complete!", 1);
         // and blur stage
         glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO_);
-        glGenTextures(1, &ssaoColorBufferBlur_);
-        glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur_);
+        glGenTextures(1, &ssaoBlurColorTexture_);
+        glBindTexture(GL_TEXTURE_2D, ssaoBlurColorTexture_);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, screenWidth, screenHeight, 0, GL_RED, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBufferBlur_, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoBlurColorTexture_, 0);
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             Log::console("SSAO Blur Framebuffer not complete!", 1);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -85,12 +86,12 @@ public:
 
         // PASS :: ssao
         // Set framebuffer for SSAO rendering
-        Context::framebuffer(getSsaoBuffer());
+        Context::framebuffer(getSsaoFramebuffer());
         Context::clear(false);
 
         // Bind textures for SSAO
-        Context::texture(gPosition_, 0);
-        Context::texture(gNormal_, 1);
+        Context::texture(gPositionTexture_, 0);
+        Context::texture(gNormalTexture_, 1);
         Context::texture(getNoiseTexture(), 2);
 
         // Prepare and draw SSAO
@@ -99,12 +100,12 @@ public:
 
         // PASS :: ssao blur
         // Set framebuffer for SSAO blur rendering
-        Context::framebuffer(getSsaoBlurBuffer());
+        Context::framebuffer(getSsaoBlurFramebuffer());
         Context::clear(false);
         
         // Use SSAO blur shader and bind SSAO texture
         Drawer::prep("ssao_blur");  
-        Context::texture(getSsaoTexture(), 0);
+        Context::texture(getSsaoColorTexture(), 0);
 
         // Prepare and draw SSAO blur
         renderQuad();
@@ -114,20 +115,20 @@ public:
     }
 
     void linkGBuffer(unsigned int gPosition, unsigned int gNormal) {
-        gPosition_ = gPosition;
-        gNormal_ = gNormal;
+        gPositionTexture_ = gPosition;
+        gNormalTexture_ = gNormal;
     }
 
-    unsigned int getSsaoColorBufferBlur() {
-        return ssaoColorBufferBlur_;
+    unsigned int getSsaoBlurColorTexture() {
+        return ssaoBlurColorTexture_;
     }
-    unsigned int getSsaoBuffer() {
+    unsigned int getSsaoFramebuffer() {
         return ssaoFBO_;
     }
-    unsigned int getSsaoTexture() {
-        return ssaoColorBuffer_;
+    unsigned int getSsaoColorTexture() {
+        return ssaoColorTexture_;
     }
-    unsigned int getSsaoBlurBuffer() {
+    unsigned int getSsaoBlurFramebuffer() {
         return ssaoBlurFBO_;
     }
 
@@ -141,9 +142,9 @@ public:
 private:
     unsigned int ssaoFBO_, ssaoBlurFBO_;
     unsigned int noiseTexture_; 
-    unsigned int ssaoColorBuffer_, ssaoColorBufferBlur_;
+    unsigned int ssaoColorTexture_, ssaoBlurColorTexture_;
 
-    unsigned int gPosition_, gNormal_;
+    unsigned int gPositionTexture_, gNormalTexture_;
 
     std::vector<glm::vec3> ssaoKernel_;
 

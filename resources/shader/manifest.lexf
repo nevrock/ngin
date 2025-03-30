@@ -1,28 +1,41 @@
 shadowmap:
-    fragment: shadowmap
-    vertex: shadowmap
-    
-envmap:
-    fragment: envmap
-    vertex: cubemap
+    fragment: shadow/shadowmap
+    vertex: shadow/shadowmap
 
-skybox:
-    fragment: skybox
-    vertex: skybox
+reflection:
+    fragment: cubemap/reflection
+    vertex: cubemap/reflection
 
     defaults:
-        environmentMap: 0
+        textureDiffuse: 1
 
-ssao_g_buffer:
-    fragment: ssao_geometry
-    vertex: ssao_geometry
+gbuffer:
+    fragment: gbuffer/gbuffer
+    vertex: gbuffer/gbuffer
 
     defaults:
         shadowMap: 0
+        textureDiffuse: 1
 
-ssao_deferred:
-    fragment: ssao_lighting
-    vertex: ssao
+ssao:
+    fragment: ssao/ssao
+    vertex: ssao/ssao
+
+    defaults:
+        gPosition: 0
+        gNormal: 1
+        texNoise: 2
+
+ssao_blur:
+    fragment: ssao/ssao_blur
+    vertex: ssao/ssao
+
+    defaults:
+        ssaoInput: 0
+
+deferred:
+    fragment: deferred/lighting
+    vertex: ssao/ssao
 
     defaults:
         shadowMap: 0
@@ -33,63 +46,34 @@ ssao_deferred:
         gPositionWorld: 5
         gNormalWorld: 6
         gDepth: 7
+        reflectionCubemap: 8
 
-ssao:
-    fragment: ssao
-    vertex: ssao
-    compute: ssao
+envmap:
+    fragment: cubemap/envmap
+    vertex: cubemap/cubemap
 
-    defaults:
-        gPosition: 0
-        gNormal: 1
-        texNoise: 2
-
-ssao_blur:
-    fragment: ssao_blur
-    vertex: ssao
-    compute: ssao_blur
-
-    defaults:
-        ssaoInput: 0
-
-
-gui:
-    fragment: gui
-    vertex: gui
-    
-
-translucent:
-    fragment: translucent
-    vertex: translucent
-
-    defaults:
-        shadowMap: 0
-        textureDiffuse: 1
-
-ssrs:
-    fragment: ssrs
-    vertex: ssrs
-
-    defaults:
-        gNormal: 0
-        colorBuffer: 1
-        depthMap: 2
-
-final:
-    fragment: final
-    vertex: ssrs
-
-    defaults:
-        colorTexture: 0
-        refTexture: 1
-        specularTexture: 2
-
-post:
-    fragment: fxaa
-    vertex: ssrs
+antialiasing:
+    fragment: antialiasing/fxaa
+    vertex: antialiasing/fxaa
 
     default:
         screenTexture: 0
 
-test:
-    compute: test
+skybox:
+    fragment: skybox/skybox
+    vertex: skybox/skybox
+
+    defaults:
+        environmentMap: 0
+
+gui:
+    fragment: gui/gui
+    vertex: gui/gui
+    
+translucent:
+    fragment: translucent/translucent
+    vertex: translucent/translucent
+
+    defaults:
+        shadowMap: 0
+        textureDiffuse: 1

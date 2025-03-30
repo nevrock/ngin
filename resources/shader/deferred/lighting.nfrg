@@ -1,0 +1,164 @@
+#version 330 core
+out vec4 FragColor;
+
+in vec2 TexCoords;
+
+uniform sampler2D shadowMap;
+uniform sampler2D gPosition;
+uniform sampler2D gNormal;
+uniform sampler2D gAlbedo;
+uniform sampler2D ssao;
+uniform sampler2D gPositionWorld;
+uniform sampler2D gNormalWorld;
+uniform sampler2D gDepth;
+uniform samplerCube reflectionCubemap; // New: Reflection cubemap texture
+
+
+struct Light {
+    vec3 Position;
+    vec3 Color;
+    
+    float Linear;
+    float Quadratic;
+};
+const int NR_LIGHTS = 32;
+uniform Light lights[NR_LIGHTS];
+uniform vec3 camPos;
+uniform vec3 viewPos;
+uniform vec3 worldLightDir;
+uniform mat4 lightSpaceMatrix;
+uniform vec3 probePosition; // New: Position of the reflection probe
+uniform vec3 lightPosition;
+uniform float lightIntensity;
+
+
+float getShadowsDirectional(vec4 fragPosLightSpace) {
+    vec3 Normal = texture(gNormalWorld, TexCoords).rgb;
+
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // calculate bias (based on depth map resolution and slope)
+    vec3 normal = normalize(Normal);
+    float bias = max(0.005 * (1.0 - dot(normal, -worldLightDir)), 0.005);
+    // check whether current frag pos is in shadow
+    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+    // PCF
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    int size = 16;
+    for(int x = -size; x <= size; ++x) {
+        for(int y = -size; y <= size; ++y) {
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 512.0;
+    
+    // keep the shadow at 0.0 when outside the CAMERA_FAR_PLANE region of the light's frustum.
+    if(projCoords.z > 1.0)
+        shadow = 0.0;
+
+    return 1.0 - shadow;
+}
+vec3 getColorDirectional(float specularIn, float intensity) {
+    vec3 color = texture(gAlbedo, TexCoords).rgb;
+    vec3 normal = texture(gNormalWorld, TexCoords).rgb;
+    vec3 worldPos = texture(gPositionWorld, TexCoords).rgb;
+    vec3 fragPos = texture(gPosition, TexCoords).rgb;
+    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(worldPos.xyz, 1.0);
+    vec3 lightColor = vec3(0.4);
+
+    // diffuse
+    float diff = max(dot(-worldLightDir, normal), 0.4);
+    vec3 diffuse = diff * vec3(intensity);
+
+    // specular
+    vec3 viewDir = normalize(viewPos - worldPos);
+    vec3 halfwayDir = normalize(-worldLightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
+    vec3 specular = spec * vec3(lightIntensity) * specularIn;
+    
+    vec3 lighting = ((diffuse + specular)) * color;
+
+    return lighting;
+}
+vec3 applyFog(vec3 color, float depth) {
+    float fogDensity = 0.04;
+    float fogGradient = 1.5;
+    float fogFactor = exp(-pow(depth * fogDensity, fogGradient));
+    fogFactor = clamp(fogFactor, 0.0, 1.0);
+    vec3 fogColor = vec3(0.5, 0.5, 0.5); // gray fog color
+    return mix(fogColor, color, fogFactor);
+}
+
+vec3 calculateReflections(vec3 worldPos, vec3 normal, vec3 probePosition, float metallic) {
+    vec3 viewDirFromProbe = normalize(probePosition - worldPos); // Direction from the fragment to the probe
+    vec3 reflectionVector = reflect(-viewDirFromProbe, normalize(normal));
+    vec3 reflectedColor = texture(reflectionCubemap, reflectionVector).rgb;
+    return mix(vec3(0.0), reflectedColor, metallic);
+}
+
+void main()
+{             
+    // retrieve data from gbuffer
+    vec3 FragPos = texture(gPosition, TexCoords).rgb;
+    vec3 Depth = texture(gDepth, TexCoords).rgb;
+    vec3 WorldPos = texture(gPositionWorld, TexCoords).rgb;
+    vec3 Normal = texture(gNormalWorld, TexCoords).rgb;
+    //vec3 Diffuse = texture(gAlbedo, TexCoords).rgb;
+    float Specular = 0.0f;
+    
+
+
+
+    vec3 Diffuse = getColorDirectional(Specular, lightIntensity);
+    float AmbientOcclusion = texture(ssao, TexCoords).r;
+
+    vec3 reflections = calculateReflections(WorldPos, Normal, probePosition, 0.0);
+
+    // then calculate lighting as usual
+    vec3 ambient = vec3(Diffuse * AmbientOcclusion);
+    vec3 lighting  = ambient; 
+    vec3 viewDir  = normalize(viewPos - FragPos);
+    for(int i = 0; i < NR_LIGHTS; ++i)
+    {
+        // diffuse
+        vec3 lightDir = normalize(lights[i].Position - WorldPos);
+        vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * lights[i].Color*max(1.0, (25.0*(1.0-lightIntensity)));
+
+        // specular
+        vec3 halfwayDir = normalize(lightDir + viewDir);  
+        float spec = pow(max(dot(Normal, halfwayDir), 0.0), 24.0);
+        vec3 specular = lights[i].Color * spec * Specular;
+
+        // attenuation
+        float distance = length(lights[i].Position - WorldPos);
+        float attenuation = 1.0 / (1.0 + lights[i].Linear * distance + lights[i].Quadratic * distance * distance);
+        diffuse *= attenuation;
+        specular *= attenuation;
+
+        lighting += diffuse + specular;        
+    }
+
+    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(WorldPos.xyz, 1.0);
+    float shadow = getShadowsDirectional(fragPosLightSpace);
+
+    lighting = lighting + reflections;
+
+    vec3 lightingOut = lighting*max(shadow, 0.75);
+    vec3 fogOut = applyFog(lightingOut, Depth.r);
+    
+    FragColor = vec4(lightingOut, 1.0);
+    //FragColor = vec4(vec3(AmbientrOcclusion), 1.0);
+    //FragColor = vec4(vec3(Depth.r), 1.0);
+    //FragColor = vec4(vec3(0.3*AmbientOcclusion), 1.0);
+    //FragColor = vec4(Diffuse, 1.0);
+}
+
+
+

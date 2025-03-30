@@ -4,198 +4,163 @@
 #include <thread>
 #include <chrono>
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <stb_image.h>
-
-#include <ngin/utils/mathutils.h>
-#include <ngin/window.h>
 #include <ngin/log.h>
 #include <ngin/lex.h>
+
 #include <ngin/game.h>
 #include <ngin/resources.h>
-#include <ngin/drawer.h>
-#include <ngin/lighter.h>
 
-#include <ngin/render/renderer.h>
+#include <ngin/render/context.h>
+
+#include <ngin/render/shadow_pass.h> 
+#include <ngin/render/reflection_pass.h> 
+#include <ngin/render/geometry_pass.h> 
+#include <ngin/render/ssao_pass.h> 
+#include <ngin/render/env_pass.h> 
+#include <ngin/render/skybox_pass.h> 
+#include <ngin/render/aa_pass.h> 
+#include <ngin/render/deferred_pass.h> 
+#include <ngin/render/translucent_pass.h> 
+#include <ngin/render/gui_pass.h> 
 
 
 // --- STATIC FUNCTIONS --- //
 static int gameInit = (Game::init(), 0);
 static int resourcesInit = (Resources::init(), 0);
-static int lighterInit = (Lighter::init(), 0);
 
 float deltaTime_, lastFrame_;
 float lastX_, lastY_;
 std::string title = "ngin";
 bool firstMouse_;
 
+
 int main()
 {
-    // Create a window with the title "ngin"
-    Window window("ngin");
-
-    // Retrieve screen and shadow dimensions from the game environment
-    int screenWidth = Game::envget<int>("screen.width");
-    int screenHeight = Game::envget<int>("screen.height");
-    int shadowWidth = Game::envget<int>("shadow.width");
-    int shadowHeight = Game::envget<int>("shadow.height");
+    // Create a context with the title "ngin"
+    Context::create("ngin");
 
     // Initialize game and drawer components
     Game::start();
 
-    // Setup the window
-    window.setup();
+    // Initialize the render passes
+    ShadowPass* shadowPass = new ShadowPass(1);
+    shadowPass->setup();
 
-    // Get the shaders we will need
-    ShaderData& shaderSsao = Resources::getShaderData("ssao");
-    ShaderData& shaderSsaoBlur = Resources::getShaderData("ssao_blur");
-    ShaderData& shaderPost = Resources::getShaderData("post");
+    ReflectionPass* reflectionPass = new ReflectionPass(2);
+    reflectionPass->setup();
+
+    GeometryPass* geomPass = new GeometryPass(2);
+    geomPass->setup();
+
+    SsaoPass* ssaoPass = new SsaoPass(3);
+    ssaoPass->setup();
+
+    DeferredPass* deferredPass = new DeferredPass(4);
+    deferredPass->setup();
+
+    EnvPass* envPass = new EnvPass(5);
+    envPass->setup();
+
+    SkyboxPass* skyboxPass = new SkyboxPass(6);
+    skyboxPass->setup();
+
+    TranslucentPass* translucentPass = new TranslucentPass(7);
+    translucentPass->setup();
+
+    AAPass* aaPass = new AAPass(8);
+    aaPass->setup();
+
+    GuiPass* guiPass = new GuiPass(9);
+    guiPass->setup();
+
+
+    // Link passes together
+    geomPass->linkSsaoColorBufferBlur(ssaoPass->getSsaoBlurColorTexture());
+    ssaoPass->linkGBuffer(geomPass->getPositionTexture(), geomPass->getNormalTexture());
+    
+    deferredPass->linkBinding(
+        [&]() { geomPass->bind(); },
+        [&]() { shadowPass->bind(); }
+    );
+    deferredPass->linkPostBuffer(aaPass->getAABuffer());
+
+    translucentPass->linkBinding(
+        [&]() { shadowPass->bind(); }
+    );
+
+    envPass->render();
+    //reflectionPass->render();
 
     // Render loop
     // -----------
-    while (!window.shouldClose())
+    while (!Context::shouldClose())
     {
         // Update game logic and transformations
         Game::updateLogic();
-        Game::updateTransform();
+        Game::updateTransform(); 
 
-        // Update window time and process input
-        window.updateTime();
-        window.processInput();
+        // Update context time and process input
+        Context::updateTime();
+        Context::processInput();
 
-        // Clear buffer and enable depth testing and face culling
-        window.clear(true);
-        window.depth(true);
-        window.cull(true);   
+        // Env pass (optional)
+        if (Game::envget<bool>("trigger.update_envmap")) {
+            envPass->render();
+            Game::envset<bool>("trigger.update_envmap", false);
+        }
 
-        // PASS :: shadows
-        // Set viewport and framebuffer for shadow rendering
-        window.viewport(shadowWidth, shadowHeight);
-        window.framebuffer(window.getShadowBuffer());
-        window.clear(true);
+        // Shadows pass
+        shadowPass->render();
 
-        // Prepare and draw shadow map
-        Drawer::prep("shadowmap");
-        Drawer::draw("shadowmap");
+        // Reflection pass (optional)
+        if (Game::envget<bool>("trigger.update_reflection")) {
+            //reflectionPass->render();
+            Game::envset<bool>("trigger.update_reflection", false);
+        }
+
+        // Geometry pass
+        geomPass->render();
+
+        // SSAO pass
+        ssaoPass->render();
         
-        // Reset viewport and framebuffer
-        window.viewport(screenWidth, screenHeight);
-        window.framebuffer(0);
-        window.clear(true);
+        // Deferred pass
+        deferredPass->render();
 
-        // PASS :: forward
-        // Set framebuffer for forward rendering
-        window.framebuffer(window.getForwardBuffer());
-        window.clear(false);
-
-        // Prepare and draw SSAO G-buffer
-        Drawer::prep("ssao_g_buffer");
-        Drawer::draw("ssao_g_buffer");
-
-        // Reset framebuffer
-        window.framebuffer(0);
-        window.clear(false);
-
-        // PASS :: ssao
-        // Set framebuffer for SSAO rendering
-        window.framebuffer(window.getSsaoBuffer());
-        window.clear(false);
-
-        // Bind textures for SSAO
-        window.texture(window.getPositionTexture(), 0);
-        window.texture(window.getNormalTexture(), 1);
-        window.texture(window.getNoiseTexture(), 2);
-
-        // Prepare and draw SSAO
-        Drawer::prep("ssao");
-        Drawer::draw("ssao");
-
-        // PASS :: ssao blur
-        // Set framebuffer for SSAO blur rendering
-        window.framebuffer(window.getSsaoBlurBuffer());
-        window.clear(false);
-        
-        // Use SSAO blur shader and bind SSAO texture
-        shaderSsaoBlur.use();
-        window.texture(window.getSsaoTexture(), 0);
-
-        // Prepare and draw SSAO blur
-        Drawer::prep("ssao_blur");
-        Drawer::draw("ssao_blur");
-        
-        // PASS :: ssao deferred
-        // Set framebuffer for SSAO deferred rendering
-        window.framebuffer(window.getPostBuffer());
-        window.clear(false);
-
-        // Bind SSAO G-buffer and shadow map
-        window.bindSsaoGBuffer();
-        window.bindShadowMap();
-
-        // Update deferred lighting and draw SSAO deferred
-        Lighter::updateDeferred("ssao_deferred");
-        Drawer::prep("ssao_deferred");
-        Drawer::draw("ssao_deferred");
-        
-        // PASS :: skybox
         // Copy depth buffer and set depth function and face culling for skybox
-        window.copyDepthBuffer(window.getPostBuffer());
-        glDepthFunc(GL_LEQUAL);
-        glCullFace(GL_FRONT);
+        geomPass->copyDepthBuffer(aaPass->getAABuffer());
 
-        // Prepare and draw skybox
-        Drawer::prep("skybox");
-        Drawer::draw("skybox");
+        // Env pass (skybox)
+        skyboxPass->render();
 
-        // Reset face culling and depth function
-        glCullFace(GL_BACK);   
-        glDepthFunc(GL_LESS);
+        // Translucent pass
+        translucentPass->render();
 
-        // Render translucent objects
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        Drawer::prep("translucent");
-        window.bindShadowMap();
-        Drawer::draw("translucent");
-
-
-
-        // draw post
-        glDisable(GL_DEPTH_TEST);
-        window.framebuffer(0);
-
-        // Render Post
-        window.texture(window.getPostTexture(), 0);
-        shaderPost.setVec2("screenSize", glm::vec2(screenWidth, screenHeight));
-
-        Drawer::prep("post");
-        Drawer::draw("post");
-
-
-        // Render GUI
-        //glDisable(GL_DEPTH_TEST);
+        // Post pass
+        aaPass->render();
         
-        Drawer::prep("gui");
-        Drawer::draw("gui");
-
-        // Re-enable depth test after rendering GUI
-        glEnable(GL_DEPTH_TEST);
-
-        // Disable blending
-        glDisable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ZERO);
+        // Gui pass
+        guiPass->render();  
 
         // Display the rendered frame and poll for events
-        window.displayAndPoll();
+        Context::displayAndPoll();
 
         // Sleep for a short duration (commented out)
-        //std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
 
-    // Terminate the window and GLFW
-    window.terminate();
-    glfwTerminate();
+    // Cleanup dynamically allocated passes
+    delete shadowPass;
+    delete geomPass;
+    delete ssaoPass;
+    delete envPass;
+    delete aaPass;
+    delete deferredPass;
+    delete translucentPass;
+    delete guiPass;
+
+    // Terminate the context and GLFW
+    Context::terminate();
+
     return 0;
 }
