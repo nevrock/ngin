@@ -63,7 +63,7 @@ public:
 
 
         float yawN   = yaw + mouseX*0.1;
-        float pitchN = pitch + mouseY*0.1;
+        float pitchN = pitch - mouseY*0.1;
 
         if (pitchN > 89.0f)
             pitchN = 89.0f;

@@ -268,8 +268,14 @@ private:
         float xpos = static_cast<float>(xposIn);
         float ypos = static_cast<float>(yposIn);
 
+        int screenHeight = Ngin::envget<int>("screen.height");
+        ypos = screenHeight - ypos; // Invert y-coordinate
+        
         Ngin::envset("mouse.x", xpos);
         Ngin::envset("mouse.y", ypos);
+
+        // raycast
+        bool raycast = Drawer::raycastGui(glm::vec2(xpos, ypos));
 
 
         if (firstMouse_)

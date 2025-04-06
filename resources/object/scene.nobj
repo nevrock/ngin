@@ -25,6 +25,7 @@ children:
                         mesh: test
                         shaders: [shadowmap, gbuffer]
                         texture: palette
+    
     camera: 
         point: 
             position: [-5.0, -7.0, 5.0]
@@ -40,6 +41,7 @@ children:
                 speed: 0.5
                 shaders: [skybox, gbuffer, deferred, ssao, translucent]
         children: 
+    
     sun: 
         point: 
             position: [0.0, 0.0, 0.0]
@@ -51,6 +53,7 @@ children:
                 shaders: [shadowmap, gbuffer, deferred, translucent]
                 lightIntensity: 1.0
         children: 
+    
     point_light:
         name: point_light_0 
         point: 
@@ -65,39 +68,36 @@ children:
                 range: 15.0
         children: 
 
-    bottom_left_gui:
-        name: bottom_left_gui
+    quad_gui:
+        name: screen_quad_gui
+        components:
+            quad_01:
+                type: gui_quad
+                shaders: [gui]
         rect:
             position: [0.0, 0.0]
             rotation: 0.0
-            size: [500.0, 500.0]
-            anchor:  [0.0, 0.0]
+            scale: [1.0, 1.0]
+            size: [100.0, 100.0]
+            anchor:  [1.0, 1.0]
+            pivot: [0.0, 0.0]
+            isRaycast: true
         children:
-            quad_gui:
-                name: screen_quad_gui
+            quad_gui_02:
+                name: screen_quad_gui_02
                 components:
-                    quad:
+                    quad_02:
                         type: gui_quad
                         shaders: [gui]
                 rect:
                     position: [0.0, 0.0]
                     rotation: 0.0
-                    size: [100.0, 100.0]
-                    anchor:  [0.0, 0.0]
-                children:
-            quad_gui_02:
-                name: screen_quad_gui_02
-                components:
-                    quad:
-                        type: gui_quad
-                        shaders: [gui]
-                rect:
-                    position: [20.0, 20.0]
-                    rotation: 0.0
+                    scale: [1.0, 1.0]
                     size: [20.0, 20.0]
-                    anchor:  [1.0, 1.0]
-            
-        
+                    anchor:  [0.5, 0.5]
+                    pivot: [1.0, 1.0]
+                    isRaycast: true
+
     text:
         name: font_test
         components:

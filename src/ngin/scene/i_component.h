@@ -28,6 +28,16 @@ public:
         return parent_->getRectTransform();
     }
 
+    bool raycast(glm::vec2 pos) {
+        RectData* rect = getRectTransform();
+        if (rect) {
+            return rect->raycast(pos);
+        } else {
+            Log::console(pos, "raycast failed: no rect transform", 1);
+            return false;
+        }
+    }
+
 protected:
     IObject* parent_;
     std::string name_;

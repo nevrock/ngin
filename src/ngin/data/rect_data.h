@@ -15,11 +15,13 @@ public:
   RectData() : TransformData(), position_(0.0f), 
               rotation_(0.0f), 
               size_(1.0f),
-              anchor_(0.0f) {} 
+              anchor_(0.0f),
+              pivot_(0.0f) {} 
   RectData(const Lex& data) : TransformData(data), position_(0.0f), 
               rotation_(0.0f), 
               size_(1.0),
-              anchor_(0.0f) {
+              anchor_(0.0f),
+              pivot_(0.0f) {
     if (data.contains("position")) {
       position_ = data.getVec2("position", glm::vec2(0.0));
     }
@@ -32,6 +34,11 @@ public:
     if (data.contains("anchor")) {
       anchor_ = data.getVec2("anchor", glm::vec2(0.0f, 0.0f));
     }
+    if (data.contains("pivot")) {
+      pivot_ = data.getVec2("pivot", glm::vec2(0.0f, 0.0f));
+    }
+
+    isRaycast_ = data.getC<bool>("isRaycast", false);
 
     screenWidth_ = Ngin::envget<int>("screen.width");
     screenHeight_ = Ngin::envget<int>("screen.height");
@@ -51,12 +58,7 @@ public:
     position_ = position; 
   }
   glm::vec2 getWorldPosition() const {
-    glm::vec4 localPosition(position_.x - (anchor_.x * size_.x), 
-                            position_.y - (anchor_.y * size_.y), 
-                            0.0f, 
-                            1.0f);
-    glm::vec4 worldPosition = getWorldModelMatrix() * localPosition;
-    return glm::vec2(worldPosition.x, worldPosition.y);
+    return glm::vec2(getRectMatrix()[0][0], getRectMatrix()[0][1]);
   }
 
   // Rotation
@@ -87,8 +89,7 @@ public:
     
     model = glm::translate(model, glm::vec3(ndcX, ndcY, 0.0f));
 
-    model = glm::translate(model, glm::vec3((1.0-rect[2][0]) * (ndcWidth/2), (1.0-rect[2][1]) * (ndcHeight/2), 0.0f));
-    //model = glm::translate(model, glm::vec3((1.0) * (ndcWidth/2), (1.0) * (ndcHeight/2), 0.0f));
+    model = glm::translate(model, glm::vec3((1.0) * (ndcWidth/2), (1.0) * (ndcHeight/2), 0.0f));
     
     model = glm::scale(model, glm::vec3(ndcWidth/2, ndcHeight/2, 1.0f));
 
@@ -101,13 +102,13 @@ public:
     glm::vec2 parentPosition = glm::vec2(parent_[0][0], parent_[0][1]);
     glm::vec2 parentSize = glm::vec2(parent_[1][0], parent_[1][1]);
     glm::vec2 parentAnchor = glm::vec2(parent_[2][0], parent_[2][1]);
-    glm::vec2 parentScale = glm::vec2(parent_[3][0], parent_[3][1]);
+    glm::vec2 parentPivot = glm::vec2(parent_[3][0], parent_[3][1]);
 
     glm::vec2 parentOrigin = parentPosition + (parentAnchor * parentSize);
 
     // Store position in the first row
-    rectMatrix[0][0] = position_.x + parentOrigin.x;
-    rectMatrix[0][1] = position_.y + parentOrigin.y;
+    rectMatrix[0][0] = position_.x + parentOrigin.x - (pivot_.x * size_.x);
+    rectMatrix[0][1] = position_.y + parentOrigin.y - (pivot_.y * size_.y);
 
     // Store size in the second row
     rectMatrix[1][0] = size_.x;
@@ -116,6 +117,10 @@ public:
     // Store anchor in the third row
     rectMatrix[2][0] = anchor_.x;
     rectMatrix[2][1] = anchor_.y;
+
+    // Store pivot in the fourth row
+    rectMatrix[3][0] = pivot_.x;
+    rectMatrix[3][1] = pivot_.y;
 
     return rectMatrix;
     
@@ -135,9 +140,9 @@ public:
     rectMatrix[2][0] = 0.0f;
     rectMatrix[2][1] = 0.0f;
 
-    // Store scale in the fourth row
-    rectMatrix[3][0] = 1.0f;
-    rectMatrix[3][1] = 1.0f;
+    // Store pivot in the fourth row
+    rectMatrix[3][0] = 0.0f;
+    rectMatrix[3][1] = 0.0f;
 
     return rectMatrix;
   }
@@ -147,14 +152,34 @@ public:
     Log::console(position_, "Position: ", 2); 
     Log::console("Rotation: " + std::to_string(rotation_), 2); 
   }
+  
+  bool raycast(const glm::vec2& ray) const {
+    if (!isRaycast_) {
+      return false;
+    }
+    // Ray is raycast screen position - return if in bounds
+    glm::mat4 rect = getRectMatrix();
+    glm::vec2 position = glm::vec2(rect[0][0], rect[0][1]);
+    glm::vec2 size = glm::vec2(rect[1][0], rect[1][1]);
+    // Implement raycasting logic here
+    if (ray.x >= position.x && ray.x <= position.x + size.x &&
+        ray.y >= position.y && ray.y <= position.y + size.y) {
+      return true;
+    }
+    return false;
+  }
 
 private:
-  glm::vec2 position_;
+  glm::vec2 position_;  
   glm::vec2 size_;
   glm::vec2 anchor_;
+  glm::vec2 pivot_;
+
   float rotation_;
 
   int screenWidth_, screenHeight_;
+
+  bool isRaycast_ = false;
 };
 
 #endif

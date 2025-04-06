@@ -85,8 +85,19 @@ public:
             //Log::console("No drawers found for key: " + key);
         }
     }
-    static void raycastGui(unsigned int x, unsigned int y) {
-        
+    static bool raycastGui(glm::vec2 pos) {
+        auto it = drawers_.find("gui");
+        if (it != drawers_.end()) {
+            auto& drawerList = it->second;
+            for (auto rit = drawerList.rbegin(); rit != drawerList.rend(); ++rit) {
+                bool isRaycast = rit->get().raycast(pos); // Call raycast on each drawer
+                if (isRaycast) {
+                    Log::console("Raycast hit: " + rit->get().getName());
+                    return true; // Stop if a hit is found
+                }
+            }
+        }
+        return false;
     }
 
 private:
