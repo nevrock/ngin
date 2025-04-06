@@ -17,7 +17,7 @@
 class GuiQuad : public IDrawer {
 public:
     GuiQuad(const std::string name, const Lex& lex, IObject* parent)
-        : IDrawer(name, lex, parent), whiteTexture_(0) {
+        : IDrawer(name, lex, parent), whiteTexture_(0), texture_(0) {
         std::vector<std::string> shaders = lex.getC<std::vector<std::string>>("shaders", {});
         for (const auto& shader : shaders) {
             Drawer::registerDrawer(shader, *this);
@@ -41,6 +41,7 @@ public:
             std::cout << "GUI QUAD Texture ID: " << texture_ << std::endl;
         } else {
             generateWhiteTexture();
+            std::cout << "GUI QUAD White Texture ID: " << whiteTexture_ << std::endl;   
         }
     }
     void launch() override {
@@ -55,35 +56,36 @@ public:
     void prep(ShaderData& shader) override {
     }
 
-    unsigned int quadVAO = 0;
-    unsigned int quadVBO;
+    unsigned int quadVAO_ = 0;
+    unsigned int quadVBO_ = 0;
     void renderQuad()
     {
-        if (quadVAO == 0)
+        if (quadVAO_ == 0)
         {
             float quadVertices[] = {
                 // positions        // texture Coords
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom-left
-                 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
-                 1.0f,  1.0f, 0.0f, 1.0f, 1.0f, // top-right
-
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom-left
-                 1.0f,  1.0f, 0.0f, 1.0f, 1.0f, // top-right
-                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f  // top-left
+                -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, // Top-left corner
+                -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // Bottom-left corner
+                 1.0f,  1.0f, 0.0f, 1.0f, 0.0f, // Top-right corner
+                 1.0f, -1.0f, 0.0f, 1.0f, 1.0f  // Bottom-right corner
             };
             // setup plane VAO
-            glGenVertexArrays(1, &quadVAO);
-            glGenBuffers(1, &quadVBO);
-            glBindVertexArray(quadVAO);
-            glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+            glGenVertexArrays(1, &quadVAO_);
+            glGenBuffers(1, &quadVBO_);
+            glBindVertexArray(quadVAO_);
+            glBindBuffer(GL_ARRAY_BUFFER, quadVBO_);
             glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+
+            // Bind position attribute (location = 0)
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-            glEnableVertexAttribArray(1);
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+            // Bind texture coordinates attribute (location = 2)
+            glEnableVertexAttribArray(2);
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
         }
-        glBindVertexArray(quadVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(quadVAO_);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
     }
     void draw(ShaderData& shader) override {
@@ -91,9 +93,11 @@ public:
         int screenHeight = Ngin::envget<int>("screen.height"); // Example screen height
 
         if (texture_ != 0) {
+            Log::console("Texture found for GUI Quad, using texture.", 1);
             bindTexture();
         } else {
-            glActiveTexture(GL_TEXTURE0);
+            Log::console("No texture found for GUI Quad, using white texture.", 1);
+            glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, whiteTexture_);
         }
         
@@ -111,7 +115,7 @@ private:
     unsigned int whiteTexture_;
 
     void bindTexture() {
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, texture_);
     }
 
@@ -121,10 +125,12 @@ private:
 
         unsigned char whitePixel[4] = { 255, 255, 255, 255 }; // RGBA white
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
+        
+        glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         glBindTexture(GL_TEXTURE_2D, 0);

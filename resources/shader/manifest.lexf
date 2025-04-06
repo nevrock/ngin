@@ -71,9 +71,9 @@ gui:
     vertex: gui/gui
 
     defaults:
-        image: 0
         text: 1
-    
+        image: 2
+
 translucent:
     fragment: translucent/translucent
     vertex: translucent/translucent

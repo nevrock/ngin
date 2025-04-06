@@ -14,6 +14,11 @@ void main()
         FragColor = vec4(COLOR.rgb, 1.0) * sampled;
     } else {
         vec4 sampled = vec4(texture(image, TexCoords).rgba);
-        FragColor = vec4(COLOR.rgb, sampled.a);
+
+        // Debug output for TexCoords and sampled color
+        // FragColor = vec4(TexCoords, 0.0, 1.0); // Uncomment to visualize UVs
+        // FragColor = sampled; // Uncomment to visualize the sampled texture
+
+        FragColor = vec4(COLOR.rgb*sampled.rgb, sampled.a);
     }
 }
