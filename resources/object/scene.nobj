@@ -74,14 +74,17 @@ children:
             quad_01:
                 type: gui_quad
                 shaders: [gui]
+                color:#6a9c31
+                texture: face
+
         rect:
             position: [0.0, 0.0]
             rotation: 0.0
-            scale: [1.0, 1.0]
             size: [100.0, 100.0]
             anchor:  [1.0, 1.0]
             pivot: [0.0, 0.0]
             isRaycast: true
+            
         children:
             quad_gui_02:
                 name: screen_quad_gui_02
@@ -89,25 +92,31 @@ children:
                     quad_02:
                         type: gui_quad
                         shaders: [gui]
+                        color: #FFFFFF
+
                 rect:
                     position: [0.0, 0.0]
                     rotation: 0.0
-                    scale: [1.0, 1.0]
                     size: [20.0, 20.0]
                     anchor:  [0.5, 0.5]
                     pivot: [1.0, 1.0]
                     isRaycast: true
 
-    text:
-        name: font_test
-        components:
-            font:
-                type: gui_font
-                shaders: [gui]
+            text:
+                name: font_test
+                components:
+                    font:
+                        type: gui_font
+                        shaders: [gui]
+                        verticalAlignmentTop: true
+                        horizontalAlignmentLeft: true
+                        scale: 1.0
+                        font: paragraph
+                        color: #000000
 
-        rect:
-            position: [100.0, 0.0]
-            rotation: 0.0
-            scale: [1.0, 1.0]
-            size: [2.0, 2.0]
-            anchor:  [0.0, 0.0]
+                rect:
+                    position: [5.0, -5.0]
+                    rotation: 0.0
+                    size: [100.0, 50.0]
+                    anchor:  [0.0, 0.0]
+                    pivot: [1.0, 1.0]

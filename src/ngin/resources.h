@@ -41,6 +41,7 @@ public:
     inline static Lex meshManifest_;
     inline static Lex textureManifest_;
     inline static Lex animationManifest_;
+    inline static Lex fontManifest_;
 
     static void init() {
         // need to load in resources
@@ -48,6 +49,7 @@ public:
         shaderManifest_ = loadLexicon("manifest.lexf", "shader/");
         meshManifest_ = loadLexicon("manifest.lexf", "mesh/");
         textureManifest_ = loadLexicon("manifest.lexf", "texture/");
+        fontManifest_ = loadLexicon("manifest.lexf", "font/");
     }
 
     static void terminate() {
@@ -249,19 +251,21 @@ public:
     }
     static FontData& loadFont(const std::string& name) {
         Log::console("load font! " + name);
-        std::string path = FileUtils::getResourcePath("font/" + name + ".ttf");
+        Lex fontManifestData = fontManifest_.getC<Lex>(name, Lex());
+        std::string location = fontManifestData.getC<std::string>("location", "");
+        std::string path = FileUtils::getResourcePath("font/" + location + ".ttf");
         auto& font = fonts_[name]; // Create a new unique_ptr entry if it does not exist
         if (!font) {
             font = std::make_unique<FontData>(); // Create a new Texture2D if not already loaded
         }
-        if (loadFontFromFile(path.c_str(), *font)) {
+        if (loadFontFromFile(path.c_str(), *font, fontManifestData.getC<int>("size", 16))) {
             return *font;
         } else {
             throw std::runtime_error("Failed to load font: " + name);
         }
     }
-    static bool loadFontFromFile(const char* path, FontData& font) {
-        font.generate(std::string(path), 16);
+    static bool loadFontFromFile(const char* path, FontData& font, int fontSize = 16) {
+        font.generate(std::string(path), fontSize);
         return true;
     }
 

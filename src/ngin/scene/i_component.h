@@ -24,7 +24,7 @@ public:
     PointData* getPointTransform() {
         return parent_->getPointTransform();
     }
-    RectData* getRectTransform() {
+    RectData* getRectTransform() const {
         return parent_->getRectTransform();
     }
 

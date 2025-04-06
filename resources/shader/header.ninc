@@ -12,3 +12,5 @@ uniform vec3 LIGHT_DIR;
 uniform vec3 CAMERA_POS;
 
 uniform float OPACITY;
+
+uniform vec4 COLOR;

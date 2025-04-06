@@ -6,3 +6,6 @@ face:
 
 palette:
     location: test_palette
+
+cursor:
+    location: cursor_main

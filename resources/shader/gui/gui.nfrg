@@ -1,17 +1,19 @@
-
 layout (location=0) out vec4 FragColor;
 
 in vec2 TexCoords;
 
+uniform sampler2D image;
 uniform sampler2D text;
+
 uniform bool isText;
 
 void main()
-{                        
+{                
     if (isText) {
         vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
-        FragColor = vec4(0.0, 0.0, 0.0, 1.0) * sampled;
+        FragColor = vec4(COLOR.rgb, 1.0) * sampled;
     } else {
-        FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        vec4 sampled = vec4(texture(image, TexCoords).rgba);
+        FragColor = vec4(COLOR.rgb, sampled.a);
     }
 }

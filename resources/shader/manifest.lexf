@@ -71,6 +71,7 @@ gui:
     vertex: gui/gui
 
     defaults:
+        image: 0
         text: 1
     
 translucent:

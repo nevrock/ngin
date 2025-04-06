@@ -143,7 +143,7 @@ public:
         return vec;
     }
     glm::vec4 getVec4(const std::string& key, const glm::vec4& defaultValue) const {
-        std::vector<float> l = getC<std::vector<float>>(key, std::vector<float>{0.0, 0.0, 0.0, 0.0});
+        std::vector<float> l = getC<std::vector<float>>(key, std::vector<float>{0.0});
         if (l.size() != 4) {
             //std::cout << "dict failed to convert to vec - list length mismatch" << std::endl;
             return defaultValue; // Return default if the length is not exactly 4
@@ -307,20 +307,13 @@ public:
         std::unordered_map<int, Lex*> dictStack;
         dictStack[-1] = this;
 
-
-        //if (isLog_) std::cout << "### dict parsing ### - " << filename << std::endl;
-
         std::string collectionName = std::string("");
 
         for (std::string line; getline(file, line); ) {
             if (line.empty() || (line[0] == '/' && line[1] == '/')) continue;
-
-            //if (isLog_) std::cout << line << std::endl;
             
             int indent = line.find_first_not_of(' ');
             indent = indent / 4;
-
-            //if (isLog_) std::cout << "# indent - " << indent << std::endl;
 
             line = trim(line);
             int delimiterPos = line.find(':');
@@ -331,14 +324,10 @@ public:
                 std::string value = delimiterPos < line.size() - 1 ? trim(line.substr(delimiterPos + 1)) : "";
                 if (value == "") {
                     // could be a list of a dict
-                    //if (isLog_) std::cout << "# element is a list or collection! " << std::endl;
                     dictStack[indent] = parseLex(dictStack[indent - 1], key); // putting new dict with key into currently opened dict, and adding to stack
-                    //if (isLog_) std::cout << "# addded dict at indent - " << indent << std::endl;
 
                 } else {
-                    //if (isLog_) std::cout << "# element is a part of a dict! " << std::endl;
                     parseLexElement(dictStack[indent - 1], key, value);
-                    //if (isLog_) std::cout << "# added element to dict at indent - " << indent - 1 << std::endl;
                 }
             }
 
@@ -442,6 +431,8 @@ private:
     std::string getType(const std::string& value) {
         if (value.empty()) {
             return "";
+        } else if (value.front() == '#' && value.size() == 7) { // Handle #RRGGBB format
+            return "color";
         } else if (value.front() == '[' && value.back() == ']') {
             // Splitting elements of the array, trimming each, and converting to `std::any`
             std::stringstream ss(value.substr(1, value.size() - 2)); // Remove the brackets
@@ -481,6 +472,16 @@ private:
         }
         if (value.empty()) {
             return {};
+        } else if (type == "color") { // Parse #RRGGBB as vector_float
+            std::vector<float> color(4, 1.0f); // Default alpha to 1.0
+            try {
+                color[0] = std::stoi(value.substr(1, 2), nullptr, 16) / 255.0f; // Red
+                color[1] = std::stoi(value.substr(3, 2), nullptr, 16) / 255.0f; // Green
+                color[2] = std::stoi(value.substr(5, 2), nullptr, 16) / 255.0f; // Blue
+            } catch (...) {
+                return {}; // Return empty on error
+            }
+            return color;
         } else if (startswith(type, "vector_")) {
             if (type == "vector_float") {
                 std::vector<float> vecFloat;
@@ -549,7 +550,6 @@ private:
         if (key == "is_log") {
             dict->setLog(value == "true");
         } else if (key == "name") {
-            //std::cout << "## setting name of dict " << value << std::endl;
             dict->setName(value);
         }
     }
