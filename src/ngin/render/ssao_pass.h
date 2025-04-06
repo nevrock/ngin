@@ -11,8 +11,8 @@ public:
     void setup() override {
         std::cout << "Setting up ssao pass with ID: " << getId() << std::endl;
 
-        int screenWidth = Game::envget<int>("screen.width");
-        int screenHeight = Game::envget<int>("screen.height");
+        int screenWidth = Ngin::envget<int>("screen.width");
+        int screenHeight = Ngin::envget<int>("screen.height");
         // also create framebuffer to hold SSAO processing stage 
         // -----------------------------------------------------
         glGenFramebuffers(1, &ssaoFBO_);  

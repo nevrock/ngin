@@ -4,7 +4,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <ngin/constants.h>
-#include <ngin/game.h>
+#include <ngin/ngin.h>
 
 #include <ngin/drawer.h>    
 
@@ -49,15 +49,15 @@ public:
 
     void update() override {
         // Implementation of update method
-        TransformData* transform = getTransform();
+        PointData* transform = getPointTransform();
 
         float yaw = transform->getYaw();
         float pitch = transform->getPitch();
 
-        float mouseX = Game::envget<float>("mouse.offsetX");
-        float mouseY = Game::envget<float>("mouse.offsetY");
-        float axesX = Game::envget<float>("axesX");
-        float axesY = Game::envget<float>("axesY");
+        float mouseX = Ngin::envget<float>("mouse.offsetX");
+        float mouseY = Ngin::envget<float>("mouse.offsetY");
+        float axesX = Ngin::envget<float>("axesX");
+        float axesY = Ngin::envget<float>("axesY");
 
         glm::vec3 position = transform->getPosition();
 
@@ -77,11 +77,11 @@ public:
 
         //transform->setRotationFromYawPitch(yaw, pitch);
 
-        glm::vec3 front = getTransform()->getForward();
-        glm::vec3 right = getTransform()->getRight();
-        glm::vec3 up = getTransform()->getUp();
+        glm::vec3 front = getPointTransform()->getForward();
+        glm::vec3 right = getPointTransform()->getRight();
+        glm::vec3 up = getPointTransform()->getUp();
 
-        float velocity = movementSpeed_ * Game::envget<float>("time.delta");
+        float velocity = movementSpeed_ * Ngin::envget<float>("time.delta");
 
         position += front * axesY * velocity;
         position += right * axesX * velocity;
@@ -95,7 +95,7 @@ public:
 
     glm::mat4 getViewMatrix()
     {
-        TransformData* transform = getTransform();
+        PointData* transform = getPointTransform();
         glm::vec3 position = transform->getPosition();
         glm::vec3 front = transform->getForward();
         glm::vec3 up = transform->getUp();
@@ -109,8 +109,8 @@ public:
     }
 
     void prep(ShaderData& shader) override {
-        int screenWidth = Game::envget<int>("screen.width");
-        int screenHeight = Game::envget<int>("screen.height");
+        int screenWidth = Ngin::envget<int>("screen.width");
+        int screenHeight = Ngin::envget<int>("screen.height");
 
         glm::mat4 projection = getProjectionMatrix(screenWidth, screenHeight);
         glm::mat4 view = getViewMatrix();
@@ -118,19 +118,17 @@ public:
         glm::mat4 inverseProjectionMatrix = glm::inverse(projection);
 
         shader.setMat4("view", view);
-        //shader.setMat4("M_CAMERA_VIEW", view);
+        shader.setMat4("M_CAMERA_VIEW", view);
         shader.setMat4("projection", projection);
-        Game::envset<glm::mat4>("projection", projection);
-        //shader.setMat4("M_CAMERA_PROJECTION", projection);
+        Ngin::envset<glm::mat4>("projection", projection);
+        shader.setMat4("M_CAMERA_PROJECTION", projection);
         //shader.setMat4("M_CAMERA_I_VIEW", inverseViewMatrix);
         //shader.setMat4("M_CAMERA_I_PROJECTION", inverseProjectionMatrix);
-        //shader.setVec3("CAMERA_POS", getTransform()->getPosition());
-        shader.setVec3("viewPos", getTransform()->getPosition());
-        shader.setVec3("camPos", getTransform()->getPosition());
+        shader.setVec3("CAMERA_POS", getPointTransform()->getPosition());
+        shader.setVec3("viewPos", getPointTransform()->getPosition());
+        shader.setVec3("camPos", getPointTransform()->getPosition());
         //shader.setFloat("CAMERA_NEAR_PLANE", 0.1f);
         //shader.setFloat("CAMERA_FAR_PLANE", 100.0f);
-
-        //Log::console("Camera position: " + std::to_string(getTransform()->getPosition().x) + ", " + std::to_string(getTransform()->getPosition().y) + ", " + std::to_string(getTransform()->getPosition().z));
     }
 
     void draw(ShaderData& shader) override {

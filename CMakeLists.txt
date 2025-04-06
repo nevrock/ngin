@@ -21,8 +21,14 @@ endif()
 # Find required packages
 find_package(GLM REQUIRED)
 find_package(GLFW3 REQUIRED)
+find_package(Freetype REQUIRED)
+find_package(ZLIB REQUIRED) # Added ZLIB
+find_package(PNG REQUIRED)  # Added PNG
 message(STATUS "GLM: ${GLM_INCLUDE_DIR}")
 message(STATUS "GLFW3: ${GLFW3_INCLUDE_DIR}")
+message(STATUS "FreeType: ${FREETYPE_INCLUDE_DIR}")
+message(STATUS "ZLIB: ${ZLIB_INCLUDE_DIRS}") # Added ZLIB message
+message(STATUS "PNG: ${PNG_INCLUDE_DIRS}")   # Added PNG message
 
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/includes/)
@@ -68,7 +74,7 @@ include_directories(${CMAKE_BINARY_DIR}/configuration)
 add_executable(ngin ${SOURCES})
 
 # Link libraries
-target_link_libraries(ngin ${LIBS})
+target_link_libraries(ngin ${LIBS} ZLIB::ZLIB PNG::PNG) # Added ZLIB and PNG
 
 # MSVC specific flags
 if(MSVC)

@@ -33,21 +33,15 @@ public:
             child->updateLogic();
         }
     }
-    void updateTransform() override {
-        // cook transform position 
-        if (parent_) {
-            transform_->setParentModel(parent_->getTransform()->getWorldModelMatrix());
-        } else {
-            transform_->setParentModel(glm::mat4(1.0f));
-        }
+    void updateTransform(glm::mat4 parentModel = glm::mat4(1.0f)) override {
+        
+        transform_->setParentModel(parentModel);
 
         transform_->execute();
 
         for (auto& [name, child] : children_) {
-            child->updateTransform();
+            child->updateTransform(transform_->getWorldModelMatrix());
         }
-
-        //Log::console("object: " + name_ + ", update transformm, with position: " + std::to_string(transform_->getWorldPosition().x) + ", " + std::to_string(transform_->getWorldPosition().y) + ", " + std::to_string(transform_->getWorldPosition().z));  
     }
 
     void build() {

@@ -11,8 +11,8 @@ public:
     void setup() override {
         std::cout << "Setting up geom pass with ID: " << getId() << std::endl;
 
-        screenWidth_ = Game::envget<int>("screen.width");
-        screenHeight_ = Game::envget<int>("screen.height");
+        screenWidth_ = Ngin::envget<int>("screen.width");
+        screenHeight_ = Ngin::envget<int>("screen.height");
         // configure g-buffer framebuffer
         glGenFramebuffers(1, &forwardFBO_);
         glBindFramebuffer(GL_FRAMEBUFFER, forwardFBO_);
@@ -76,6 +76,9 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
     void render() override {
+        screenWidth_ = Ngin::envget<int>("screen.width");
+        screenHeight_ = Ngin::envget<int>("screen.height");
+
         // Reset viewport and framebuffer
         Context::viewport(screenWidth_, screenHeight_);
         Context::framebuffer(0);
@@ -94,8 +97,6 @@ public:
         ssaoColorBufferBlur_ = ssaoColorBufferBlur;
     }
     void copyDepthBuffer(unsigned int drawBuffer = 0) {
-        int screenWidth_ = Game::envget<int>("screen.width");
-        int screenHeight_ = Game::envget<int>("screen.height");
 
         glBindFramebuffer(GL_READ_FRAMEBUFFER, forwardFBO_);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawBuffer); // write to default framebuffer
@@ -129,7 +130,7 @@ public:
         glBindTexture(GL_TEXTURE_2D, gDepth_);
 
         glActiveTexture(GL_TEXTURE8);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, Game::envget<int>("envCubemap"));
+        glBindTexture(GL_TEXTURE_CUBE_MAP, Ngin::envget<int>("envCubemap"));
     }
 
     unsigned int getForwardBuffer() {

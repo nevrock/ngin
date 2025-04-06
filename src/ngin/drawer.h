@@ -85,6 +85,9 @@ public:
             //Log::console("No drawers found for key: " + key);
         }
     }
+    static void raycastGui(unsigned int x, unsigned int y) {
+        
+    }
 
 private:
 

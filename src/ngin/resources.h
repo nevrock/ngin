@@ -20,6 +20,8 @@
 #include <ngin/data/mesh_data.h>
 #include <ngin/data/texture_data.h>
 #include <ngin/data/compute_data.h>
+#include <ngin/data/animation_data.h>
+#include <ngin/data/font_data.h>
 
 #if defined(_MSC_VER)
     #include <io.h>
@@ -32,18 +34,18 @@ public:
     inline static std::map<std::string, std::unique_ptr<ShaderData>> shaders_;
     inline static std::map<std::string, std::unique_ptr<TextureData>> textures_;
     inline static std::map<std::string, std::unique_ptr<ComputeData>> computeShaders_;
+    inline static std::map<std::string, std::unique_ptr<AnimationData>> animations_;
+    inline static std::map<std::string, std::unique_ptr<FontData>> fonts_;
 
     inline static Lex shaderManifest_;
     inline static Lex meshManifest_;
     inline static Lex textureManifest_;
+    inline static Lex animationManifest_;
 
     static void init() {
         // need to load in resources
 
         shaderManifest_ = loadLexicon("manifest.lexf", "shader/");
-        //shaderManifest_.print();
-
-        // we load mesh and texture selectively
         meshManifest_ = loadLexicon("manifest.lexf", "mesh/");
         textureManifest_ = loadLexicon("manifest.lexf", "texture/");
     }
@@ -143,7 +145,6 @@ public:
     static MeshData& getMeshData(const std::string& name) {
         auto it = meshes_.find(name);
         if (it == meshes_.end()) {
-            Log::console("Mesh not found: " + name + ". Loading default mesh.", 1);
             loadMeshData(name);  // Potentially risky if name still doesn't correspond to a valid mesh file
             it = meshes_.find(name);
             if (it == meshes_.end()) {
@@ -158,7 +159,7 @@ public:
         Lex meshManifestData = meshManifest_.getC<Lex>(name, Lex());
         std::string location = meshManifestData.getC<std::string>("location", "");
         Log::console("Loading mesh! " + name + ", at location: " + location, 1);
-        std::string meshFilePath = FileUtils::getResourcePath("mesh/" + location + ".nmsh");
+        std::string meshFilePath = FileUtils::getResourcePath("vox/" + location + ".nvox");
         Log::console("Mesh filepath: " + meshFilePath, 1);
 
         Lex n;
@@ -166,8 +167,10 @@ public:
         //n.print();
 
         std::string meshName = n.getC<std::string>("name", "");
-
-        meshes_[name] = std::make_unique<MeshData>(meshName, n);
+        
+        std::unique_ptr<MeshData> meshData = std::make_unique<MeshData>(meshName, n);
+        meshData->load();
+        meshes_[name] = std::move(meshData);
     }
     static void unloadMeshData(const std::string& name) {
         auto it = meshes_.find(name);
@@ -236,6 +239,32 @@ public:
         return true;
     }
 
+    static FontData& getFont(const std::string& name) {
+        auto it = fonts_.find(name);
+        if (it == fonts_.end()) {
+            std::cerr << "FontData not found: " << name << ". Loading font." << std::endl;
+            return loadFont(name);
+        }
+        return *(it->second);
+    }
+    static FontData& loadFont(const std::string& name) {
+        Log::console("load font! " + name);
+        std::string path = FileUtils::getResourcePath("font/" + name + ".ttf");
+        auto& font = fonts_[name]; // Create a new unique_ptr entry if it does not exist
+        if (!font) {
+            font = std::make_unique<FontData>(); // Create a new Texture2D if not already loaded
+        }
+        if (loadFontFromFile(path.c_str(), *font)) {
+            return *font;
+        } else {
+            throw std::runtime_error("Failed to load font: " + name);
+        }
+    }
+    static bool loadFontFromFile(const char* path, FontData& font) {
+        font.generate(std::string(path), 16);
+        return true;
+    }
+
     static ComputeData& getComputeData(const std::string& name) {
         auto it = computeShaders_.find(name);
         if (it == computeShaders_.end()) {
@@ -249,7 +278,6 @@ public:
         }
         return *(it->second);
     }
-
     static void loadComputeData(const std::string& name) {
         Lex shaderManifestData = shaderManifest_.getC<Lex>(name, Lex());
 
@@ -267,7 +295,6 @@ public:
 
         computeShaders_[name]->use();
     }
-
     static void unloadComputeData(const std::string& name) {
         auto it = computeShaders_.find(name);
         if (it != computeShaders_.end()) {

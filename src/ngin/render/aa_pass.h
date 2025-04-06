@@ -11,8 +11,8 @@ public:
     void setup() override {
         std::cout << "Setting up post pass with ID: " << getId() << std::endl;
 
-        screenWidth_ = Game::envget<int>("screen.width");
-        screenHeight_ = Game::envget<int>("screen.height");
+        screenWidth_ = Ngin::envget<int>("screen.width");
+        screenHeight_ = Ngin::envget<int>("screen.height");
 
         // Generate framebuffer
         glGenFramebuffers(1, &aaFBO_);
@@ -40,6 +40,9 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
     void render() override {
+        screenWidth_ = Ngin::envget<int>("screen.width");
+        screenHeight_ = Ngin::envget<int>("screen.height");
+        
         // draw post
         glDisable(GL_DEPTH_TEST);
         Context::framebuffer(0);

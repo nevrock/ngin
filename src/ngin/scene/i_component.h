@@ -21,6 +21,12 @@ public:
     TransformData* getTransform() {
         return parent_->getTransform();
     }
+    PointData* getPointTransform() {
+        return parent_->getPointTransform();
+    }
+    RectData* getRectTransform() {
+        return parent_->getRectTransform();
+    }
 
 protected:
     IObject* parent_;

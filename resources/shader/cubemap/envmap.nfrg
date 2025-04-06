@@ -1,4 +1,3 @@
-#version 330 core
 out vec4 FragColor;
 in vec3 WorldPos;
 
@@ -10,5 +9,8 @@ void main()
     float t = WorldPos.z; // Interpolation factor based on the y-coordinate of the UV
     vec3 color = mix(color1, color2, t);
     
-    FragColor = vec4(color, 1.0);
+    vec3 envColor = color / (color + vec3(1.0));
+    envColor = pow(color, vec3(1.0/2.2)); 
+
+    FragColor = vec4(envColor, 1.0);
 }

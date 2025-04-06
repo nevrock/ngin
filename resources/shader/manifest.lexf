@@ -69,6 +69,9 @@ skybox:
 gui:
     fragment: gui/gui
     vertex: gui/gui
+
+    defaults:
+        text: 1
     
 translucent:
     fragment: translucent/translucent

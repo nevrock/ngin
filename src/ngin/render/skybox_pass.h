@@ -20,7 +20,7 @@ public:
         Drawer::prep("skybox");
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, Game::envget<int>("envCubemap"));
+        glBindTexture(GL_TEXTURE_CUBE_MAP, Ngin::envget<int>("envCubemap"));
 
         renderCube();
     }

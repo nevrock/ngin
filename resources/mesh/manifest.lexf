@@ -2,3 +2,5 @@ cube:
     location: cube
 plane: 
     location: plane
+test:
+    location: test

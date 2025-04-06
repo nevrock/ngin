@@ -2,19 +2,31 @@ name: start
 children: 
     cube: 
         name: cube_test
-        transform: 
+        point: 
             position: [0.0, 0.0, 0.0]
             rotation: [0.0, 0.0, 0.0]
-            scale: [1.0, 1.0, 1.0]
+            scale: [0.2, 0.2, 0.2]
         components: 
             mesh: 
                 type: mesh
-                mesh: cube
+                mesh: test
                 shaders: [shadowmap, gbuffer]
-                texture: face
+                texture: palette
         children: 
+            cube_test_02:
+                name: cube_test
+                point: 
+                    position: [10.0, 0.0, 0.0]
+                    rotation: [0.0, 0.0, 0.0]
+                    scale: [1.0, 1.0, 1.0]
+                components: 
+                    mesh: 
+                        type: mesh
+                        mesh: test
+                        shaders: [shadowmap, gbuffer]
+                        texture: palette
     camera: 
-        transform: 
+        point: 
             position: [-5.0, -7.0, 5.0]
             rotation: [-63.199986276938105, -6.998917952086515e-06, -34.40000869814827]
             scale: [1.0, 1.0, 1.0]
@@ -29,7 +41,7 @@ children:
                 shaders: [skybox, gbuffer, deferred, ssao, translucent]
         children: 
     sun: 
-        transform: 
+        point: 
             position: [0.0, 0.0, 0.0]
             rotation: [-39.99999883637168, -30.000000834826057, 0.0]
             scale: [1.0, 1.0, 1.0]
@@ -39,21 +51,9 @@ children:
                 shaders: [shadowmap, gbuffer, deferred, translucent]
                 lightIntensity: 1.0
         children: 
-    plane: 
-        transform: 
-            position: [0.0, 0.0, 0.0]
-            rotation: [0.0, 0.0, 0.0]
-            scale: [1.0, 1.0, 1.0]
-        components: 
-            mesh: 
-                type: mesh
-                mesh: plane
-                shaders: [shadowmap, reflection, gbuffer]
-                texture: metal
-        children: 
     point_light:
         name: point_light_0 
-        transform: 
+        point: 
             position: [-1.0, -5.0, 1.0]
             rotation: [0.0, 0.0, 0.0]
             scale: [1.0, 1.0, 1.0]
@@ -64,9 +64,50 @@ children:
                 intensity: 1.0
                 range: 15.0
         children: 
-    quad_gui:
-        name: screen_quad_gui
+
+    bottom_left_gui:
+        name: bottom_left_gui
+        rect:
+            position: [0.0, 0.0]
+            rotation: 0.0
+            size: [500.0, 500.0]
+            anchor:  [0.0, 0.0]
+        children:
+            quad_gui:
+                name: screen_quad_gui
+                components:
+                    quad:
+                        type: gui_quad
+                        shaders: [gui]
+                rect:
+                    position: [0.0, 0.0]
+                    rotation: 0.0
+                    size: [100.0, 100.0]
+                    anchor:  [0.0, 0.0]
+                children:
+            quad_gui_02:
+                name: screen_quad_gui_02
+                components:
+                    quad:
+                        type: gui_quad
+                        shaders: [gui]
+                rect:
+                    position: [20.0, 20.0]
+                    rotation: 0.0
+                    size: [20.0, 20.0]
+                    anchor:  [1.0, 1.0]
+            
+        
+    text:
+        name: font_test
         components:
-            quad:
-                type: gui_quad
+            font:
+                type: gui_font
                 shaders: [gui]
+
+        rect:
+            position: [100.0, 0.0]
+            rotation: 0.0
+            scale: [1.0, 1.0]
+            size: [2.0, 2.0]
+            anchor:  [0.0, 0.0]

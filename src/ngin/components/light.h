@@ -49,8 +49,8 @@ public:
         glm::mat4 lightProjection, lightView;
         glm::mat4 lightSpaceMatrix;
 
-        glm::vec3 lightDir = -getTransform()->getUp();  // Use a normalized direction vector for the light
-        glm::vec3 lightPos = getTransform()->getWorldPosition();  // Use the light's position
+        glm::vec3 lightDir = -getPointTransform()->getUp();  // Use a normalized direction vector for the light
+        glm::vec3 lightPos = getPointTransform()->getWorldPosition();  // Use the light's position
         float nearPlane = 1.0f, farPlane = 45.0f;  // Adjust these to ensure your scene fits within the light's frustum
         lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
 

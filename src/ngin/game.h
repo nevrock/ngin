@@ -20,8 +20,6 @@ public:
         std::cout << "-------------------------------" << std::endl;
 
         game_ = std::make_shared<Lex>(Resources::loadLexicon("game"));
-        // game_->print();
-        env_ = std::make_shared<Lex>(game_->getC<Lex>("env", Lex()));
 
         running_ = true;
     }
@@ -39,20 +37,6 @@ public:
         scene_->updateTransform();
     }
     static void terminate() {
-    }
-    static void setEnv(std::shared_ptr<Lex> nevf) {
-        env_ = nevf;
-    }
-    static std::shared_ptr<Lex> getEnv() {
-        return env_;
-    }
-    template <typename T>
-    static T envget(const std::string& key) { 
-        return env_->getC<T>(key, T());
-    }
-    template <typename T>
-    static void envset(const std::string& key, T value) {
-        env_->set(key, value);
     }
     static std::string& getState() {
         return state_;
@@ -80,7 +64,6 @@ private:
     static std::string state_;
     static Event eventState_;
 
-    static std::shared_ptr<Lex> env_;
     static std::shared_ptr<Lex> game_;
     static inline std::unique_ptr<Scene> scene_;
 

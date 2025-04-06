@@ -33,7 +33,7 @@ public:
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // enable pre-filter mipmap sampling (combatting visible dots artifact)
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        Game::envset<int>("envCubemap", envCubemap_);
+        Ngin::envset<int>("envCubemap", envCubemap_);
 
         // pbr: set up projection and view matrices for capturing data onto the 6 cubemap face directions
         // ----------------------------------------------------------------------------------------------
@@ -54,11 +54,11 @@ public:
         Context::cull(true, true);
 
         envmap_.use();
-        envmap_.setMat4("projection", captureProjection_);
+        envmap_.setMat4("M_PROJECTION", captureProjection_);
 
         for (unsigned int i = 0; i < 6; ++i)
         {
-            envmap_.setMat4("view", captureViews_[i]);
+            envmap_.setMat4("M_VIEW", captureViews_[i]);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, envCubemap_, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -73,8 +73,8 @@ public:
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // then before rendering, configure the viewport to the original framebuffer's screen dimensions
-        int screenWidth = Game::envget<int>("screen.width");
-        int screenHeight = Game::envget<int>("screen.height");
+        int screenWidth = Ngin::envget<int>("screen.width");
+        int screenHeight = Ngin::envget<int>("screen.height");
         glViewport(0, 0, screenWidth, screenHeight);
 
         Context::cull(true);

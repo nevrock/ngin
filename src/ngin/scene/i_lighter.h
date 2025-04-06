@@ -16,7 +16,7 @@ public:
 
     std::shared_ptr<LightData> getLightData() { 
         lightData_->setName(getName());
-        lightData_->setPosition(getTransform()->getPosition());
+        lightData_->setPosition(getPointTransform()->getPosition());
         lightData_->setColor(lex_.getVec("color", glm::vec3(1.0)));
         lightData_->setIntensity(lex_.getC<float>("intensity", 1.0f));
         lightData_->setRange(lex_.getC<float>("range", 1.0f));

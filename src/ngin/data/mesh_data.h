@@ -14,6 +14,8 @@
 #include <ngin/lex.h>
 #include <ngin/log.h>
 
+#include <ngin/data/voxa_data.h>
+
 #define MAX_BONE_INFLUENCE 4
 #define MAX_TEXTURES 4
 
@@ -37,39 +39,23 @@ public:
     Lex faces;
     std::vector<VertexData> vertices;
     std::vector<int> indices;
-    unsigned int VAO;
-    unsigned int VBO, EBO;
+    unsigned int VAO, VBO, EBO;
 
     glm::mat4 localTransform;
 
     glm::mat4 getMeshMatrix() {
         return localTransform;
     }
-
     void execute() override {
         // cook this data so it is stable for remaining passes
     }
-
     std::string getName() override { return name_; } 
 
     MeshData() : VAO(0), VBO(0), EBO(0) {}
-
     MeshData(std::string name, Lex data) : name_(name), VAO(0), VBO(0), EBO(0), data_(data) {
 
         Log::console("Creating mesh_data: " + name, 1);
-
-        if (data.contains("faces")) {
-            setupFromFaces();
-        } else if (data.contains("vertices")) {
-            setupFromVertices();
-        }
-
-        Log::console("Vertices initialized: " + std::to_string(vertices.size()), 1);
-        Log::console("Indices initialized: " + std::to_string(indices.size()), 1); 
-
-        setupMesh();
     }
-
     ~MeshData() {
         std::string logMessage = "Destroying Mesh with VAO: " + std::to_string(VAO);
         Log::console(logMessage, 1);
@@ -84,6 +70,24 @@ public:
         //}
     }
 
+    void load() {
+        VoxaData voxa(name_, data_);
+        voxa.unpackIdArray();
+
+        Lex dataN = voxa.bakeToMesh(true);
+
+        //Log::console(dataN.getString());
+        
+        data_ = dataN;
+
+        setupFromFaces();
+
+        Log::console("Vertices initialized: " + std::to_string(vertices.size()), 1);
+        Log::console("Indices initialized: " + std::to_string(indices.size()), 1); 
+
+        setupMesh();
+    }
+
     void render() {
         // std::cout << "Rendering Mesh with VAO: " << VAO << std::endl;
         // draw mesh
@@ -92,8 +96,6 @@ public:
         glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
-
-    // initializes all the buffer objects/arrays
     void setupMesh() {
         Log::console("Setting up Mesh... ", 1);
 
@@ -153,31 +155,6 @@ private:
             triangulateFace(face);
         }
     }
-    void setupFromVertices() {
-        Lex vertexLex = data_.getC<Lex>("vertices", Lex());
-        int vertexCount = vertexLex.length();
-        vertices.reserve(vertexCount);
-        indices.reserve(vertexCount);
-
-        for (int i = 0; i < vertexLex.length(); ++i) {
-            Lex vertexData = vertexLex.getC<Lex>(std::to_string(i), Lex());
-            VertexData vertex;
-            vertex.position = vertexData.getVec("position", glm::vec3(0.0f));
-            vertex.normal = vertexData.getVec("normal", glm::vec3(0.0f));
-            //Log::console("normal: " + std::to_string(vertex.normal.x) + ", " + std::to_string(vertex.normal.y) + ", " + std::to_string(vertex.normal.z));
-            vertex.uv = vertexData.getVec2("uv", glm::vec2(0.0f));
-            vertex.color = vertexData.getVec("color", glm::vec3(1.0f));
-            auto boneIDs = vertexData.getC<std::vector<int>>("bone_ids", std::vector<int>(MAX_BONE_INFLUENCE, 0));
-            auto weights = vertexData.getC<std::vector<float>>("weights", std::vector<float>(MAX_BONE_INFLUENCE, 0.0f));
-            std::copy(boneIDs.begin(), boneIDs.end(), vertex.m_BoneIDs);
-            std::copy(weights.begin(), weights.end(), vertex.m_Weights);
-            vertices.push_back(vertex);
-        }
-        for (int i = 0; i < vertexCount; ++i) {
-            indices.push_back(i);
-        }
-    }
-
     int getVertexCountFromFaces() {
         int count = 0;
         for (const auto& kvp : faces) {
@@ -187,8 +164,8 @@ private:
         }
         return count;
     }
-
     void triangulateFace(const Lex& face) {
+
         Lex vertexLex = face.getC<Lex>("vertices", Lex());
         int startIndex = vertices.size();
         for (int i = 0; i < vertexLex.length(); ++i) {
@@ -205,23 +182,7 @@ private:
             std::copy(weights.begin(), weights.end(), vertex.m_Weights);
             vertices.push_back(vertex);
         }
-        /*
-        for (const auto& kvp : vertexLex) {
-            //indices.push_back(std::any_cast<int>(kvp.first) + startIndex);
-            Lex vertexData = std::any_cast<Lex>(kvp.second);
-            VertexData vertex;
-            vertex.position = vertexData.getVec("position", glm::vec3(0.0f));
-            vertex.normal = vertexData.getVec("normal", glm::vec3(0.0f));
-            Log::console("normal: " + std::to_string(vertex.normal.x) + ", " + std::to_string(vertex.normal.y) + ", " + std::to_string(vertex.normal.z));
-            vertex.uv = vertexData.getVec2("uv", glm::vec2(0.0f));
-            vertex.color = vertexData.getVec("color", glm::vec3(1.0f));
-            auto boneIDs = vertexData.getC<std::vector<int>>("bone_ids", std::vector<int>(MAX_BONE_INFLUENCE, 0));
-            auto weights = vertexData.getC<std::vector<float>>("weights", std::vector<float>(MAX_BONE_INFLUENCE, 0.0f));
-            std::copy(boneIDs.begin(), boneIDs.end(), vertex.m_BoneIDs);
-            std::copy(weights.begin(), weights.end(), vertex.m_Weights);
-            vertices.push_back(vertex);
-        }
-        */
+
         // add two triangles
         indices.push_back(startIndex);
         indices.push_back(startIndex + 1);
@@ -232,9 +193,6 @@ private:
     }
 
 }; // Added missing semicolon here at the end of the class definition
-
-
-
 
 
 #endif // MESH_H

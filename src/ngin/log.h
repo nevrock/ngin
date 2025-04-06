@@ -28,6 +28,12 @@ public:
         }
         std::cout << prefix << " " << "vec3: (" << vec.x << ", " << vec.y << ", " << vec.z << ")" << std::endl;
     }
+    static void console(const glm::vec2& vec, std::string prefix = "", unsigned int indent = 0) {
+        for (unsigned int i = 0; i < indent; ++i) {
+            std::cout << "  ";
+        }
+        std::cout << prefix << " " << "vec2: (" << vec.x << ", " << vec.y << ")" << std::endl;
+    }
     static void console(const glm::quat& quat, std::string prefix = "", unsigned int indent = 0) {
         for (unsigned int i = 0; i < indent; ++i) {
             std::cout << "  ";

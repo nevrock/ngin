@@ -12,8 +12,8 @@ public:
     void setup() override {
         std::cout << "Setting up shadows pass with ID: " << getId() << std::endl;
 
-        shadowWidth_ = Game::envget<int>("shadow.width");
-        shadowHeight_ = Game::envget<int>("shadow.height");
+        shadowWidth_ = Ngin::envget<int>("shadow.width");
+        shadowHeight_ = Ngin::envget<int>("shadow.height");
 
         glGenFramebuffers(1, &shadowMapFBO_);
         glGenTextures(1, &shadowMap_);

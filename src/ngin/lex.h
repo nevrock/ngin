@@ -41,7 +41,10 @@ public:
         return *this;
     }
 
-    void set(const std::string& key, std::any value) {
+    void set(const std::string& key, std::any value, bool isLogValue = false) {
+        if (isLogValue) {
+            std::cout << "Setting key: " << key << " with value type: " << value.type().name() << std::endl;
+        }
         if (data_.find(key) == data_.end()) {
             keyOrder_.push_back(key); // Track insertion order
         }
@@ -264,6 +267,12 @@ public:
     }
 
     const std::unordered_map<std::string, std::any>& data() const { return data_; }
+
+    // Add this method to allow access to the internal map
+    const std::unordered_map<std::string, std::any>& getMap() const {
+        return data_;
+    }
+
     void sync(const Lex* other, bool overwrite = false) {
         if (other == nullptr) {
             std::cerr << "provided dictionary pointer is null" << std::endl;

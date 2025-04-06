@@ -1,0 +1,14 @@
+#version 330 core
+
+uniform bool IS_ANIMATION;
+uniform bool IS_TEXT;
+
+uniform mat4 M_CAMERA_PROJECTION;
+uniform mat4 M_CAMERA_VIEW;
+uniform mat4 M_MODEL;
+uniform mat4 M_LIGHT_SPACE;
+
+uniform vec3 LIGHT_DIR;
+uniform vec3 CAMERA_POS;
+
+uniform float OPACITY;

@@ -32,12 +32,12 @@ public:
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
-        Game::envset<int>("reflectionCubemap", reflectionCubemap_);
+        Ngin::envset<int>("reflectionCubemap", reflectionCubemap_);
 
         captureProjection_ = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
         glm::vec3 position = glm::vec3(0.0f, 0.0f, 30.0f);
 
-        Game::envset<glm::vec3>("reflectionPosition", position);
+        Ngin::envset<glm::vec3>("reflectionPosition", position);
 
         captureViews_[0] = glm::lookAt(position, glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
         captureViews_[1] = glm::lookAt(position, glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));

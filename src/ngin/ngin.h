@@ -7,43 +7,13 @@
 
 #include <ngin/log.h>
 #include <ngin/lex.h>
-
-#include <ngin/game.h>
 #include <ngin/resources.h>
-#include <ngin/drawer.h>
-#include <ngin/lighter.h>
 
 class Ngin {
 public:
 
     static void init() {
-        Game::init();
-        Resources::init();
-        Drawer::init();
-        Lighter::init();
-    }
-    static void start() {
-        Game::start();
-        Drawer::start();
-    }
-    static void end() {
-        Resources::terminate();
-        Game::terminate();
-    }
-    static void updateRender() {
-        //Log::console("update render");
-    }
-    static void updatePhysics() {
-        //Log::console("update physics");
-    }
-    
-    static void updateLogic() {
-        //Log::console("update logic");
-        Game::updateLogic();
-    }
-    static void updateTransform() {
-        //Log::console("update transform");
-        Game::updateTransform();
+        env_ = std::make_shared<Lex>(Resources::loadLexicon("env"));
     }
 
     static void setEnv(std::shared_ptr<Lex> nevf) {

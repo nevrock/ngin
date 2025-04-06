@@ -61,7 +61,7 @@ public:
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        TransformData* transform = getTransform();
+        PointData* transform = getPointTransform();
         glm::mat4 model = transform->getWorldModelMatrix();
         shader.setMat4("model", model);
         shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));

@@ -26,7 +26,7 @@ public:
         Lighter::updateDeferred("deferred");
         Drawer::prep("deferred");
 
-        deferred_.setVec3("probePosition", Game::envget<glm::vec3>("reflectionPosition"));
+        deferred_.setVec3("probePosition", Ngin::envget<glm::vec3>("reflectionPosition"));
 
         renderQuad();
     }

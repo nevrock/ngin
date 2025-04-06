@@ -8,12 +8,13 @@
 #include <GLFW/glfw3.h>
 
 #include <ngin/log.h>
-#include <ngin/game.h>
+#include <ngin/ngin.h>
 #include <ngin/utils/mathutils.h>
 
 #include <ngin/resources.h>
 #include <ngin/drawer.h>
 #include <random>
+#include <stb_image.h> // Include stb_image for image loading
 
 class Context {
 public:
@@ -24,8 +25,8 @@ public:
 
     static void create(const std::string& title) {
 
-        int screenWidth = Game::envget<int>("screen.width");
-        int screenHeight = Game::envget<int>("screen.height");
+        int screenWidth = Ngin::envget<int>("screen.width");
+        int screenHeight = Ngin::envget<int>("screen.height");
 
         lastX_ = (float)screenWidth / 2.0;
         lastY_ = (float)screenHeight / 2.0;
@@ -136,12 +137,12 @@ public:
         deltaTime = currentTime - lastFrame;
         lastFrame = currentTime;
 
-        Game::envset<float>("time.current", currentTime);
-        Game::envset<float>("time.delta", deltaTime);
+        Ngin::envset<float>("time.current", currentTime);
+        Ngin::envset<float>("time.delta", deltaTime);
         
         if (timer_ > 0.1f) {
-            Game::envset<float>("mouse.offsetX", MathUtils::lerp(Game::envget<float>("mouse.offsetX"), 0.0f, deltaTime * 5.0f));
-            Game::envset<float>("mouse.offsetY", MathUtils::lerp(Game::envget<float>("mouse.offsetY"), 0.0f, deltaTime * 5.0f));    
+            Ngin::envset<float>("mouse.offsetX", MathUtils::lerp(Ngin::envget<float>("mouse.offsetX"), 0.0f, deltaTime * 5.0f));
+            Ngin::envset<float>("mouse.offsetY", MathUtils::lerp(Ngin::envget<float>("mouse.offsetY"), 0.0f, deltaTime * 5.0f));    
         }
 
         timer_ += deltaTime;
@@ -167,8 +168,8 @@ public:
         if (glfwGetKey(mainGl, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(mainGl, true);
 
-        float axesX = Game::envget<float>("axesX");
-        float axesY = Game::envget<float>("axesY");
+        float axesX = Ngin::envget<float>("axesX");
+        float axesY = Ngin::envget<float>("axesY");
 
         bool isY = false;
         bool isX = false;
@@ -197,8 +198,37 @@ public:
             axesX = MathUtils::lerp(axesX, 0.0, deltaTime * 5.0f);
         }
 
-        Game::envset<float>("axesX", axesX);
-        Game::envset<float>("axesY", axesY);
+        Ngin::envset<float>("axesX", axesX);
+        Ngin::envset<float>("axesY", axesY);
+    }
+
+    static void setCursorEnabled(bool enabled) {
+        if (enabled) {
+            glfwSetInputMode(mainGl, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        } else {
+            glfwSetInputMode(mainGl, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+    }
+    
+    static void setCustomCursor(const std::string& imagePath, int hotspotX, int hotspotY) {
+        GLFWimage image;
+        // Load the image (implementation depends on your image loading library)
+        // Example: Load image data into `image.pixels`, and set `image.width` and `image.height`
+        if (!loadImage(imagePath, image)) {
+            Log::console("Failed to load cursor image: " + imagePath, 1);
+            return;
+        }
+
+        GLFWcursor* cursor = glfwCreateCursor(&image, hotspotX, hotspotY);
+        if (!cursor) {
+            Log::console("Failed to create custom cursor", 1);
+            return;
+        }
+
+        glfwSetCursor(mainGl, cursor);
+
+        // Free image data if necessary (depends on your image loading library)
+        freeImage(image);
     }
 
 private:
@@ -208,20 +238,39 @@ private:
 
     static inline float timer_ = 0.0f;
 
+    static bool loadImage(const std::string& path, GLFWimage& image) {
+        int channels;
+        unsigned char* data = stbi_load(path.c_str(), &image.width, &image.height, &channels, STBI_rgb_alpha);
+        if (!data) {
+            Log::console("Failed to load image: " + path, 1);
+            return false;
+        }
+
+        image.pixels = data; // Assign loaded image data to GLFWimage
+        return true;
+    }
+
+    static void freeImage(GLFWimage& image) {
+        if (image.pixels) {
+            stbi_image_free(image.pixels); // Free the image data
+            image.pixels = nullptr;
+        }
+    }
 
     static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
 
-        Game::envset("screen.width", width);
-        Game::envset("screen.height", height);
+        Ngin::envset("screen.width", width);
+        Ngin::envset("screen.height", height);
     }
     static void mouseCallback(GLFWwindow* window, double xposIn, double yposIn) {
         // Implement mouse position handling logic here
         float xpos = static_cast<float>(xposIn);
         float ypos = static_cast<float>(yposIn);
 
-        Game::envset("mouse.x", xpos);
-        Game::envset("mouse.y", ypos);
+        Ngin::envset("mouse.x", xpos);
+        Ngin::envset("mouse.y", ypos);
+
 
         if (firstMouse_)
         {
@@ -236,8 +285,8 @@ private:
         lastX_ = xpos;
         lastY_ = ypos;
 
-        Game::envset("mouse.offsetX", xoffset);
-        Game::envset("mouse.offsetY", yoffset);
+        Ngin::envset("mouse.offsetX", xoffset);
+        Ngin::envset("mouse.offsetY", yoffset);
 
         timer_ = 0.0f;
 
@@ -246,7 +295,7 @@ private:
     static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
         // Implement scroll handling logic here
 
-        Game::envset("scroll_y", static_cast<float>(yoffset));
+        Ngin::envset("scroll_y", static_cast<float>(yoffset));
     }
 };
 

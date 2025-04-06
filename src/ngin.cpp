@@ -8,6 +8,7 @@
 #include <ngin/lex.h>
 
 #include <ngin/game.h>
+#include <ngin/ngin.h>
 #include <ngin/resources.h>
 
 #include <ngin/render/context.h>
@@ -26,6 +27,7 @@
 
 // --- STATIC FUNCTIONS --- //
 static int gameInit = (Game::init(), 0);
+static int nginInit = (Ngin::init(), 0);
 static int resourcesInit = (Resources::init(), 0);
 
 float deltaTime_, lastFrame_;
@@ -38,6 +40,8 @@ int main()
 {
     // Create a context with the title "ngin"
     Context::create("ngin");
+    Context::setCursorEnabled(true);
+    Context::setCustomCursor(FileUtils::getResourcePath("texture/cursor_main.png"), 0, 0);
 
     // Initialize game and drawer components
     Game::start();
@@ -104,18 +108,18 @@ int main()
         Context::processInput();
 
         // Env pass (optional)
-        if (Game::envget<bool>("trigger.update_envmap")) {
+        if (Ngin::envget<bool>("trigger.update_envmap")) {
             envPass->render();
-            Game::envset<bool>("trigger.update_envmap", false);
+            Ngin::envset<bool>("trigger.update_envmap", false);
         }
 
         // Shadows pass
         shadowPass->render();
 
         // Reflection pass (optional)
-        if (Game::envget<bool>("trigger.update_reflection")) {
+        if (Ngin::envget<bool>("trigger.update_reflection")) {
             //reflectionPass->render();
-            Game::envset<bool>("trigger.update_reflection", false);
+            Ngin::envset<bool>("trigger.update_reflection", false);
         }
 
         // Geometry pass
