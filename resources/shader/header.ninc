@@ -2,6 +2,7 @@
 
 uniform bool IS_ANIMATION;
 uniform bool IS_TEXT;
+uniform bool IS_INSTANCE;
 
 uniform mat4 M_CAMERA_PROJECTION;
 uniform mat4 M_CAMERA_VIEW;
@@ -14,3 +15,4 @@ uniform vec3 CAMERA_POS;
 uniform float OPACITY;
 
 uniform vec4 COLOR;
+

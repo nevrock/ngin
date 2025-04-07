@@ -3,6 +3,11 @@ layout (location = 3) in vec3 aOffset;
 layout (location = 4) in ivec4 aBoneIDs;
 layout (location = 5) in vec4 aWeights;
 
+layout (location = 6) in vec4 aInstanceMatrixCol0;
+layout (location = 7) in vec4 aInstanceMatrixCol1;
+layout (location = 8) in vec4 aInstanceMatrixCol2;
+layout (location = 9) in vec4 aInstanceMatrixCol3;
+
 uniform mat4 lightSpaceMatrix;
 uniform mat4 model;
 
@@ -12,6 +17,12 @@ uniform mat4 bones[40]; // Ensure this size matches the number of bones used in 
 
 void main()
 {
+    mat4 instanceModelMatrix = mat4(aInstanceMatrixCol0, aInstanceMatrixCol1, aInstanceMatrixCol2, aInstanceMatrixCol3);
+    
+    mat4 modelMatrix = model;
+    if (IS_INSTANCE)
+        modelMatrix = instanceModelMatrix;
+
     mat4 skinning = mat4(0.0);
     if (isAnimation) {
         // Initialize skinning matrix as zero matrix
@@ -32,5 +43,5 @@ void main()
         skinning = mat4(1.0);
     }
 
-    gl_Position = lightSpaceMatrix * model * vec4(aPos + aOffset, 1.0);
+    gl_Position = lightSpaceMatrix * modelMatrix * vec4(aPos + aOffset, 1.0);
 }

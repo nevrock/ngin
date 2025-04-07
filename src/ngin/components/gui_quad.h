@@ -55,50 +55,14 @@ public:
     }
     void prep(ShaderData& shader) override {
     }
-
-    unsigned int quadVAO_ = 0;
-    unsigned int quadVBO_ = 0;
-    void renderQuad()
-    {
-        if (quadVAO_ == 0)
-        {
-            float quadVertices[] = {
-                // positions        // texture Coords
-                -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, // Top-left corner
-                -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // Bottom-left corner
-                 1.0f,  1.0f, 0.0f, 1.0f, 0.0f, // Top-right corner
-                 1.0f, -1.0f, 0.0f, 1.0f, 1.0f  // Bottom-right corner
-            };
-            // setup plane VAO
-            glGenVertexArrays(1, &quadVAO_);
-            glGenBuffers(1, &quadVBO_);
-            glBindVertexArray(quadVAO_);
-            glBindBuffer(GL_ARRAY_BUFFER, quadVBO_);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-
-            // Bind position attribute (location = 0)
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-
-            // Bind texture coordinates attribute (location = 2)
-            glEnableVertexAttribArray(2);
-            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-        }
-        glBindVertexArray(quadVAO_);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        glBindVertexArray(0);
-    }
     void draw(ShaderData& shader) override {
         int screenWidth = Ngin::envget<int>("screen.width"); // Example screen width
         int screenHeight = Ngin::envget<int>("screen.height"); // Example screen height
 
         if (texture_ != 0) {
-            Log::console("Texture found for GUI Quad, using texture.", 1);
             bindTexture();
         } else {
-            Log::console("No texture found for GUI Quad, using white texture.", 1);
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, whiteTexture_);
+            bindWhiteTexture();
         }
         
         glm::mat4 model = getRectTransform()->getModelMatrix();
@@ -135,6 +99,44 @@ private:
 
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+    void bindWhiteTexture() {
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, whiteTexture_);
+    }
+
+    unsigned int quadVAO_ = 0;
+    unsigned int quadVBO_ = 0;
+    void renderQuad()
+    {
+        if (quadVAO_ == 0)
+        {
+            float quadVertices[] = {
+                // positions        // texture Coords
+                -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, // Top-left corner
+                -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // Bottom-left corner
+                 1.0f,  1.0f, 0.0f, 1.0f, 0.0f, // Top-right corner
+                 1.0f, -1.0f, 0.0f, 1.0f, 1.0f  // Bottom-right corner
+            };
+            // setup plane VAO
+            glGenVertexArrays(1, &quadVAO_);
+            glGenBuffers(1, &quadVBO_);
+            glBindVertexArray(quadVAO_);
+            glBindBuffer(GL_ARRAY_BUFFER, quadVBO_);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+
+            // Bind position attribute (location = 0)
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+
+            // Bind texture coordinates attribute (location = 2)
+            glEnableVertexAttribArray(2);
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        }
+        glBindVertexArray(quadVAO_);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
+    }
+    
 };
 
 #endif // GUI_QUAD_H

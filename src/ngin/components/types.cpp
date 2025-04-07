@@ -4,9 +4,11 @@
 #include <ngin/components/light_point.h>
 #include <ngin/components/camera.h>
 #include <ngin/components/mesh.h>
-#include <ngin/components/gui_quad.h>
 #include <ngin/components/armature.h>
+
+#include <ngin/components/gui_quad.h>
 #include <ngin/components/gui_font.h>
+#include <ngin/components/gui_group.h>
 
 bool light_registered = []() {
     Object::registerComponent("light", [](const std::string name, const Lex& lex, IObject* parent) {
@@ -53,6 +55,13 @@ bool gui_quad_registered = []() {
 bool gui_font_registered = []() {
     Object::registerComponent("gui_font", [](const std::string name, const Lex& lex, IObject* parent) {
         return std::make_unique<GuiFont>(name, lex, parent);
+    });
+    return true;
+}();
+
+bool gui_group_registered = []() {
+    Object::registerComponent("gui_group", [](const std::string name, const Lex& lex, IObject* parent) {
+        return std::make_unique<GuiGroup>(name, lex, parent);
     });
     return true;
 }();

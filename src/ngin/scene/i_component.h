@@ -28,6 +28,13 @@ public:
         return parent_->getRectTransform();
     }
 
+    std::vector<PointData*> getChildPointTransforms() {
+        return parent_->getChildPointTransforms();
+    }
+    std::vector<RectData*> getChildRectTransforms() {
+        return parent_->getChildRectTransforms();
+    }
+
     bool raycast(glm::vec2 pos) {
         RectData* rect = getRectTransform();
         if (rect) {

@@ -16,12 +16,16 @@ public:
               rotation_(0.0f), 
               size_(1.0f),
               anchor_(0.0f),
-              pivot_(0.0f) {} 
+              pivot_(0.0f),
+              isRaycast_(false),
+              isCanvas_(false) {} 
   RectData(const Lex& data) : TransformData(data), position_(0.0f), 
               rotation_(0.0f), 
               size_(1.0),
               anchor_(0.0f),
-              pivot_(0.0f) {
+              pivot_(0.0f),
+              isRaycast_(false),
+              isCanvas_(false) {
     if (data.contains("position")) {
       position_ = data.getVec2("position", glm::vec2(0.0));
     }
@@ -39,6 +43,7 @@ public:
     }
 
     isRaycast_ = data.getC<bool>("isRaycast", false);
+    isCanvas_ = data.getC<bool>("isCanvas", false);
 
     screenWidth_ = Ngin::envget<int>("screen.width");
     screenHeight_ = Ngin::envget<int>("screen.height");
@@ -79,6 +84,7 @@ public:
   }
   glm::mat4 getModelMatrix() const override {
     glm::mat4 model = glm::mat4(1.0f);
+
     glm::mat4 rect = getRectMatrix();
 
     float ndcX = (2.0f * rect[0][0]) / screenWidth_ - 1.0f;
@@ -98,6 +104,10 @@ public:
   }
   glm::mat4 getRectMatrix() const {
     glm::mat4 rectMatrix = glm::mat4(1.0f);
+
+    if (isCanvas_) {
+       return getCanvasMatrix();
+    }
 
     glm::vec2 parentPosition = glm::vec2(parent_[0][0], parent_[0][1]);
     glm::vec2 parentSize = glm::vec2(parent_[1][0], parent_[1][1]);
@@ -146,6 +156,30 @@ public:
 
     return rectMatrix;
   }
+  glm::mat4 getCanvasMatrix() const {
+    glm::mat4 rectMatrix = glm::mat4(1.0f);
+
+    int screenWidth = Ngin::envget<int>("screen.width");
+    int screenHeight = Ngin::envget<int>("screen.height");
+
+    // Store position in the first row
+    rectMatrix[0][0] = 0.0f;
+    rectMatrix[0][1] = 0.0f;
+
+    // Store size in the second row
+    rectMatrix[1][0] = screenWidth;
+    rectMatrix[1][1] = screenHeight;
+
+    // Store anchor in the third row
+    rectMatrix[2][0] = anchor_.x;
+    rectMatrix[2][1] = anchor_.y;
+
+    // Store pivot in the fourth row
+    rectMatrix[3][0] = pivot_.x;
+    rectMatrix[3][1] = pivot_.y;
+
+    return rectMatrix;
+  }
 
   void log() const override {
     Log::console("Rect data: " + name_, 1);
@@ -179,7 +213,8 @@ private:
 
   int screenWidth_, screenHeight_;
 
-  bool isRaycast_ = false;
+  bool isRaycast_;
+  bool isCanvas_;
 };
 
 #endif

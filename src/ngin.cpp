@@ -43,6 +43,9 @@ int main()
     Context::setCursorEnabled(true);
     Context::setCustomCursor(FileUtils::getResourcePath("texture/cursor_main.png"), 0, 0);
 
+    // Initialize the Drawer after the OpenGL context is created
+    Drawer::init();
+
     // Initialize game and drawer components
     Game::start();
 

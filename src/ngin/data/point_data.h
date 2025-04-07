@@ -122,11 +122,8 @@ public:
   glm::mat4 getModelMatrix() const override {
       glm::mat4 model = glm::mat4(1.0f);
       model = glm::translate(model, position_);
-      model = glm::rotate(model, glm::radians(rotation_.x), glm::vec3(1.0f, 0.0f, 0.0f));
-      model = glm::rotate(model, glm::radians(rotation_.y), glm::vec3(0.0f, 1.0f, 0.0f));
-      model = glm::rotate(model, glm::radians(rotation_.z), glm::vec3(0.0f, 0.0f, 1.0f));
+      model *= glm::mat4_cast(rotation_); // Use quaternion rotation
       model = glm::scale(model, scale_);
-
       return model;
   }
 

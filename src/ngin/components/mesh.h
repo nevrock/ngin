@@ -6,6 +6,7 @@
 #include <ngin/constants.h>
 
 #include <ngin/data/mesh_data.h>
+#include <ngin/data/instance_data.h>
 #include <ngin/log.h>
 
 #include <ngin/drawer.h>    
@@ -18,14 +19,27 @@ public:
         std::vector<std::string> shaders = lex.getC<std::vector<std::string>>("shaders", {});
         metallic_ = lex.getC<float>("metallic", 0.0);
         roughness_ = lex.getC<float>("roughness", 1.0);
-        for (const auto& shader : shaders) {
-            Drawer::registerDrawer(shader, *this);
+        isInstance_ = lex.getC<bool>("isInstance", false);
+        if (isInstance_) {
+            for (const auto& shader : shaders) {
+                Drawer::registerInstance(shader, lex.getC<std::string>("mesh", ""), *this);
+            }
+        } else {
+            for (const auto& shader : shaders) {
+                Drawer::registerDrawer(shader, *this);
+            }
         }
     }
     ~Mesh() {
         std::vector<std::string> shaders = lex_.getC<std::vector<std::string>>("shaders", {});
-        for (const auto& shader : shaders) {
-            Drawer::unregisterDrawer(shader, *this);
+        if (isInstance_) {
+            for (const auto& shader : shaders) {
+                Drawer::unregisterInstance(shader, lex_.getC<std::string>("mesh", ""), *this);
+            }
+        } else {
+            for (const auto& shader : shaders) {
+                Drawer::unregisterDrawer(shader, *this);
+            }
         }
     }
 
@@ -70,10 +84,22 @@ public:
         meshData_.render();
     }
 
+    InstanceData getInstanceData() override {
+        InstanceData instanceData;
+        PointData* transform = getPointTransform();
+        instanceData.modelMatrix = transform->getWorldModelMatrix();
+        instanceData.uvOffset = glm::vec2(0.0f, 0.0f);
+        instanceData.color = glm::vec3(1.0f, 1.0f, 1.0f);
+        return instanceData;
+    }
+    unsigned int getTextureId() override {
+        return texture_;
+    }
+
 private:
     MeshData& meshData_;
     unsigned int texture_;
-
+    bool isInstance_;
     float metallic_, roughness_;
 
     void bindTexture() {

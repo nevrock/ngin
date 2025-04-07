@@ -92,6 +92,7 @@ public:
         // Prepare and draw SSAO G-buffer
         Drawer::prep("gbuffer");
         Drawer::draw("gbuffer");
+        Drawer::drawInstances("gbuffer");
     }
     void linkSsaoColorBufferBlur(unsigned int ssaoColorBufferBlur) {
         ssaoColorBufferBlur_ = ssaoColorBufferBlur;

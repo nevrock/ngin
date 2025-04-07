@@ -14,6 +14,7 @@ public:
   TransformData() : parent_(1.0f) {} 
   TransformData(const Lex& data) : parent_(1.0f) {
     parent_ = glm::mat4(1.0f);
+    name_ = data.getC<std::string>("name", "transform_data");
   }
   std::string getName() override { return name_; } 
 

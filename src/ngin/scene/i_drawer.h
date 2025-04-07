@@ -3,6 +3,7 @@
 
 #include <ngin/scene/i_component.h>
 #include <ngin/data/shader_data.h>
+#include <ngin/data/instance_data.h>
 
 class IDrawer : public IComponent {
 public:
@@ -13,6 +14,13 @@ public:
     
     virtual void prep(ShaderData& shader) = 0; // Pure virtual method for preparing
     virtual void draw(ShaderData& shader) = 0; // Pure virtual method for rendering
+
+    virtual InstanceData getInstanceData() {
+        return InstanceData();
+    }
+    virtual unsigned int getTextureId() {
+        return 0;
+    }
 };
 
 #endif // I_DRAWER_H

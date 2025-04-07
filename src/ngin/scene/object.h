@@ -44,7 +44,7 @@ public:
         }
     }
 
-    void build() {
+    void build() override {
         createChildren();
 
         buildTransform();
@@ -77,31 +77,10 @@ public:
     }
 
     template<typename T>
-    std::vector<T*> getComponents() {
-        std::vector<T*> components;
-        for (auto& component : components_) {
-            auto casted = dynamic_cast<T*>(component.get());
-            if (casted) {
-                components.push_back(casted);
-            }
-        }
-        return components;
-    }
-    template<typename T>
     T* getComponent(const std::string& name) {
         for (auto& component : components_) {
             if (component->getName() == name) {
                 return dynamic_cast<T*>(component.get());
-            }
-        }
-        return nullptr;
-    }
-    template<typename T>
-    T* getComponent() {
-        for (auto& component : components_) {
-            auto casted = dynamic_cast<T*>(component.get());
-            if (casted) {
-                return casted;
             }
         }
         return nullptr;
@@ -141,7 +120,7 @@ public:
         getComponentFactories()[name] = factory;
     }
 
-    void log(int indent = 0) const {
+    void log(int indent = 0) const override {
         std::string indentation(indent, ' ');
         Log::console(indentation + "Object: " + getName(), 1); 
         for (auto& [name, child] : children_) {
@@ -152,9 +131,6 @@ public:
     void registerComponent(const std::string& name, std::function<void()> factory);
 
 protected:
-    std::vector<std::unique_ptr<IComponent>> components_;
-
-    std::map<std::string, std::unique_ptr<Object>> children_;
     Object* parent_;
 
     void createChildren() {

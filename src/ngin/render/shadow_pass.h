@@ -50,6 +50,7 @@ public:
         // Prepare and draw shadow map
         Drawer::prep("shadowmap");
         Drawer::draw("shadowmap");
+        Drawer::drawInstances("shadowmap");
         
     }
     void bind() override {
