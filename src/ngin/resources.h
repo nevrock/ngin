@@ -22,6 +22,7 @@
 #include <ngin/data/compute_data.h>
 #include <ngin/data/animation_data.h>
 #include <ngin/data/font_data.h>
+#include <ngin/audio/audio_data.h>
 
 #if defined(_MSC_VER)
     #include <io.h>
@@ -36,12 +37,14 @@ public:
     inline static std::map<std::string, std::unique_ptr<ComputeData>> computeShaders_;
     inline static std::map<std::string, std::unique_ptr<AnimationData>> animations_;
     inline static std::map<std::string, std::unique_ptr<FontData>> fonts_;
+    inline static std::map<std::string, std::unique_ptr<AudioData>> audioData_;
 
     inline static Lex shaderManifest_;
     inline static Lex meshManifest_;
     inline static Lex textureManifest_;
     inline static Lex animationManifest_;
     inline static Lex fontManifest_;
+    inline static Lex audioManifest_;
 
     static void init() {
         // need to load in resources
@@ -50,6 +53,7 @@ public:
         meshManifest_ = loadLexicon("manifest.lexf", "mesh/");
         textureManifest_ = loadLexicon("manifest.lexf", "texture/");
         fontManifest_ = loadLexicon("manifest.lexf", "font/");
+        audioManifest_ = loadLexicon("manifest.lexf", "audio/");
     }
 
     static void terminate() {
@@ -65,6 +69,9 @@ public:
         }
         for (auto& [name, computeShader] : computeShaders_) {
             computeShader.reset();
+        }
+        for (auto& [name, audio] : audioData_) {
+            audio.reset();
         }
     }
 
@@ -303,6 +310,39 @@ public:
         auto it = computeShaders_.find(name);
         if (it != computeShaders_.end()) {
             computeShaders_.erase(it);
+        }
+    }
+
+    static AudioData& getAudioData(const std::string& name) {
+        auto it = audioData_.find(name);
+        if (it == audioData_.end()) {
+            loadAudioData(name);
+            it = audioData_.find(name);
+            if (it == audioData_.end()) {
+                throw std::runtime_error("Failed to load audio: " + name);
+            }
+        }
+        return *(it->second);
+    }
+
+    static void loadAudioData(const std::string& name) {
+        Lex audioManifestData = audioManifest_.getC<Lex>(name, Lex());
+        std::string location = audioManifestData.getC<std::string>("location", "");
+        std::string filePath = FileUtils::getResourcePath("audio/" + location + ".wav");
+
+        auto& audio = audioData_[name];
+        if (!audio) {
+            audio = std::make_unique<AudioData>(name);
+        }
+        if (!audio->loadFromFile(filePath)) {
+            throw std::runtime_error("Failed to load audio: " + name);
+        }
+    }
+
+    static void unloadAudioData(const std::string& name) {
+        auto it = audioData_.find(name);
+        if (it != audioData_.end()) {
+            audioData_.erase(it);
         }
     }
 

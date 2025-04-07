@@ -51,6 +51,8 @@ int main()
     // Initialize the audio system
     Audio::create();
 
+    Audio::play("levelup");
+
     // Initialize game and drawer components
     Game::start();
 
@@ -170,6 +172,8 @@ int main()
     delete deferredPass;
     delete translucentPass;
     delete guiPass;
+
+    Audio::destroy();
 
     // Terminate the context and GLFW
     Context::terminate();

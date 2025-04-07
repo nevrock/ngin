@@ -2,9 +2,13 @@
 #define AUDIO_H
 
 #include <iostream>
+#include <fstream>
+#include <vector>
 #include <AL/al.h>
 #include <AL/alc.h>
+#include <cstdint>
 
+#include <ngin/resources.h>
 
 class Audio {
 public:
@@ -33,19 +37,22 @@ public:
         }
 
         std::cout << "OpenAL initialized successfully!" << std::endl;
-
-        // Clean up
-        alcMakeContextCurrent(nullptr);
-        alcDestroyContext(context);
-        alcCloseDevice(device);
-
         return true;
     }
-    
+
+    static void destroy() {
+        alcMakeContextCurrent(nullptr);
+        if (context) alcDestroyContext(context);
+        if (device) alcCloseDevice(device);
+    }
+
+    static bool play(const std::string& name) {
+        AudioData& data = Resources::getAudioData(name);
+        data.play();
+        return true;
+    }
+
 private:
-
-
-
 };
 
 #endif
