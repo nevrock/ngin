@@ -24,15 +24,19 @@ find_package(GLFW3 REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(ZLIB REQUIRED) # Added ZLIB
 find_package(PNG REQUIRED)  # Added PNG
+find_package(OpenAL REQUIRED)
+
 message(STATUS "GLM: ${GLM_INCLUDE_DIR}")
 message(STATUS "GLFW3: ${GLFW3_INCLUDE_DIR}")
 message(STATUS "FreeType: ${FREETYPE_INCLUDE_DIR}")
 message(STATUS "ZLIB: ${ZLIB_INCLUDE_DIRS}") # Added ZLIB message
 message(STATUS "PNG: ${PNG_INCLUDE_DIRS}")   # Added PNG message
+message(STATUS "OpenAL Libraries: ${OPENAL_LIBRARY}")
 
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/includes/)
 include_directories(${CMAKE_SOURCE_DIR}/src/)
+include_directories(${OpenAL_INCLUDE_DIRS})
 
 # Set libraries and platform-specific settings
 if(WIN32)
@@ -74,7 +78,7 @@ include_directories(${CMAKE_BINARY_DIR}/configuration)
 add_executable(ngin ${SOURCES})
 
 # Link libraries
-target_link_libraries(ngin ${LIBS} ZLIB::ZLIB PNG::PNG) # Added ZLIB and PNG
+target_link_libraries(ngin ${LIBS} ZLIB::ZLIB PNG::PNG ${OPENAL_LIBRARY}) # Added OpenAL
 
 # MSVC specific flags
 if(MSVC)

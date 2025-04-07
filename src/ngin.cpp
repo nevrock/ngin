@@ -24,6 +24,8 @@
 #include <ngin/render/translucent_pass.h> 
 #include <ngin/render/gui_pass.h> 
 
+#include <ngin/audio/audio.h> 
+
 
 // --- STATIC FUNCTIONS --- //
 static int gameInit = (Game::init(), 0);
@@ -45,6 +47,9 @@ int main()
 
     // Initialize the Drawer after the OpenGL context is created
     Drawer::init();
+
+    // Initialize the audio system
+    Audio::create();
 
     // Initialize game and drawer components
     Game::start();
