@@ -7,6 +7,7 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <cstdint>
+#include <glm/vec3.hpp> // Include glm for 3D vector support
 
 #include <ngin/resources.h>
 
@@ -35,6 +36,7 @@ public:
             alcCloseDevice(device);
             return false;
         }
+        
 
         std::cout << "OpenAL initialized successfully!" << std::endl;
         return true;
@@ -46,9 +48,9 @@ public:
         if (device) alcCloseDevice(device);
     }
 
-    static bool play(const std::string& name) {
+    static bool play(const std::string& name, const glm::vec3& sourcePosition, const glm::vec3& listenerPosition) {
         AudioData& data = Resources::getAudioData(name);
-        data.play();
+        data.play(sourcePosition, listenerPosition);
         return true;
     }
 

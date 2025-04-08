@@ -55,6 +55,17 @@ public:
         fontManifest_ = loadLexicon("manifest.lexf", "font/");
         audioManifest_ = loadLexicon("manifest.lexf", "audio/");
     }
+    static void load() {
+        for (const auto& [key, value] : audioManifest_.data()) {
+            if (value.type() == typeid(Lex)) {
+                const Lex& nestedLex = std::any_cast<const Lex&>(value);
+                std::string location = nestedLex.getC<std::string>("location", "");
+                if (!location.empty()) {
+                    loadAudioData(key);
+                }
+            }
+        }
+    }
 
     static void terminate() {
         // need to unload resources
@@ -324,7 +335,13 @@ public:
         }
         return *(it->second);
     }
-
+    static AudioData* getAudioDataPtr(const std::string& name) {
+        auto it = audioData_.find(name);
+        if (it == audioData_.end()) {
+            return nullptr;
+        }
+        return it->second.get();
+    }
     static void loadAudioData(const std::string& name) {
         Lex audioManifestData = audioManifest_.getC<Lex>(name, Lex());
         std::string location = audioManifestData.getC<std::string>("location", "");

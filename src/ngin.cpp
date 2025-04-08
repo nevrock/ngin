@@ -51,7 +51,12 @@ int main()
     // Initialize the audio system
     Audio::create();
 
-    Audio::play("levelup");
+    // Load resources
+    Resources::load();
+
+    // Example source and listener positions
+    glm::vec3 sourcePosition(0.0f, 0.0f, 0.0f); // Source is 5 units to the right
+    glm::vec3 listenerPosition(0.0f, 0.0f, 0.0f); // Listener at origin
 
     // Initialize game and drawer components
     Game::start();
@@ -109,6 +114,10 @@ int main()
     // -----------
     while (!Context::shouldClose())
     {
+        if (Context::time > 5.0f) {
+            Audio::play("levelup", sourcePosition, listenerPosition);
+        }
+
         // Update game logic and transformations
         Game::updateLogic();
         Game::updateTransform(); 

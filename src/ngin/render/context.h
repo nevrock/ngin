@@ -23,6 +23,8 @@ public:
     static inline float deltaTime = 0.0f;
     static inline float lastFrame = 0.0f;
 
+    static inline float time = 0.0f;
+
     static void create(const std::string& title) {
 
         int screenWidth = Ngin::envget<int>("screen.width");
@@ -146,6 +148,7 @@ public:
         }
 
         timer_ += deltaTime;
+        time += deltaTime;
     }
     static void clear(bool isClearColor=false) {
         if (isClearColor)
