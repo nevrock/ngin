@@ -17,13 +17,9 @@
 
 class AudioData {
 public:
-    AudioData(const std::string& name) : name_(name), buffer_(0), source_(0), isPlaying_(false) {}
+    AudioData(const std::string& name) : name_(name), buffer_(0), source_(0), isPlaying_(false), durationInSeconds_(0) {}
 
     ~AudioData() {
-        stop(); // Ensure playback is stopped before cleanup
-        if (playThread_.joinable()) {
-            playThread_.join(); // Wait for the playback thread to finish
-        }
         if (source_) {
             alDeleteSources(1, &source_);
             source_ = 0; // Reset to avoid dangling references
@@ -80,8 +76,22 @@ public:
 
         file.ignore(fmtChunkSize - 16); // Skip extra fmt chunk data
 
-        uint32_t dataSize;
-        file.read(reinterpret_cast<char*>(&dataSize), sizeof(dataSize));
+        uint32_t dataSize = 0;
+
+        // Locate the "data" chunk to correctly read its size
+        char dataHeader[4];
+        while (file.read(dataHeader, 4)) {
+            if (std::string(dataHeader, 4) == "data") {
+                file.read(reinterpret_cast<char*>(&dataSize), sizeof(dataSize));
+                break;
+            } else {
+                uint32_t chunkSize;
+                file.read(reinterpret_cast<char*>(&chunkSize), sizeof(chunkSize));
+                file.ignore(chunkSize); // Skip unknown chunk
+            }
+        }
+
+        if (dataSize == 0) return logError("Missing or invalid data chunk");
 
         std::vector<char> audioData(dataSize);
         file.read(audioData.data(), dataSize);
@@ -113,6 +123,11 @@ public:
 
         alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
         if (!checkOpenALError("alDistanceModel")) return false;
+
+        // Correctly calculate and store the duration of the audio file
+        int numSamples = dataSize / (numChannels * (bitsPerSample / 8));
+        durationInSeconds_ = static_cast<int>(numSamples / static_cast<float>(sampleRate));
+        std::cout << "Audio file duration: " << durationInSeconds_ << " seconds." << std::endl;
 
         return true;
     }
@@ -157,8 +172,6 @@ public:
     }
 
     void play(const glm::vec3& sourcePosition, const glm::vec3& listenerPosition) {
-        if (isPlaying_) return; // Prevent multiple play calls
-
         // Set listener position and orientation (default to facing forward)
         alListener3f(AL_POSITION, listenerPosition.x, listenerPosition.y, listenerPosition.z);
         if (!checkOpenALError("alListener3f (AL_POSITION)")) return;
@@ -179,21 +192,20 @@ public:
         alSourcei(source_, AL_SOURCE_RELATIVE, AL_FALSE);
         if (!checkOpenALError("alSourcei (AL_SOURCE_RELATIVE)")) return;
 
-        isPlaying_ = true;
-        std::cout << "AudioData: Source is starting to play." << std::endl; // Log when playback starts
-        playThread_ = std::thread([this]() {
-            alSourcePlay(source_);
-            if (!checkOpenALError("alSourcePlay")) return;
-        });
+        alSourcePlay(source_);
+        if (!checkOpenALError("alSourcePlay")) return;
+        isPlaying_ = true; // Set to true when playback starts
     }
 
     void stop() {
-        if (isPlaying_) {
-            std::cout << "AudioData: Stopping the source." << std::endl; // Log when stopping is initiated
-            isPlaying_ = false; // Signal the thread to stop
-            playThread_.join(); // Wait for the playback thread to finish
+        if (source_) {
             alSourceStop(source_); // Stop the OpenAL source
-            std::cout << "AudioData: Source has been stopped." << std::endl; // Log after stopping
+            if (!checkOpenALError("alSourceStop")) return;
+
+            alSourcei(source_, AL_BUFFER, 0); // Detach the buffer from the source
+            if (!checkOpenALError("alSourcei (AL_BUFFER)")) return;
+
+            isPlaying_ = false; // Set to false when playback stops
         }
     }
 
@@ -201,12 +213,25 @@ public:
         return name_;
     }
 
+    bool isPlaying() {
+        ALint state; // Update isPlaying_ based on the actual source state
+        alGetSourcei(source_, AL_SOURCE_STATE, &state);
+        isPlaying_ = (state == AL_PLAYING);
+        //std::cout << "Checking state for source " << source_ << ": state = " << state
+        //<< " (AL_PLAYING=" << AL_PLAYING << ", AL_STOPPED=" << AL_STOPPED << ")" << std::endl;
+        return isPlaying_;
+    }
+
+    int getDurationInSeconds() const {
+        return durationInSeconds_;
+    }
+
 private:
     std::string name_;
     ALuint buffer_;
     ALuint source_;
-    std::atomic<bool> isPlaying_;
-    std::thread playThread_;
+    bool isPlaying_ = false; // Track playback state
+    int durationInSeconds_ = 0; // Store the duration of the audio file
 
     bool logError(const std::string& message) {
         std::cerr << "AudioData Error: " << message << std::endl;

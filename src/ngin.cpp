@@ -50,9 +50,9 @@ int main()
 
     // Initialize the audio system
     Audio::create();
+    Audio::startAudioThread();
 
-    // Load resources
-    Resources::load();
+    Audio::setAudio("levelup");
 
     // Example source and listener positions
     glm::vec3 sourcePosition(0.0f, 0.0f, 0.0f); // Source is 5 units to the right
@@ -182,6 +182,7 @@ int main()
     delete translucentPass;
     delete guiPass;
 
+    Audio::stopAudioThread();
     Audio::destroy();
 
     // Terminate the context and GLFW

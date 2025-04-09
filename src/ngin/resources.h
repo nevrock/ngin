@@ -55,7 +55,7 @@ public:
         fontManifest_ = loadLexicon("manifest.lexf", "font/");
         audioManifest_ = loadLexicon("manifest.lexf", "audio/");
     }
-    static void load() {
+    static void loadAudioFiles() {
         for (const auto& [key, value] : audioManifest_.data()) {
             if (value.type() == typeid(Lex)) {
                 const Lex& nestedLex = std::any_cast<const Lex&>(value);
