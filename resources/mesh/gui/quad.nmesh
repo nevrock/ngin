@@ -1,0 +1,27 @@
+name: gui_quad
+kind: mesh
+lable: data
+data: 
+    vertices:
+        0:
+            position: [-1.0, 1.0, 0.0]
+            normal: [0.0, 0.0, 1.0]
+            uv: [0.0, 0.0]
+        1:
+            position: [-1.0, -1.0, 0.0]
+            normal: [0.0, 0.0, 1.0]
+            uv: [0.0, 1.0]
+        2:
+            position: [1.0, 1.0, 0.0]
+            normal: [0.0, 0.0, 1.0]
+            uv: [1.0, 0.0]
+        3:
+            position: [1.0, -1.0, 0.0]
+            normal: [0.0, 0.0, 1.0]
+            uv: [1.0, 1.0]
+
+    faces:
+        0: [0, 1, 2, 3]
+
+    vertex_groups: []
+    smooth_shading: false

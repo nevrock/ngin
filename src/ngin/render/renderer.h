@@ -1,79 +1,95 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <string>
+#include <ngin/debug/logger.h>
+#include <ngin/util/file.h>
+#include <ngin/render/gl/context.h>
+#include <ngin/render/data.h>
+#include <ngin/render/pass.h>
+#include <ngin/ngin.h>
+
 #include <iostream>
-#include <random>
-#include <vector> // Added for std::vector
-#include <glad/glad.h>
-
-#include <ngin/log.h>
-#include <ngin/game.h>
-#include <ngin/lex.h>
-
-#include <ngin/render/context.h>
-
-#include <ngin/render/shadow_pass.h> 
-#include <ngin/render/geometry_pass.h> 
-#include <ngin/render/ssao_pass.h> 
-#include <ngin/render/env_pass.h> 
-#include <ngin/render/post_pass.h> 
+#include <string>
+#include <sstream> // Required for std::stringstream
+#include <vector>
+#include <tuple>
 
 class Renderer {
 
 public:
-
-    static inline float deltaTime = 0.0f;
-    static inline float lastFrame = 0.0f;
-
-    Renderer() {
-        Log::console("Renderer constructor called", 0);
-
-        Context::create("ngin");
+    Renderer() : render_data_(NGIN::render()) {
     }
+    ~Renderer() {
+        if (logger_) {
+            delete logger_;
+        }
+        if (context_) {
+            delete context_;
+        }
+    }
+
     void setup() {
-        shadowPass_ = new ShadowPass(1); // Provide the required argument to ShadowPass constructor
-        shadowPass_->setup();
+        logger_ = new Logger("Renderer");
 
-        geomPass_ = new GeometryPass(2);
-        geomPass_->setup();
+        setup_render_data();
+        setup_render_passes();
 
-        ssaoPass_ = new SsaoPass(3);
-        ssaoPass_->setup();
+        context_ = new GlContext("ngin", render_data_, gl_data_);
 
-        envPass_ = new EnvPass(5);
-        envPass_->setup();
-
-        postPass_ = new PostPass(7);
-        postPass_->setup();
-
-        geomPass_->linkSsaoColorBufferBlur(ssaoPass.getSsaoColorBufferBlur());
+        std::vector<std::string> shader_assets = NGIN::assets().get_asset_names_for_bucket("shader");
+        for (const auto& shader_asset : shader_assets) {
+            logger_->info("Loading shader asset: " + shader_asset);
+            NGIN::assets().load_asset("shader", shader_asset);
+        }
+        
+        logger_->info("Renderer setup");
     }
-    void render() {
-        shadowPass_->render();
+    void setup_render_data() {
+        std::tuple<std::string, bool> resource_path = FileUtil::get_resource_path("data/render.atl");
 
-        geomPass_->render();
+        Atlas data;
+        data.read(std::get<0>(resource_path));
 
-        ssaoPass_->render();
+        // Use get with default value directly
+        render_data_.screen_width = 1280;
+        render_data_.screen_height = 720;
+        render_data_.screen_width = *data.get<int>("screen.width", &render_data_.screen_width);
+        render_data_.screen_height = *data.get<int>("screen.height", &render_data_.screen_height);
 
-        deferredPass_->render();  
+        logger_->info("Renderer setup render data with screen width: " + std::to_string(render_data_.screen_width) + " and height: " + std::to_string(render_data_.screen_height));
+    }
+    void setup_render_passes() {
+        
+    }
+    void update() {
+        context_->update_time();
+        context_->process_input();
 
-        envPass_->render();
-
-        translucentPass_->render();
-
-        postPass_->render();
-
-        guiPass_->render();
+        context_->swap();
+    }
+    void cleanup() {
+        logger_->info("Renderer cleanup");
+        if (context_) {
+            delete context_;
+            context_ = nullptr; // Set to nullptr after deletion
+        }
     }
 
+    bool should_close() {
+        bool should_close = context_->should_close();
+        if (should_close) {
+            logger_->info("Renderer should close");
+        }
+        return should_close;
+    }
 
 private:
-    ShadowPass* shadowPass_; // Updated type to ShadowPass*
-    GeometryPass* geomPass_;
-    SsaoPass* ssaoPass_;
-    EnvPass* envPass_;
-    PostPass* postPass_;
+    Logger* logger_ = nullptr;
+    GlContext* context_ = nullptr;
+    std::vector<RenderPass*> render_passes_;
+
+    RenderData& render_data_;
+    GlData gl_data_;
 };
 
-#endif // RENDERER_H
+#endif

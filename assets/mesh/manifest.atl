@@ -1,0 +1,5 @@
+sphere: 
+    name: sphere
+    location: mesh/sphere.nmesh
+    kind: mesh
+    preload: true

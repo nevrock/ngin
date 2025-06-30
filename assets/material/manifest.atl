@@ -1,0 +1,5 @@
+sphere: 
+    name: sphere
+    location: material/sphere.nmat
+    kind: material
+    preload: true

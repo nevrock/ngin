@@ -1,0 +1,8 @@
+name: gui
+
+fragment: shader/gui/gui.nfrg
+vertex: shader/gui/gui.nvtx
+
+attributes:
+    TEX_TEXT: 1
+    TEX_IMAGE: 2

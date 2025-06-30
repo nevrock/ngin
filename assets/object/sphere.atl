@@ -1,0 +1,22 @@
+name: sphere
+location: object/sphere.atl
+kind: atlas
+preload: true
+children: 
+    sphere: 
+        name: sphere
+        location: object/sphere.atl
+        kind: atlas
+        preload: true
+        transform: 
+            position: [0.0, 0.0, 2.0]
+            rotation: [0.0, 0.0, 0.0]
+            scale: [1.0, 1.0, 1.0]
+        modules: 
+            sphere: 
+                name: sphere
+                kind: mesh
+                label: module
+                shaders: [shadowmap, gbuffer]
+        children: 
+modules: 

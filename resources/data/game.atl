@@ -1,0 +1,15 @@
+name: tuvok
+
+debug.vulkan: false
+
+screen.width: 800
+screen.height: 600
+
+instance:
+    debug: true
+
+    app.name: outlandia
+    app.version: 1
+
+    engine.name: tuvok
+    engine.verison: 1

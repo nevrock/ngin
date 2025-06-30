@@ -1,40 +1,42 @@
 #ifndef NGIN_H
 #define NGIN_H
 
-#include <memory>
-#include <functional>
-#include <atomic>
+#include <ngin/atlas/atlas.h>
+#include <ngin/assets/assets.h>
 
-#include <ngin/log.h>
-#include <ngin/lex.h>
-#include <ngin/resources.h>
+#include <iostream>
+#include <string>
 
-class Ngin {
+#include <ngin/render/data.h>
+#include <ngin/render/drawer/data.h>
+
+// Declare functions directly in the Ngin namespace
+class NGIN {
 public:
-
-    static void init() {
-        env_ = std::make_shared<Lex>(Resources::loadLexicon("env"));
-    }
-
-    static void setEnv(std::shared_ptr<Lex> nevf) {
-        env_ = nevf;
-    }
-    static std::shared_ptr<Lex> getEnv() {
-        return env_;
-    }
-    
     template <typename T>
-    static T envget(const std::string& key) { 
-        return env_->getC<T>(key, T());
+    static void envset(const std::string& key, T* value) {
+        env_.set(key, value);
     }
     template <typename T>
-    static void envset(const std::string& key, T value) {
-        env_->set(key, value);
+    static T* envget(const std::string& key, T* defaultValue = nullptr) {
+        return env_.get<T>(key, defaultValue);
     }
-
+    static inline Assets& assets() {
+        return assets_;
+    }
+    static inline RenderData& render() {
+        return render_;
+    }
+    static inline DrawerData& drawer() {
+        return drawer_;
+    }
 private:
-    static inline std::shared_ptr<Lex> env_;
+    static inline Atlas env_;
 
+    static inline Assets assets_;
+    
+    static inline RenderData render_;
+    static inline DrawerData drawer_;
 };
 
-#endif // NGIN_H
+#endif

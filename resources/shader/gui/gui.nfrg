@@ -2,23 +2,22 @@ layout (location=0) out vec4 FragColor;
 
 in vec2 TexCoords;
 
-uniform sampler2D image;
-uniform sampler2D text;
+uniform sampler2D TEX_IMAGE;
+uniform sampler2D TEX_TEXT;
 
-uniform bool isText;
+uniform bool IS_TEXT;
 
 void main()
 {                
-    if (isText) {
-        vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
-        FragColor = vec4(COLOR.rgb, 1.0) * sampled;
-    } else {
-        vec4 sampled = vec4(texture(image, TexCoords).rgba);
+    if (IS_TEXT) {
+        vec4 sampled = vec4(1.0, 1.0, 1.0, texture(TEX_TEXT, TexCoords).r);
 
-        // Debug output for TexCoords and sampled color
-        // FragColor = vec4(TexCoords, 0.0, 1.0); // Uncomment to visualize UVs
-        // FragColor = sampled; // Uncomment to visualize the sampled texture
+        FragColor = vec4(COLOR.rgb, 1.0) * sampled;
+
+    } else {
+        vec4 sampled = vec4(texture(TEX_IMAGE, TexCoords).rgba);
 
         FragColor = vec4(COLOR.rgb*sampled.rgb, sampled.a);
+
     }
 }

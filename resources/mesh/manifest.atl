@@ -1,0 +1,5 @@
+gui_quad: 
+    name: qui_quad
+    location: mesh/gui/quad.nmesh
+    kind: mesh
+    preload: true

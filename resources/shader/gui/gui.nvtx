@@ -3,16 +3,16 @@ layout (location = 2) in vec2 aTexCoords;
 
 out vec2 TexCoords;
 
-uniform mat4 model;
-uniform bool isText;
+uniform mat4 M_MODEL;
+uniform mat4 M_PROJECTION;
 
-uniform mat4 projection;
+uniform bool IS_TEXT;
 
 void main() {
-    if (isText) {
-        gl_Position = projection * vec4(aPos.xy, 0.0, 1.0);
+    if (IS_TEXT) {
+        gl_Position = M_PROJECTION * vec4(aPos.xy, 0.0, 1.0);
     } else {
-        gl_Position = model * vec4(aPos, 1.0);
+        gl_Position = M_MODEL * vec4(aPos, 1.0);
     }
 
     TexCoords = aTexCoords;

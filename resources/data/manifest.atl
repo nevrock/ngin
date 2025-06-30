@@ -1,0 +1,11 @@
+game:
+    preload: false
+    location: data/game.atl
+
+instance:
+    preload: false
+    location: data/instance.atl
+
+render:
+    preload: false
+    location: data/render.atl

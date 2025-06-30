@@ -1,0 +1,5 @@
+sphere: 
+    name: sphere
+    location: object/sphere.atl
+    kind: atlas
+    preload: true

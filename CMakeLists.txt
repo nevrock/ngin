@@ -4,7 +4,7 @@ cmake_policy(VERSION 3.0)
 project(ngin)
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -61,13 +61,13 @@ endif()
 
 # Add source files
 set(SOURCES
-    src/ngin/glad.c
-    src/ngin/stb_image.cpp
+    src/vendor/glad.c
+    src/vendor/stb_image.cpp
 
-    src/ngin/components/types.cpp
-    src/ngin/game.cpp
-    
-    src/ngin.cpp
+    src/ngin/assets/manifest.cpp
+    src/ngin/game/scene/module/manifest.cpp
+
+    src/njobs_stealer.cpp
 )
 
 # Configure and include root directory header
@@ -82,6 +82,6 @@ target_link_libraries(ngin ${LIBS} ZLIB::ZLIB PNG::PNG ${OPENAL_LIBRARY}) # Adde
 
 # MSVC specific flags
 if(MSVC)
-    target_compile_options(ngin PRIVATE /std:c++17 /MP)
+    target_compile_options(ngin PRIVATE /MP) 
     target_link_options(ngin PUBLIC /ignore:4099)
 endif()

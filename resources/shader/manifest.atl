@@ -1,0 +1,5 @@
+gui: 
+    name: gui
+    location: shader/gui/gui.atl
+    kind: shader
+    preload: false
