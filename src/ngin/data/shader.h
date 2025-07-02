@@ -18,7 +18,7 @@ struct ShaderData {
 
     Atlas* attributes = nullptr;
 
-    void from_data(Atlas& data, Logger* logger = nullptr) {
+    void from_data(Atlas& data, ngin::debug::Logger* logger = nullptr) {
         std::string* name;
         name = data.get<std::string>("name", name);
 

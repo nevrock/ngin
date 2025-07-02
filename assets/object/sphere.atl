@@ -1,12 +1,12 @@
 name: sphere
 location: object/sphere.atl
-kind: atlas
+kind: object
 preload: true
 children: 
     sphere: 
         name: sphere
         location: object/sphere.atl
-        kind: atlas
+        kind: object
         preload: true
         transform: 
             position: [0.0, 0.0, 2.0]

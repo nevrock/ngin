@@ -35,7 +35,7 @@ public:
 
 
 private:
-    Logger* logger_ = nullptr;
+    ngin::debug::Logger* logger_ = nullptr;
     std::shared_ptr<std::atomic<int>> counter_; 
 
 };

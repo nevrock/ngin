@@ -16,16 +16,16 @@
 #include <glm/glm.hpp>
 #include <unordered_map>
 
-#include <ngin/assets/asset.h>
+#include <ngin/asset/asset.h>
 #include <ngin/debug/logger.h>
 
-class Atlas : public Asset {
+class Atlas {
 public:
     // CONSTRUCTORS
-    Atlas(std::string name) : Asset(name), data_(new std::unordered_map<std::string, std::any>), keyOrder_(new std::vector<std::string>) { 
+    Atlas(std::string name) : data_(new std::unordered_map<std::string, std::any>), keyOrder_(new std::vector<std::string>) { 
     }
-    Atlas() : Asset(""), data_(new std::unordered_map<std::string, std::any>), keyOrder_(new std::vector<std::string>) {}
-    Atlas(const Atlas& other) : Asset(""), data_(new std::unordered_map<std::string, std::any>(*other.data_)), keyOrder_(new std::vector<std::string>(*other.keyOrder_)) {}
+    Atlas() : data_(new std::unordered_map<std::string, std::any>), keyOrder_(new std::vector<std::string>) {}
+    Atlas(const Atlas& other) : data_(new std::unordered_map<std::string, std::any>(*other.data_)), keyOrder_(new std::vector<std::string>(*other.keyOrder_)) {}
     Atlas& operator=(const Atlas& other) {
         if (this != &other) {
             *data_ = *other.data_;
@@ -33,7 +33,7 @@ public:
         }
         return *this;
     }
-    Atlas(Atlas&& other) noexcept : Asset(""), data_(other.data_), keyOrder_(other.keyOrder_) {
+    Atlas(Atlas&& other) noexcept : data_(other.data_), keyOrder_(other.keyOrder_) {
         other.data_ = nullptr;
         other.keyOrder_ = nullptr;
     }
@@ -205,7 +205,7 @@ public:
         return data_->size();
     }
 
-    void log_keys(Logger& logger, std::string name = "") const {
+    void log_keys(ngin::debug::Logger& logger, std::string name = "") const {
         std::string logm = "Keys: [ ";
         if (name != "") {
             logm = name + " - " + logm;

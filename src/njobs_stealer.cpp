@@ -9,9 +9,46 @@
 // Third-party libraries for windowing and OpenGL loading
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <ngin/job/system_stealer.h>
+#include <ngin/job/ngin.h>
 #include <ngin/job/handle.h>
-#include <ngin/job/render_job.h>
+
+// Include the thread-safe queue from your original files.
+#include <ngin/job/collections/queue.h>
+#include <vector>
+
+/**
+ * @struct Mat4
+ * @brief A simple 4x4 matrix struct to avoid needing a full math library for this example.
+ * The job system will calculate transformations and store them in this struct.
+ */
+struct Mat4 {
+    // Stored in column-major order for direct use with OpenGL.
+    float elements[16] = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+};
+
+/**
+ * @struct RenderCommand
+ * @brief Represents a single, self-contained command to be executed by the renderer.
+ * Jobs will generate these commands in parallel, and the main thread will execute them.
+ */
+struct RenderCommand {
+    unsigned int shader_program_id;
+    unsigned int vao_id;
+    int vertex_count;
+    Mat4 model_matrix; // Each command stores the pre-calculated model matrix for an object.
+};
+
+/**
+ * @typedef RenderCommandQueue
+ * @brief A type alias for a thread-safe queue that will hold the generated RenderCommands.
+ */
+using RenderCommandQueue = ParallelQueue<RenderCommand>;
+
 
 // Forward declarations...
 GLFWwindow* g_window = nullptr;
@@ -33,7 +70,7 @@ const std::vector<JobType> all_job_types = {
 };
 
 // MODIFIED: Diagnostic function now accepts FPS to print on the same line.
-void print_job_system_diagnostics(const ngin::jobs::JobSystem& job_system, int fps) {
+void print_job_system_diagnostics(const ngin::jobs::JobNgin& job_system, int fps) {
     const auto snapshot = job_system.get_diagnostics_snapshot();
     const int total_jobs = snapshot.total_pending;
 
@@ -94,13 +131,13 @@ int main() {
     if (!init_window()) return -1;
     
     glfwSetKeyCallback(g_window, key_callback);
-    ngin::jobs::JobSystem job_system;
+    ngin::jobs::JobNgin job_system;
 
     unsigned int shader_program = create_shader_program();
     unsigned int triangle_vao = create_triangle_vao();
     GLint model_loc = glGetUniformLocation(shader_program, "model");
     RenderCommandQueue render_command_queue;
-    const int NUM_OBJECTS = 5000;
+    const int NUM_OBJECTS = 5000; 
     std::vector<float> object_angles(NUM_OBJECTS, 0.0f);
     std::vector<float> object_speeds(NUM_OBJECTS, 0.0f);
     std::vector<float> object_x_pos(NUM_OBJECTS, 0.0f);

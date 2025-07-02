@@ -9,13 +9,9 @@
 #include <GLFW/glfw3.h>
 
 #include <ngin/debug/logger.h>
-
 #include <ngin/util/math.h>
-
 #include <ngin/render/gl/data.h>
 #include <ngin/render/data.h>
-
-#include <ngin/ngin.h>
 
 #include <stb_image.h>
 
@@ -23,11 +19,11 @@ class GlContext {
 public:
 
     GlContext(const std::string& title, RenderData& render_data, GlData& gl_data) : render_data_(render_data), gl_data_(gl_data) {
-        logger_ = new Logger("GlContext");
+        logger_ = new ngin::debug::Logger("GlContext");
 
         // --- GLFW and Window Initialization ---
         // Moved from the old static `create` method.
-        logger_->info("Initializing GlContext...", 0);
+        logger_->info("Initializing GlContext...");
         
         int screen_width = render_data.screen_width;
         int screen_height = render_data.screen_height;
@@ -36,7 +32,7 @@ public:
         last_y_ = static_cast<float>(screen_height) / 2.0f;
 
         if (!glfwInit()) {
-            logger_->info("Failed to initialize GLFW", 1);
+            logger_->info("Failed to initialize GLFW");
             // In a constructor, it's better to throw an exception on failure.
             throw std::runtime_error("Failed to initialize GLFW");
         }
@@ -52,7 +48,7 @@ public:
 
         gl_data_.window = glfwCreateWindow(screen_width, screen_height, title.c_str(), NULL, NULL);
         if (!gl_data_.window) {
-            logger_->info("Failed to create GLFW window", 1);
+            logger_->info("Failed to create GLFW window");
             glfwTerminate();
             throw std::runtime_error("Failed to create GLFW window");
         }
@@ -72,7 +68,7 @@ public:
 
         // --- GLAD Initialization ---
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-            logger_->info("Failed to initialize GLAD", 1);
+            logger_->info("Failed to initialize GLAD");
             glfwDestroyWindow(gl_data_.window);
             glfwTerminate();
             throw std::runtime_error("Failed to initialize GLAD");
@@ -80,13 +76,13 @@ public:
         
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         glfwSwapInterval(1); // Enable V-Sync
-        logger_->info("GlContext initialized successfully.", 0);
+        logger_->info("GlContext initialized successfully.");
 
         set_cursor_enabled(true);
     }
 
     ~GlContext() {
-        logger_->info("Destroying GlContext...", 0);
+        logger_->info("Destroying GlContext...");
         if (gl_data_.window) {
             glfwDestroyWindow(gl_data_.window);
         }
@@ -183,7 +179,7 @@ public:
     void set_custom_cursor(const std::string& imagePath, int hotspotX, int hotspotY) {
         GLFWimage image;
         if (!load_image(imagePath, image)) {
-            logger_->info("Failed to load cursor image: " + imagePath, 0);
+            logger_->info("Failed to load cursor image: " + imagePath);
             return;
         }
 
@@ -191,7 +187,7 @@ public:
         free_image(image); // Free the stb_image data immediately after cursor creation
 
         if (!cursor) {
-            logger_->info("Failed to create custom cursor", 0);
+            logger_->info("Failed to create custom cursor");
             return;
         }
 
@@ -206,7 +202,7 @@ public:
 private:
     GlData& gl_data_;
     RenderData& render_data_;
-    Logger* logger_;
+    ngin::debug::Logger* logger_;
 
     float last_x_ = 0.0f;
     float last_y_ = 0.0f;
@@ -217,7 +213,7 @@ private:
         int channels;
         unsigned char* data = stbi_load(path.c_str(), &image.width, &image.height, &channels, STBI_rgb_alpha);
         if (!data) {
-            logger_->info("stb_image failed to load: " + path, 1);
+            logger_->info("stb_image failed to load: " + path);
             return false;
         }
         image.pixels = data;

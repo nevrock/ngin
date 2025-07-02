@@ -10,6 +10,7 @@
 
 enum class JobType {
     None,
+    AssetSetup,
     Physics,
     Animation,
     AI,

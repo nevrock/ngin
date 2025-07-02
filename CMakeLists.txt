@@ -64,10 +64,9 @@ set(SOURCES
     src/vendor/glad.c
     src/vendor/stb_image.cpp
 
-    src/ngin/assets/manifest.cpp
-    src/ngin/game/scene/module/manifest.cpp
-
-    src/njobs_stealer.cpp
+    src/ngin/asset/types/manifest.cpp
+    
+    src/main.cpp
 )
 
 # Configure and include root directory header

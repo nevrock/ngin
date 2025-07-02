@@ -12,7 +12,7 @@
 class FileUtil {
 private:
     typedef std::string (*Builder) (const std::string& path);
-    static inline Logger* logger_ = new Logger("File");
+    static inline ngin::debug::Logger* logger_ = new ngin::debug::Logger("File");
 
 public:
     static inline const std::string ASSETS_PREFIX = "assets/";

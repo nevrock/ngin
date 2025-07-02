@@ -19,7 +19,7 @@ struct MeshData {
     std::vector<std::string> vertex_groups;
     bool smooth_shading;
 
-    void from_data(Atlas& data, Logger* logger = nullptr) {
+    void from_data(Atlas& data, ngin::debug::Logger* logger = nullptr) {
         Atlas* raw_data = new Atlas();
         raw_data = data.get<Atlas>("data", raw_data);
 
@@ -102,7 +102,7 @@ struct MeshData {
         if (logger) {
             logger->info(
                 "Mesh created with " + std::to_string(vertices.size()) + 
-                " vertices, & " + std::to_string(faces.size()) + " faces", 3);
+                " vertices, & " + std::to_string(faces.size()) + " faces");
         }
     }
 };

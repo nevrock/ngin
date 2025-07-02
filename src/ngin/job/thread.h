@@ -8,7 +8,7 @@
 #include <functional>
 #include <memory> // For std::unique_ptr
 
-// Assuming Logger is available as per original JobSystem
+// Assuming ngin::debug::Logger is available as per original JobSystem
 #include <ngin/debug/logger.h>
 
 namespace ngin {
@@ -18,7 +18,7 @@ class Thread {
 public:
     // Constructor: Initializes the thread with an ID and the loop function.
     // The logger is passed to allow the thread to log its own lifecycle events.
-    Thread(unsigned int id, std::function<void(unsigned int, std::atomic<bool>&, std::mutex&, std::condition_variable&)> thread_loop_func, Logger* logger)
+    Thread(unsigned int id, std::function<void(unsigned int, std::atomic<bool>&, std::mutex&, std::condition_variable&)> thread_loop_func, ngin::debug::Logger* logger)
         : id_(id),
           stop_flag_(false),
           thread_loop_func_(std::move(thread_loop_func)),
@@ -83,7 +83,7 @@ private:
     std::mutex mutex_; // Mutex specific to this thread's operation (e.g., waiting for work)
     std::condition_variable cv_; // Condition variable specific to this thread
     std::function<void(unsigned int, std::atomic<bool>&, std::mutex&, std::condition_variable&)> thread_loop_func_;
-    Logger* logger_; // Pointer to the shared logger instance
+    ngin::debug::Logger* logger_; // Pointer to the shared logger instance
 };
 
 } // namespace JobSystem

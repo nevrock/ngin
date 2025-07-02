@@ -1,5 +1,5 @@
 origin_gui: 
     name: origin_gui
     location: object/origin.ngui
-    kind: atlas
+    kind: object
     preload: true
