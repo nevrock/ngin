@@ -28,9 +28,17 @@ public:
         args_ = data;
     }
 
-    Atlas& get_args() {
-        return *args_;
+    Atlas* get_args() {
+        return args_;
     }
+    std::string& get_name() {
+        return name_;
+    }
+    std::string& get_kind() {
+        return kind_;
+    }
+
+
 
 
     size_t get_deep_memory_usage() const {

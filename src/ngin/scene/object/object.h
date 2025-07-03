@@ -8,7 +8,7 @@
 namespace ngin {
 namespace scene {
 
-enum ObjectEditKind {
+enum class ObjectEditKind {
     EditParent,
     AddChild,
     RemoveChild,

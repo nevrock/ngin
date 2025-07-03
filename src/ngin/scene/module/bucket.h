@@ -25,13 +25,18 @@ namespace scene {
 class ModuleBucket {
 public:
 
-    ModuleBucket(const std::string& name) : name_(name) {
+    ModuleBucket(const std::string& kind) : kind_(kind) {
     }
     ~ModuleBucket() {
     }
 
     std::string& get_name() {
-        return name_;
+        return kind_;
+    }
+    unsigned int add_module(const std::string& name, Atlas* data) {
+        unsigned int id = IdUtil::get_unique_id();
+        load_module_(id, name, data);
+        return id;
     }
 
     template<typename T>
@@ -58,7 +63,7 @@ public:
     }
     template<typename T>
     T* get(unsigned int id) {
-        std::optional<std::shared_ptr<Module>> module_ptr_opt = modules_.get(module_id_opt.value());
+        std::optional<std::shared_ptr<Module>> module_ptr_opt = modules_.get(id);
         if (module_ptr_opt) {
             // Module found by ID
             
@@ -87,12 +92,24 @@ public:
 
 private:
     ngin::debug::Logger* logger_ = new ngin::debug::Logger("ModuleBucket");
-    std::string name_;
+    std::string kind_;
 
     ngin::jobs::ParallelMap<unsigned int, std::shared_ptr<Module>> modules_;
     ngin::jobs::ParallelMap<std::string, unsigned int> name_to_id_mapping_;
 
     std::string debug_name_ = "ModuleBucket::";
+
+    void load_module_(unsigned int id, const std::string& name, Atlas* data) {
+        std::optional<ModuleBucket::ModuleFactory> factory = get_module_factories().get(kind_);
+        if (factory) {
+            std::shared_ptr<Module> module = (*factory)(id, name); // Dereference the optional to call the factory
+            module->from_atlas(data);
+
+            modules_.add(id, module);
+            name_to_id_mapping_.add(name, id);
+        } else {
+        }
+    }
 };
 
 }

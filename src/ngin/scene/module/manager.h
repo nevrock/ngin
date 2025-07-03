@@ -31,6 +31,18 @@ public:
         }
         return buckets_[bucket]->get<T>(name);
     }
+    
+    unsigned int add_module(const std::string& bucket, const std::string& name, Atlas* data) {
+        if (buckets_.find(bucket) == buckets_.end()) {
+            return 0;
+        }
+        unsigned int id = buckets_[bucket]->add_module(name, data);
+
+        logger_->info("Added module " + name + ", type " + bucket + ", with ID " + std::to_string(id));
+
+        return id;
+    }
+
 
     void log_snapshot() {
         logger_->info("Module Snapshot:");
@@ -47,7 +59,7 @@ private:
     std::unordered_map<std::string, ModuleBucket*> buckets_;
 
     void setup_buckets_() {
-
+        buckets_["transform"] = new ModuleBucket("transform");
     }
 };
 

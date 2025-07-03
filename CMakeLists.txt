@@ -65,6 +65,7 @@ set(SOURCES
     src/vendor/stb_image.cpp
 
     src/ngin/asset/types/manifest.cpp
+    src/ngin/scene/module/kinds/manifest.cpp
     
     src/main.cpp
 )

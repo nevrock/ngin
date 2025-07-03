@@ -24,6 +24,9 @@ public:
         for (auto& module : modules_) {
             delete module;
         }
+        if (transform_atlas_) {
+            delete transform_atlas_;
+        }
     }
 
     std::string& get_name() {
@@ -41,6 +44,10 @@ public:
     TransformData& get_transform() {
         return transform_;
     }
+    Atlas* get_transform_atlas() {
+        return transform_atlas_;
+    }
+
 
 
     void from_atlas(Atlas* data) {
@@ -55,6 +62,7 @@ public:
         transform_atlas = data->get<Atlas>("transform", transform_atlas);
         if (transform_atlas) {
             transform_.from_atlas(transform_atlas);
+            transform_atlas_ = transform_atlas;
         }
                                                                                                                                                                                                                                                                                                                                                                                                                                  
         Atlas* children_atlas = nullptr;
@@ -115,6 +123,7 @@ private:
     std::vector<ObjectData*> children_;
     std::vector<ModuleData*> modules_;
     TransformData transform_;
+    Atlas* transform_atlas_;
 };
 
 #endif // OBJECT_DATA_H

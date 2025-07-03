@@ -60,6 +60,27 @@ public:
         }
 
         // TODO: modules go here
+        unsigned int transform_id = module_mgr_.add_module(
+            "transform",
+            "transform",
+            data->get_transform_atlas()  
+        );
+        obj->add_module(transform_id);
+
+
+        for (auto& module : data->get_modules()) {
+            unsigned int module_id = module_mgr_.add_module(
+                module->get_kind(),
+                module->get_name(),
+                module->get_args()
+            );
+            if (module_id == 0) {
+                logger_->info(
+                    "Module not found: " + module->get_name()
+                );
+            }
+            obj->add_module(module_id);
+        }
 
         add_object(id, obj);
 
