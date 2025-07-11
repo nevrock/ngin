@@ -22,7 +22,6 @@ private:
 
     ngin::asset::AssetManager asset_mgr_;
     ngin::render::RenderManager render_mgr_;
-    ngin::debug::DebugManager debug_mgr_;
 
     // temp
     ngin::scene::ObjectManager object_mgr_;
@@ -30,10 +29,9 @@ private:
     void init_() {
 
         // Asset setup
-            JobHandle asset_setup_handle = asset_mgr_.process_setup_jobs(job_ngin_, debug_mgr_.get_context());
+            JobHandle asset_setup_handle = asset_mgr_.process_setup_jobs(job_ngin_);
             job_ngin_.wait_for(asset_setup_handle);
-
-            debug_mgr_.show();
+            asset_mgr_.debug_show();
             asset_mgr_.log_snapshot();
         
         // Render setup
@@ -49,6 +47,8 @@ private:
     void update_() {
         while (!render_mgr_.should_close()) {
             render_mgr_.update_early();
+
+            
 
 
             render_mgr_.update_late();

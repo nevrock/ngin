@@ -10,6 +10,7 @@
 #include <ngin/job/collections/vector.h>
 #include <ngin/job/collections/map.h>
 #include <ngin/scene/module/module.h>
+#include <ngin/scene/object/context.h>
 
 #include <string>
 #include <unordered_map>

@@ -34,6 +34,7 @@ public:
     
     unsigned int add_module(const std::string& bucket, const std::string& name, Atlas* data) {
         if (buckets_.find(bucket) == buckets_.end()) {
+            logger_->info("Module bucket not found: " + bucket);
             return 0;
         }
         unsigned int id = buckets_[bucket]->add_module(name, data);
@@ -60,6 +61,7 @@ private:
 
     void setup_buckets_() {
         buckets_["transform"] = new ModuleBucket("transform");
+        buckets_["mesh"] = new ModuleBucket("mesh");
     }
 };
 

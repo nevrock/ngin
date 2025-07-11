@@ -2,6 +2,7 @@
 #define ASSET_MANAGER_H
 
 #include <ngin/debug/logger.h>
+#include <ngin/debug/bucket.h>
 
 #include <ngin/job/ngin.h>
 
@@ -32,13 +33,15 @@ public:
         return buckets_[bucket]->get<T>(name);
     }
 
-    JobHandle process_setup_jobs(ngin::jobs::JobNgin& job_ngin, ngin::debug::Printer& debug) {
+    JobHandle process_setup_jobs(ngin::jobs::JobNgin& job_ngin) {
         logger_->info("Asset processing setup jobs");
+
+        ngin::debug::Printer& printer = debugger_.get_context();
 
         std::vector<std::function<void()>> bucket_setup_tasks;
         for (auto& bucket : buckets_) {
             bucket_setup_tasks.push_back([&, bucket_ptr = bucket.second]() {
-                bucket_ptr->setup(debug);
+                bucket_ptr->setup(printer);
             });
         }
         JobHandle buckets_setup_handle = job_ngin.submit_jobs(bucket_setup_tasks, JobType::AssetSetup);
@@ -46,13 +49,16 @@ public:
 
         std::vector<std::function<void()>> preload_tasks;
         for (auto& bucket : buckets_) {
-            for (auto& job : bucket.second->generate_preload_jobs(debug)) {
+            for (auto& job : bucket.second->generate_preload_jobs(printer)) {
                 preload_tasks.push_back(job);
             }
         }
         JobHandle preload_handle = job_ngin.submit_jobs(preload_tasks, JobType::AssetLoading);
 
         return preload_handle;
+    }
+    void debug_show() {
+        debugger_.show();
     }
     void process_update_jobs() {
 
@@ -73,6 +79,7 @@ public:
 
 private:
     ngin::debug::Logger* logger_;
+    ngin::debug::DebugBucket debugger_;
     std::unordered_map<std::string, AssetBucket*> buckets_;
 
     void setup_buckets_() {

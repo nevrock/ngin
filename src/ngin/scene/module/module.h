@@ -33,11 +33,20 @@ public:
         return name_;
     }
 
+    void set_level(unsigned int level) {
+        level_ = level;
+    }
+    unsigned int& get_level() {
+        return level_;
+    }
+
     virtual void from_atlas(Atlas* data) = 0;
 
 private:
     unsigned int id_;
     std::string name_;
+
+    unsigned int level_;
 };
 
 }
