@@ -21,6 +21,7 @@ endif()
 # Find required packages
 find_package(GLM REQUIRED)
 find_package(GLFW3 REQUIRED)
+find_package(ASSIMP REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(ZLIB REQUIRED) # Added ZLIB
 find_package(PNG REQUIRED)  # Added PNG
@@ -41,7 +42,7 @@ include_directories(${OpenAL_INCLUDE_DIRS})
 # Set libraries and platform-specific settings
 if(WIN32)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-    set(LIBS glfw3 opengl32 freetype)
+    set(LIBS glfw3 assimp opengl32 freetype)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 elseif(UNIX AND NOT APPLE)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
@@ -55,7 +56,7 @@ elseif(APPLE)
     find_library(OpenGL_LIBRARY OpenGL)
     find_library(IOKit_LIBRARY IOKit)
     find_library(CoreVideo_LIBRARY CoreVideo)
-    set(APPLE_LIBS ${COCOA_LIBRARY} ${IOKit_LIBRARY} ${OpenGL_LIBRARY} ${CoreVideo_LIBRARY} ${GLFW3_LIBRARY} ${FREETYPE_LIBRARIES})
+    set(APPLE_LIBS ${COCOA_LIBRARY} ${IOKit_LIBRARY} ${OpenGL_LIBRARY} ${CoreVideo_LIBRARY} ${GLFW3_LIBRARY} ${FREETYPE_LIBRARIES} ${ASSIMP_LIBRARY})
     set(LIBS ${LIBS} ${APPLE_LIBS})
 endif()
 
@@ -63,11 +64,8 @@ endif()
 set(SOURCES
     src/vendor/glad.c
     src/vendor/stb_image.cpp
-
-    src/ngin/asset/types/manifest.cpp
-    src/ngin/scene/module/kinds/manifest.cpp
     
-    src/main.cpp
+    src/ssao/ssao.cpp
 )
 
 # Configure and include root directory header

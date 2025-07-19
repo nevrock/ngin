@@ -33,12 +33,15 @@ unset(FREETYPE_VERSION)
 
 # Define preferred header search paths, prioritizing /usr/local
 set(_FREETYPE_HEADER_SEARCH_DIRS
+    "/opt/homebrew/include/freetype2" # Add this line
+    "/opt/homebrew/include"         # Add this line
     "/usr/local/include/freetype2"
     "/usr/include/freetype2"
     "/opt/local/include/freetype2"
     "/usr/local/include"
     "/usr/include"
     "/opt/local/include"
+    "/usr/local/include/freetype2"
     "${CMAKE_SOURCE_DIR}/include"
     "${CMAKE_SOURCE_DIR}/includes"
     "${FREETYPE_ROOT_DIR}/include/freetype2"
@@ -48,6 +51,7 @@ set(_FREETYPE_HEADER_SEARCH_DIRS
 
 # Define preferred library search paths, prioritizing /usr/local
 set(_FREETYPE_LIBRARY_SEARCH_DIRS
+    "/opt/homebrew/lib"             # Add this line
     "/usr/local/lib"
     "/usr/lib"
     "/opt/local/lib"
