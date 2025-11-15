@@ -52,9 +52,11 @@ int main()
     Audio::create();
     Audio::startAudioThread();
 
-    glm::vec3 sourcePosition(0.0f, 0.0f, 0.0f); // Source is at the origin
+    Audio::setAudio("levelup");
+
+    // Example source and listener positions
+    glm::vec3 sourcePosition(0.0f, 0.0f, 0.0f); // Source is 5 units to the right
     glm::vec3 listenerPosition(0.0f, 0.0f, 0.0f); // Listener at origin
-    Audio::setAudio("levelup", sourcePosition, listenerPosition);
 
     // Initialize game and drawer components
     Game::start();
@@ -108,16 +110,12 @@ int main()
     envPass->render();
     //reflectionPass->render();
 
-    bool playSound = true;
-
     // Render loop
     // -----------
     while (!Context::shouldClose())
     {
-        if (Context::time > 5.0f && playSound) {
-            std::cout << "Playing levelup sound again" << std::endl;
+        if (Context::time > 5.0f) {
             Audio::play("levelup", sourcePosition, listenerPosition);
-            playSound = false;
         }
 
         // Update game logic and transformations

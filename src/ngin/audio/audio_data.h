@@ -172,10 +172,6 @@ public:
     }
 
     void play(const glm::vec3& sourcePosition, const glm::vec3& listenerPosition) {
-        // Reattach the buffer to the source if it was detached
-        alSourcei(source_, AL_BUFFER, buffer_);
-        if (!checkOpenALError("alSourcei (AL_BUFFER)")) return;
-
         // Set listener position and orientation (default to facing forward)
         alListener3f(AL_POSITION, listenerPosition.x, listenerPosition.y, listenerPosition.z);
         if (!checkOpenALError("alListener3f (AL_POSITION)")) return;
@@ -198,7 +194,6 @@ public:
 
         alSourcePlay(source_);
         if (!checkOpenALError("alSourcePlay")) return;
-        
         isPlaying_ = true; // Set to true when playback starts
     }
 
