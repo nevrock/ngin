@@ -3,3 +3,9 @@ origin_gui:
     location: object/origin.ngui
     kind: object
     preload: true
+
+test_ssao:
+    name: test_ssao
+    location: object/test/ssao.nobj
+    kind: object
+    preload: true

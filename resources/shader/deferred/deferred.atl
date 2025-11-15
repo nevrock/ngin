@@ -1,0 +1,4 @@
+name: gui
+
+fragment: shader/deferred/deferred.nfrg
+vertex: shader/ssao/ssao.nvtx

@@ -8,6 +8,8 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
+#include <ngin/debug/printer.h>
+
 #include <ngin/data/shader.h>
 
 class GlShaderData {
@@ -15,7 +17,7 @@ public:
     GlShaderData(const std::string name, ShaderData& data) : name_(name), data_(data) {
     }
 
-    void load() {
+    void refresh() {
         std::string vertex_code;
         std::string fragment_code;
         std::string geometry_code;

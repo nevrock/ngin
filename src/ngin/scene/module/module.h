@@ -44,9 +44,9 @@ public:
 
 private:
     unsigned int id_;
+    unsigned int level_;
     std::string name_;
 
-    unsigned int level_;
 };
 
 }

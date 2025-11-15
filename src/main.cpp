@@ -40,8 +40,6 @@ private:
 
     ngin::asset::AssetManager asset_mgr_;   ///< @brief Manages loading and accessing assets.
     ngin::render::RenderManager render_mgr_; ///< @brief Handles all rendering operations.
-
-    // temp
     ngin::scene::ObjectManager object_mgr_; ///< @brief Manages scene objects (temporary).
 
     /**
@@ -60,6 +58,9 @@ private:
         
         // Render setup
             render_mgr_.setup();
+
+        // Asset refresh
+            asset_mgr_.refresh_gl_data();
 
         // Scene setup
             std::string object_origin = "sphere";
@@ -84,9 +85,9 @@ private:
         while (!render_mgr_.should_close()) {
             render_mgr_.update_early();
 
-            // @todo Add game logic, input processing, physics updates here.
+            // @todo Add game logic.
             
-
+            
 
             render_mgr_.update_late();
         }
@@ -99,6 +100,7 @@ private:
      * release resources, primarily by cleaning up the render manager.
      */
     void cleanup_() {
+        asset_mgr_.cleanup();
         render_mgr_.cleanup();
     }
 };

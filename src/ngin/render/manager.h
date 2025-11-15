@@ -2,6 +2,7 @@
 #define RENDERER_H
 
 #include <ngin/render/gl/context.h>
+#include <ngin/render/context.h>
 #include <ngin/atlas/atlas.h>
 #include <ngin/debug/logger.h>
 #include <ngin/util/file.h>
@@ -21,11 +22,9 @@ public:
     RenderManager() {
     }
     ~RenderManager() {
+        logger_->info("RenderManager cleanup");
         if (logger_) {
             delete logger_;
-        }
-        if (context_) {
-            delete context_;
         }
     }
 
@@ -35,7 +34,8 @@ public:
         setup_render_data();
         setup_render_passes();
 
-        context_ = new GlContext("ngin", render_data_, gl_data_);
+        gl_context_ = new GlContext("ngin", gl_data_);
+        render_context_ = new RenderContext(render_data_, *gl_context_);
         logger_->info("RenderManager setup");
     }
     void setup_render_data() {
@@ -45,33 +45,39 @@ public:
         data.read(std::get<0>(resource_path));
 
         // Use get with default value directly
-        render_data_.screen_width = 1280;
-        render_data_.screen_height = 720;
-        render_data_.screen_width = *data.get<int>("screen.width", &render_data_.screen_width);
-        render_data_.screen_height = *data.get<int>("screen.height", &render_data_.screen_height);
+        gl_data_.screen_width = 1280;
+        gl_data_.screen_height = 720;
+        gl_data_.screen_width = *data.get<int>("screen.width", &gl_data_.screen_width);
+        gl_data_.screen_height = *data.get<int>("screen.height", &gl_data_.screen_height);
 
-        logger_->info("RenderManager setup render data with screen width: " + std::to_string(render_data_.screen_width) + " and height: " + std::to_string(render_data_.screen_height));
+        logger_->info("RenderManager setup render data with screen width: " + std::to_string(gl_data_.screen_width) + " and height: " + std::to_string(gl_data_.screen_height));
     }
     void setup_render_passes() {
         
     }
     void update_early() {
-        context_->update_time();
-        context_->process_input();
+        gl_context_->update_time();
+        gl_context_->process_input();
     }
     void update_late() {
-        context_->swap();
+        gl_context_->swap();
     }
     void cleanup() {
-        logger_->info("RenderManager cleanup");
-        if (context_) {
-            delete context_;
-            context_ = nullptr; // Set to nullptr after deletion
+        // logger_->info("RenderManager cleanup");
+        // if (gl_context_) {
+        //     delete gl_context_;
+        //     gl_context_ = nullptr; // Set to nullptr after deletion
+        // }
+        if (gl_context_) {
+            delete gl_context_;
+        }
+        if (render_context_) {
+            delete render_context_;
         }
     }
 
     bool should_close() {
-        bool should_close = context_->should_close();
+        bool should_close = gl_context_->should_close();
         if (should_close) {
             logger_->info("RenderManager should close");
         }
@@ -80,7 +86,10 @@ public:
 
 private:
     ngin::debug::Logger* logger_ = nullptr;
-    GlContext* context_ = nullptr;
+
+    GlContext* gl_context_ = nullptr;
+    RenderContext* render_context_ = nullptr;
+
     RenderData render_data_;
     GlData gl_data_;
 };

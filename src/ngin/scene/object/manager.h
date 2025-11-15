@@ -1,4 +1,4 @@
-#ifndef OBJECT_MANAGER_H
+ #ifndef OBJECT_MANAGER_H
 #define OBJECT_MANAGER_H
 
 #include <parallel_hashmap/phmap.h>
@@ -38,10 +38,12 @@ public:
     ObjectManager() : module_mgr_(), logger_(ngin::debug::Logger("ObjectManager")) {
     }
     ~ObjectManager() {
+        
     }
 
     void build_from_asset(ObjectAsset& object_asset) {
         // convert scene hierarchy into OMS (object-module-scene) - also known as eco (entity-component-scene)
+        logger_.info("Building object from asset: " + object_asset.get_name());
         new_object(object_asset.get_data());
     }
     void new_object(ObjectData* data) {
@@ -59,7 +61,6 @@ public:
             obj->set_level(0);
         }
 
-        // TODO: modules go here
         unsigned int transform_id = module_mgr_.add_module(
             "transform",
             "transform",
@@ -92,16 +93,13 @@ public:
             new_object(child);
         }
     }
-    std::vector<std::function<void()>> exeucte_object_edit_jobs() {
+    void execute_object_edit_jobs() {
         std::vector<ObjectEdit> edits;
         edit_queue_.pop_all(edits);
 
         for (const auto& edit : edits) {
             execute_edit_(edit);
         }
-        // This function signature returns std::vector<std::function<void()>>, but the implementation
-        // does not currently return any. Depending on its intended use, it might need to be adjusted.
-        return {}; 
     }
 
 private:

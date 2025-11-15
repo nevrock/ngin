@@ -16,9 +16,15 @@
 class GlMeshData {
 public:
     GlMeshData(MeshData& mesh)
-        : mesh_(mesh), vao_(0), vbo_(0), ebo_(0), instance_vbo_(0), num_indices_(0) {}
+        : mesh_(mesh), vao_(0), vbo_(0), ebo_(0), instance_vbo_(0), num_indices_(0) {
+
+        }
 
     ~GlMeshData() {
+        if (logger_) {
+            logger_->info("GlMeshData cleanup");
+            delete logger_;
+        }
         if (vao_ != 0) glDeleteVertexArrays(1, &vao_);
         if (vbo_ != 0) glDeleteBuffers(1, &vbo_);
         if (ebo_ != 0) glDeleteBuffers(1, &ebo_);
@@ -26,8 +32,8 @@ public:
     }
 
     void refresh() {
-        std::vector<VertexData>& vertices = mesh_.vertices;
-        std::vector<FaceData>& faces = mesh_.faces;
+        std::vector<VertexData>& vertices = mesh_.get_vertices();
+        std::vector<FaceData>& faces = mesh_.get_faces();
 
         glGenVertexArrays(1, &vao_);
         glBindVertexArray(vao_);
@@ -119,6 +125,8 @@ public:
     }
 
 private:
+    ngin::debug::Logger* logger_ = new ngin::debug::Logger("GlMeshData");
+
     unsigned int vao_;         // Vertex Array Object ID
     unsigned int vbo_;         // Vertex Buffer Object ID (for per-vertex data)
     unsigned int ebo_;         // Element Buffer Object ID (for indices)

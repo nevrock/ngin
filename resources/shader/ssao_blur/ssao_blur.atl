@@ -1,0 +1,4 @@
+name: ssao_blur
+
+fragment: shader/ssao_blur/ssao_blur.nfrg
+vertex: shader/ssao/ssao.nvtx

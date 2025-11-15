@@ -12,24 +12,32 @@ struct RenderData {
     ~RenderData() {
     }
 
-    int screen_width;
-    int screen_height;
+    // textures
+    unsigned int tex_g_position;
+    unsigned int tex_g_normal;
+    unsigned int tex_g_albedo;
 
-    int view_width;
-    int view_height;
+    unsigned int tex_g_aa_position;
+    unsigned int tex_g_aa_normal;
+    unsigned int tex_g_aa_albedo;
 
-    float time;
-    float time_delta;
-    float time_last;
+    unsigned int tex_ssao_albedo;
+    unsigned int tex_ssao_blur;
 
-    float mouse_x;
-    float mouse_y;
-    float mouse_offset_x;
-    float mouse_offset_y;
-    float scroll_y;
+    unsigned int tex_g_specular;
+    unsigned int tex_depthmap;
 
-    float axes_x;
-    float axes_y;
+    // framebuffers
+    unsigned int original_fb;
+    unsigned int forward_fb;
+    unsigned int forward_aa_fb;
+    unsigned int ssao_fb;
+    unsigned int ssao_blur_fb;
+    unsigned int deferred_fb;
+    unsigned int ssr_fb;
+
+    // renderbuffer
+    unsigned int depth_rb;
 };
 
 #endif

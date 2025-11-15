@@ -1,0 +1,4 @@
+name: gui
+
+fragment: shader/forward/forward.nfrg
+vertex: shader/forward/forward.nvtx

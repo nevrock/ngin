@@ -1,0 +1,23 @@
+backpack_diffuse: 
+    name: backpack_diffuse
+    location: texture/backpack/diffuse.jpg
+    kind: texture
+    preload: true
+
+backpack_normal: 
+    name: backpack_normal
+    location: texture/backpack/normal.png
+    kind: texture
+    preload: true
+
+backpack_specular: 
+    name: backpack_specular
+    location: texture/backpack/specular.jpg
+    kind: texture
+    preload: true
+
+backpack_roughness: 
+    name: backpack_roughness
+    location: texture/backpack/roughness.jpg
+    kind: texture
+    preload: true

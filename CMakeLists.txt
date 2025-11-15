@@ -64,8 +64,11 @@ endif()
 set(SOURCES
     src/vendor/glad.c
     src/vendor/stb_image.cpp
-    
-    src/ssao/ssao.cpp
+
+    src/ngin/asset/types/manifest.cpp
+    src/ngin/scene/module/kinds/manifest.cpp
+
+    src/main.cpp
 )
 
 # Configure and include root directory header

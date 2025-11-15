@@ -19,10 +19,8 @@ public:
         setup_buckets_();
     }
     ~AssetManager() {
+        logger_->info("AssetManager cleanup");
         delete logger_;
-        for (auto& bucket : buckets_) {
-            delete bucket.second;
-        }
     }
 
     template<typename T>
@@ -56,6 +54,16 @@ public:
         JobHandle preload_handle = job_ngin.submit_jobs(preload_tasks, JobType::AssetLoading);
 
         return preload_handle;
+    }
+    void refresh_gl_data() {
+        for (auto& bucket : buckets_) {
+            bucket.second->refresh_gl_data();
+        }
+    }
+    void cleanup() {
+        for (auto& bucket : buckets_) {
+            delete bucket.second;
+        }
     }
     void debug_show() {
         debugger_.show();
@@ -97,6 +105,11 @@ private:
         std::string shader_bucket_name = "shader";
         AssetBucket* shader_bucket = new AssetBucket(shader_bucket_name);
         buckets_[shader_bucket_name] = shader_bucket;
+
+        // Create the texture bucket
+        std::string texture_bucket_name = "texture";
+        AssetBucket* texture_bucket = new AssetBucket(texture_bucket_name);
+        buckets_[texture_bucket_name] = texture_bucket;
     }
 };
 

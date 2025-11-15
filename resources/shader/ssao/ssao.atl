@@ -1,0 +1,4 @@
+name: ssao
+
+fragment: shader/ssao/ssao.nfrg
+vertex: shader/ssao/ssao.nvtx

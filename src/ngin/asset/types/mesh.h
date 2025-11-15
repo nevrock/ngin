@@ -10,7 +10,10 @@
 
 #include <ngin/atlas/atlas.h>
 #include <ngin/debug/logger.h>
+
 #include <ngin/render/gl/mesh/data.h>
+#include <ngin/data/mesh/mesh_converter_atl.h>
+#include <ngin/data/mesh/mesh_converter_obj.h>
 
 class MeshAsset : public Asset {
 public:    
@@ -18,17 +21,32 @@ public:
         logger_ = new ngin::debug::Logger("MeshAsset::" + name);
     }
     ~MeshAsset() {
+        logger_->info("MeshAsset cleanup --> " + get_name());
         delete logger_;
     }
 
     void read(const std::string& filepath, ngin::debug::Printer& debug) override {
-        Atlas* data = new Atlas();
-        data->read(filepath);
-        data_.from_data(*data);
+        if (filepath.substr(filepath.find_last_of(".") + 1) == "nmesh") {
+            Atlas* data = new Atlas();
+            data->read(filepath);
+
+            MeshConverterAtlas converter;
+            converter.from_data(*data, data_, logger_);
+            delete data;
+        } else if (filepath.substr(filepath.find_last_of(".") + 1) == "obj") { // Assume .obj for now
+            MeshConverterObj converter;
+            converter.from_file(filepath, data_, logger_);
+        } else {
+            logger_->info("Unsupported mesh file format: " + filepath);
+            return;
+        }
     }
     void write(const std::string& filepath) const override {
     }
-    
+    void refresh_gl_data() override {
+        logger_->info("Refreshing GL data for mesh: " + get_name());
+        gl_data_.refresh();
+    }
 private:
     ngin::debug::Logger* logger_;
     

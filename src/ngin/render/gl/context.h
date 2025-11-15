@@ -18,15 +18,15 @@
 class GlContext {
 public:
 
-    GlContext(const std::string& title, RenderData& render_data, GlData& gl_data) : render_data_(render_data), gl_data_(gl_data) {
+    GlContext(const std::string& title, GlData& gl_data) : gl_data_(gl_data) {
         logger_ = new ngin::debug::Logger("GlContext");
 
         // --- GLFW and Window Initialization ---
         // Moved from the old static `create` method.
         logger_->info("Initializing GlContext...");
         
-        int screen_width = render_data.screen_width;
-        int screen_height = render_data.screen_height;
+        int screen_width = gl_data.screen_width;
+        int screen_height = gl_data.screen_height;
 
         last_x_ = static_cast<float>(screen_width) / 2.0f;
         last_y_ = static_cast<float>(screen_height) / 2.0f;
@@ -117,15 +117,15 @@ public:
     void update_time() {
         float currentTime = static_cast<float>(glfwGetTime());
         
-        render_data_.time_delta = currentTime - render_data_.time_last;
-        render_data_.time_last = currentTime;
-        render_data_.time += render_data_.time_delta;
+        gl_data_.time_delta = currentTime - gl_data_.time_last;
+        gl_data_.time_last = currentTime;
+        gl_data_.time += gl_data_.time_delta;
         
         if (timer_ > 0.1f) {
-            render_data_.mouse_offset_x = MathUtil::lerp(render_data_.mouse_offset_x, 0.0f, render_data_.time_delta * 5.0f);
-            render_data_.mouse_offset_y = MathUtil::lerp(render_data_.mouse_offset_y, 0.0f, render_data_.time_delta * 5.0f);
+            gl_data_.mouse_offset_x = MathUtil::lerp(gl_data_.mouse_offset_x, 0.0f, gl_data_.time_delta * 5.0f);
+            gl_data_.mouse_offset_y = MathUtil::lerp(gl_data_.mouse_offset_y, 0.0f, gl_data_.time_delta * 5.0f);
         }
-        timer_ += render_data_.time_delta;
+        timer_ += gl_data_.time_delta;
     }
     void process_input() {
         if (glfwGetKey(gl_data_.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -141,8 +141,8 @@ public:
         if (glfwGetKey(gl_data_.window, GLFW_KEY_A) == GLFW_PRESS) axesX = -1.0f;
         if (glfwGetKey(gl_data_.window, GLFW_KEY_D) == GLFW_PRESS) axesX = 1.0f;
 
-        render_data_.axes_x = axesX;
-        render_data_.axes_y = axesY;
+        gl_data_.axes_x = axesX;
+        gl_data_.axes_y = axesY;
     }
     
     void set_blend(bool is_transparent) {
@@ -201,7 +201,6 @@ public:
 
 private:
     GlData& gl_data_;
-    RenderData& render_data_;
     ngin::debug::Logger* logger_;
 
     float last_x_ = 0.0f;
@@ -227,17 +226,17 @@ private:
     }
     void on_framebuffer_size_event(int width, int height) {
         glViewport(0, 0, width, height);
-        render_data_.screen_width = width;
-        render_data_.screen_height = height;
+        gl_data_.screen_width = width;
+        gl_data_.screen_height = height;
     }
     void on_mouse_event(double xposIn, double yposIn) {
         float xpos = static_cast<float>(xposIn);
         float ypos = static_cast<float>(yposIn);
 
-        float screen_height = render_data_.screen_height;
+        float screen_height = gl_data_.screen_height;
 
-        render_data_.mouse_x = xpos;
-        render_data_.mouse_y = screen_height-ypos;
+        gl_data_.mouse_x = xpos;
+        gl_data_.mouse_y = screen_height-ypos;
 
         if (first_mouse_) {
             last_x_ = xpos;
@@ -251,13 +250,13 @@ private:
         last_x_ = xpos;
         last_y_ = ypos;
 
-        render_data_.mouse_offset_x = xoffset;
-        render_data_.mouse_offset_y = yoffset;
+        gl_data_.mouse_offset_x = xoffset;
+        gl_data_.mouse_offset_y = yoffset;
         
         timer_ = 0.0f;
     }
     void on_scroll_event(double xoffset, double yoffset) {
-        render_data_.scroll_y = static_cast<float>(yoffset);
+        gl_data_.scroll_y = static_cast<float>(yoffset);
     }
     static void framebuffer_size_callback_wrapper(GLFWwindow* window, int width, int height) {
         GlContext* self = static_cast<GlContext*>(glfwGetWindowUserPointer(window));

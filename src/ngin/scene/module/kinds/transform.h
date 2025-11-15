@@ -19,6 +19,8 @@ public:
 
     void from_atlas(Atlas* data) override {
         data_.from_atlas(data);
+
+        
     }
 
 private:

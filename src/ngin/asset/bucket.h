@@ -65,6 +65,10 @@ public:
     AssetBucket(const std::string& name) : name_(name) {
     }
     ~AssetBucket() {
+        logger_->info("AssetBucket cleanup " + name_);
+        if (logger_) {
+            delete logger_;
+        }
     }
 
     std::string& get_name() {
@@ -169,6 +173,12 @@ public:
     }
     unsigned int get_asset_count() {
         return assets_.size();
+    }
+
+    void refresh_gl_data() {
+        for (auto& asset : assets_) {
+            asset.second->refresh_gl_data();
+        }
     }
 
 

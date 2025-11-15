@@ -26,12 +26,15 @@ public:
         Atlas *data = new Atlas();
         data->read(filepath);
         data_.from_data(*data);
-        gl_data_.load();
+        delete data;
     }
     void write(const std::string &filepath) const override
     {
     }
-
+    void refresh_gl_data() override {
+        logger_->info("Refreshing GL data for shader: " + get_name());
+        gl_data_.refresh();
+    }
 private:
     ngin::debug::Logger *logger_;
 

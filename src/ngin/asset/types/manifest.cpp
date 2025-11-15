@@ -4,6 +4,7 @@
 #include <ngin/asset/types/mesh.h>
 #include <ngin/asset/types/shader.h>
 #include <ngin/asset/types/object.h>
+#include <ngin/asset/types/texture.h>
 
 #include <ngin/debug/logger.h>
 
@@ -15,6 +16,9 @@ std::shared_ptr<Asset> create_shader(unsigned int id, const std::string& name) {
 }
 std::shared_ptr<Asset> create_object(unsigned int id, const std::string& name) {
     return std::make_shared<ObjectAsset>(id, name);
+}
+std::shared_ptr<Asset> create_texture(unsigned int id, const std::string& name) {
+    return std::make_shared<TextureAsset>(id, name);
 }
 
 void register_all_assets() {
@@ -30,6 +34,9 @@ void register_all_assets() {
     // object
     ngin::asset::AssetBucket::register_asset("object", create_object);
     logger.info("Object registered", "", 1);
+    // texture
+    ngin::asset::AssetBucket::register_asset("texture", create_texture);
+    logger.info("Texture registered", "", 1);
 }
 
 bool register_assets = []() {

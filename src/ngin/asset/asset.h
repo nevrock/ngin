@@ -7,9 +7,9 @@
 class Asset {
 public:
     Asset(unsigned int id, std::string name) : id_(id), name_(name) {}
-    virtual ~Asset() {}
     virtual void read(const std::string& filepath, ngin::debug::Printer& debug) = 0;
     virtual void write(const std::string& filepath) const = 0;
+    virtual void refresh_gl_data() {}
     std::string& get_name() {
         return name_;
     }

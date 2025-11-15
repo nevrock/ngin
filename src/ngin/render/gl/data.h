@@ -10,18 +10,25 @@ struct GLFWwindow; // <--- Add this line!
 
 struct GlData {
     GLFWwindow* window;
-    
-    // textures
-    unsigned int tex_g_normal;
-    unsigned int tex_g_albedo;
-    unsigned int tex_g_specular;
-    unsigned int tex_depthmap;
 
-    // framebuffers
-    unsigned int original_fb;
-    unsigned int forward_fb;
-    unsigned int deferred_fb;
-    unsigned int ssr_fb;
+    int screen_width;
+    int screen_height;
+
+    int view_width;
+    int view_height;
+
+    float time;
+    float time_delta;
+    float time_last;
+
+    float mouse_x;
+    float mouse_y;
+    float mouse_offset_x;
+    float mouse_offset_y;
+    float scroll_y;
+
+    float axes_x;
+    float axes_y;
 
     // matrices (temp)
     glm::mat4 view;
